@@ -139,29 +139,28 @@ export default function ThemeShowcasePage() {
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-luminous bg-surface-card/60 backdrop-blur-md shadow-xs">
           <Sparkles className="w-4 h-4 text-primary-teal animate-pulse" />
           <span className="text-xs font-semibold tracking-wide uppercase text-muted-fg">
-            Next.js 15 &bull; Lenis &bull; Magnetic Proximity &bull; Glow Cards
+            Next.js 15 &bull; Navigation Header &bull; Mega-Menu &bull; Emergency SOS
           </span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
-          Luminous Motion,{" "}
+          Luminous Public Navigation &amp;{" "}
           <span className="bg-gradient-to-r from-primary-teal via-emerald-accent to-violet-accent bg-clip-text text-transparent">
-            Magnetic Pull &amp; Radial Glow
+            Healthcare Ecosystem
           </span>
         </h1>
 
         <p className="text-lg sm:text-xl text-muted-fg max-w-2xl mx-auto leading-relaxed">
-          Experience magnetic cursor attraction (35px radius) and mouse-tracking <code className="text-xs bg-muted-bg px-2 py-1 rounded text-violet-accent font-mono">&lt;GlowCard&gt;</code> components that adapt dynamically across Light &amp; Dark modes.
+          Featuring sticky glassmorphic navigation, interactive Mega-Menu, GPS-enabled Emergency SOS dispatch, multi-role portal login selector, and responsive mobile sheet.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
           <ThemeToggle />
           
-          {/* Reusable Magnetic Button */}
           <MagneticButton distance={35} strength={0.35}>
             <Button variant="primary" size="lg" className="gap-2 shadow-lg">
               <Magnet className="w-4 h-4 text-white" />
-              <span>Magnetic Button (Hover 35px near me)</span>
+              <span>Magnetic Action (35px Radius)</span>
             </Button>
           </MagneticButton>
         </div>
@@ -178,7 +177,7 @@ export default function ThemeShowcasePage() {
             Doctor Cards with Dynamic Mouse Glow
           </h2>
           <p className="text-sm text-muted-fg max-w-2xl mx-auto">
-            Move your cursor across these <code className="text-xs text-primary-teal font-mono">&lt;GlowCard&gt;</code> elements to reveal mouse-position tracking radial glow (Cyan/Emerald in Light mode, Luminescent Violet in Dark mode).
+            Move your cursor across these <code className="text-xs text-primary-teal font-mono">&lt;GlowCard&gt;</code> elements to reveal mouse-position tracking radial glow.
           </p>
         </FadeInUp>
 
@@ -186,7 +185,6 @@ export default function ThemeShowcasePage() {
           {doctorCards.map((doc) => (
             <StaggerItem key={doc.id} variants={itemVariants}>
               <GlowCard data-cursor-text={doc.cursorTag} className="p-6 space-y-5 cursor-pointer">
-                {/* Doctor Avatar Header */}
                 <div className="flex items-center gap-4">
                   <div
                     className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${doc.avatarBg} flex items-center justify-center text-white font-extrabold text-xl shadow-md group-hover:scale-105 transition-transform duration-300`}
@@ -208,7 +206,6 @@ export default function ThemeShowcasePage() {
                   </div>
                 </div>
 
-                {/* Doctor Info Pills */}
                 <div className="space-y-2 pt-2 border-t border-surface-border text-xs text-muted-fg">
                   <div className="flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5 text-primary-teal" />
@@ -224,7 +221,6 @@ export default function ThemeShowcasePage() {
                   </div>
                 </div>
 
-                {/* Magnetic Action Button inside Card */}
                 <div className="pt-2 flex justify-center">
                   <MagneticButton distance={30} strength={0.4} className="w-full">
                     <Button
@@ -303,97 +299,16 @@ export default function ThemeShowcasePage() {
         </StaggerChildren>
       </section>
 
-      {/* ── Dark Slate-Blue Showcase ───────────────────────────── */}
-      <FadeInUp>
-        <GlowCard className="p-8 sm:p-12 border-luminous glow-teal">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-teal/15 text-primary-teal text-xs font-bold uppercase tracking-wider">
-                <Moon className="w-3.5 h-3.5" />
-                <span>Deep Rich Slate-Blue Dark Mode</span>
-              </div>
-
-              <h2 className="text-3xl font-extrabold tracking-tight">
-                Deep rich slate-blue background (<code className="text-xs text-primary-teal font-mono">hsl 222 47% 11%</code>)
-              </h2>
-
-              <p className="text-muted-fg leading-relaxed">
-                Magnetic attraction button controls, Lenis smooth scrolling, mouse-position tracking glow cards, and accessible motion primitives (<code className="text-xs bg-muted-bg px-1.5 py-0.5 rounded text-fg-app">&lt;MagneticButton&gt;</code>, <code className="text-xs bg-muted-bg px-1.5 py-0.5 rounded text-fg-app">&lt;GlowCard&gt;</code>, <code className="text-xs bg-muted-bg px-1.5 py-0.5 rounded text-fg-app">&lt;FadeInUp&gt;</code>).
-              </p>
-
-              <div className="flex flex-wrap gap-3 pt-2">
-                <MagneticButton distance={25} strength={0.3}>
-                  <Button variant="primary" size="md">
-                    Primary Teal
-                  </Button>
-                </MagneticButton>
-                <MagneticButton distance={25} strength={0.3}>
-                  <Button variant="emerald" size="md">
-                    Vibrant Emerald
-                  </Button>
-                </MagneticButton>
-                <MagneticButton distance={25} strength={0.3}>
-                  <Button variant="violet" size="md">
-                    Electric Violet
-                  </Button>
-                </MagneticButton>
-                <MagneticButton distance={25} strength={0.3}>
-                  <Button variant="coral" size="md">
-                    Warm Coral
-                  </Button>
-                </MagneticButton>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <Card className="glass-card luminous-border shadow-xl">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <h3 className="text-sm font-semibold flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-emerald-accent" />
-                    <span>System Status &amp; Performance</span>
-                  </h3>
-                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-emerald-accent/20 text-emerald-accent">
-                    60 FPS
-                  </span>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 rounded-xl bg-muted-bg/60 border border-surface-border">
-                      <p className="text-xs text-muted-fg">Magnetic Proximity</p>
-                      <p className="text-lg font-bold text-primary-teal">35px Radius</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-muted-bg/60 border border-surface-border">
-                      <p className="text-xs text-muted-fg">Glow Card Blur</p>
-                      <p className="text-lg font-bold text-violet-accent">16px Glass</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-fg">Accessibility Compliance</span>
-                      <span className="font-semibold text-emerald-accent">100% (Reduced Motion)</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-muted-bg overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-primary-teal via-emerald-accent to-coral-accent rounded-full w-full" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </GlowCard>
-      </FadeInUp>
-
       {/* ── Feature Highlights Grid with GlowCard ────────────────── */}
       <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StaggerItem variants={itemVariants}>
           <GlowCard className="p-6 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-primary-teal/15 text-primary-teal flex items-center justify-center">
-              <Magnet className="w-5 h-5" />
+              <HeartPulse className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold">Magnetic Proximity (35px)</h3>
+            <h3 className="text-lg font-bold">Public Navigation Header</h3>
             <p className="text-sm text-muted-fg leading-relaxed">
-              Calculates cursor distance within 35px radius and gently pulls buttons toward the mouse before snapping back on leave.
+              Sticky glassmorphic layout featuring brand logo, interactive mega-menu, SOS dispatch, and role switcher.
             </p>
           </GlowCard>
         </StaggerItem>
@@ -403,25 +318,23 @@ export default function ThemeShowcasePage() {
             <div className="w-10 h-10 rounded-xl bg-emerald-accent/15 text-emerald-accent flex items-center justify-center">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold">Radial Glow Tracking</h3>
+            <h3 className="text-lg font-bold">GPS SOS Dispatch</h3>
             <p className="text-sm text-muted-fg leading-relaxed">
-              Dynamically tracks mouse position across card surfaces with cyan/emerald highlights in Light Mode &amp; luminescent violet in Dark Mode.
+              Real-time browser geolocation telemetry with one-touch emergency ambulance dispatch and 999 hotline integration.
             </p>
           </GlowCard>
         </StaggerItem>
 
         <StaggerItem variants={itemVariants}>
-          <StaggerItem variants={itemVariants}>
-            <GlowCard className="p-6 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-violet-accent/15 text-violet-accent flex items-center justify-center">
-                <Layers className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold">16px Glassmorphism</h3>
-              <p className="text-sm text-muted-fg leading-relaxed">
-                Backdrop-blur (16px) glass surfaces with subtle luminous border highlights and responsive touch safety.
-              </p>
-            </GlowCard>
-          </StaggerItem>
+          <GlowCard className="p-6 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-violet-accent/15 text-violet-accent flex items-center justify-center">
+              <Layers className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-bold">Role Access Selector</h3>
+            <p className="text-sm text-muted-fg leading-relaxed">
+              Interactive badge switcher for Patient, Doctor, Lab, and Pharmacy portals.
+            </p>
+          </GlowCard>
         </StaggerItem>
       </StaggerChildren>
     </div>

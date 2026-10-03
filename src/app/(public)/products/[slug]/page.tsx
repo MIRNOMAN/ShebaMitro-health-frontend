@@ -4,17 +4,9 @@ import { siteConfig } from "@/config/site";
 import { getProductBySlug } from "@/features/products";
 import { Button } from "@/components/ui/button";
 
-// ---------------------------------------------------------------------------
-// Types — using the Next.js PageProps helper for this route
-// ---------------------------------------------------------------------------
-
 type Props = {
   params: Promise<{ slug: string }>;
 };
-
-// ---------------------------------------------------------------------------
-// Dynamic Metadata (SEO, OpenGraph, Twitter)
-// ---------------------------------------------------------------------------
 
 export async function generateMetadata(
   { params }: Props,
@@ -57,19 +49,9 @@ export async function generateMetadata(
   };
 }
 
-// ---------------------------------------------------------------------------
-// Static Params (for SSG / ISR)
-// ---------------------------------------------------------------------------
-
 export async function generateStaticParams() {
-  // In a real app, fetch all product slugs from your API/DB.
-  // For this starter, we provide a sample slug.
   return [{ slug: "sample-product" }];
 }
-
-// ---------------------------------------------------------------------------
-// Page Component
-// ---------------------------------------------------------------------------
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
@@ -81,38 +63,34 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-16 sm:py-24">
-      {/* ── Breadcrumbs ────────────────────────────── */}
-      <nav className="mb-8 text-sm text-foreground/50">
+      <nav className="mb-8 text-sm text-muted-fg">
         <span>Home</span>
         <span className="mx-2">/</span>
         <span>Products</span>
         <span className="mx-2">/</span>
-        <span className="text-foreground">{product.name}</span>
+        <span className="text-fg-app font-semibold">{product.name}</span>
       </nav>
 
-      {/* ── Product Detail ─────────────────────────── */}
       <div className="grid gap-12 lg:grid-cols-2">
-        {/* Image placeholder */}
-        <div className="flex aspect-square items-center justify-center rounded-2xl bg-foreground/5 text-6xl">
+        <div className="flex aspect-square items-center justify-center rounded-2xl bg-surface-card border border-surface-border text-6xl shadow-md">
           📦
         </div>
 
-        {/* Details */}
         <div className="flex flex-col justify-center">
-          <span className="mb-2 inline-block w-fit rounded-full bg-foreground/10 px-3 py-1 text-xs font-medium uppercase tracking-wider">
+          <span className="mb-2 inline-block w-fit rounded-full bg-primary-teal/15 text-primary-teal px-3 py-1 text-xs font-bold uppercase tracking-wider">
             {product.category}
           </span>
-          <h1 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
+          <h1 className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
             {product.name}
           </h1>
-          <p className="mb-6 text-lg leading-relaxed text-foreground/60">
+          <p className="mb-6 text-lg leading-relaxed text-muted-fg">
             {product.description}
           </p>
-          <p className="mb-8 text-2xl font-semibold">
+          <p className="mb-8 text-2xl font-bold text-primary-teal">
             ${(product.price / 100).toFixed(2)}
           </p>
           <div className="flex gap-4">
-            <Button size="lg">Add to Cart</Button>
+            <Button variant="primary" size="lg">Add to Cart</Button>
             <Button variant="outline" size="lg">
               Learn More
             </Button>
