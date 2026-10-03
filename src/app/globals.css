@@ -34,6 +34,10 @@
   --glow-emerald-rgb: 16 185 129;
   --glow-violet-rgb: 139 92 246;
   --glow-coral-rgb: 249 115 22;
+
+  /* Radial Mouse Tracking Glow (Light Mode: subtle cyan/emerald highlight) */
+  --glow-radial-color: rgba(6, 182, 212, 0.15);
+  --luminous-border-highlight: rgba(16, 185, 129, 0.6);
 }
 
 .dark {
@@ -53,6 +57,10 @@
   --glow-emerald-rgb: 24 180 126;
   --glow-violet-rgb: 142 81 240;
   --glow-coral-rgb: 240 90 48;
+
+  /* Radial Mouse Tracking Glow (Dark Mode: luminescent violet border glow) */
+  --glow-radial-color: rgba(142, 81, 240, 0.25);
+  --luminous-border-highlight: rgba(142, 81, 240, 0.75);
 }
 
 /* ------------------------------------------------------------------ */
