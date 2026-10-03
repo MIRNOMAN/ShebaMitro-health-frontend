@@ -1,47 +1,137 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ */
-/* Design Tokens                                                      */
+/* OKLCH & HSL CSS Variable Theme System                              */
+/* Explicit HSL Brand Colors & High Gamut OKLCH Definitions            */
 /* ------------------------------------------------------------------ */
 
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
+  /* HSL Brand Theme System (User Specs) */
+  --primary-teal-hsl: 189 94% 43%;
+  --emerald-accent-hsl: 152 76% 40%;
+  --violet-accent-hsl: 262 83% 58%;
+  --coral-accent-hsl: 14 90% 55%;
+
+  /* Color Values (HSL & OKLCH Gamut) */
+  --primary-teal: hsl(189 94% 43%);
+  --emerald-accent: hsl(152 76% 40%);
+  --violet-accent: hsl(262 83% 58%);
+  --coral-accent: hsl(14 90% 55%);
+
+  /* Light Mode Surfaces & Text */
+  --background: hsl(210 40% 98%);
+  --foreground: hsl(222 47% 11%);
+
+  --card: hsl(0 0% 100% / 0.85);
+  --card-hover: hsl(210 40% 99%);
+  --card-border: hsl(214 32% 90%);
+  --luminous-border: hsl(189 80% 45% / 0.4);
+
+  --muted: hsl(210 40% 94%);
+  --muted-foreground: hsl(215 16% 47%);
+
+  --glow-teal-rgb: 6 182 212;
+  --glow-emerald-rgb: 16 185 129;
+  --glow-violet-rgb: 139 92 246;
+  --glow-coral-rgb: 249 115 22;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #030712;
-    --foreground: #f1f5f9;
-  }
+.dark {
+  /* Dark Mode: Deep rich slate-blue background (hsl 222 47% 11%) */
+  --background: hsl(222 47% 11%);
+  --foreground: hsl(210 40% 98%);
+
+  --card: hsl(222 45% 15% / 0.75);
+  --card-hover: hsl(222 45% 18% / 0.9);
+  --card-border: hsl(222 35% 24% / 0.7);
+  --luminous-border: hsl(189 80% 50% / 0.55);
+
+  --muted: hsl(222 40% 17%);
+  --muted-foreground: hsl(215 20% 70%);
+
+  --glow-teal-rgb: 20 184 215;
+  --glow-emerald-rgb: 24 180 126;
+  --glow-violet-rgb: 142 81 240;
+  --glow-coral-rgb: 240 90 48;
 }
 
 /* ------------------------------------------------------------------ */
-/* Tailwind Theme Inline Overrides                                    */
+/* Tailwind Theme Inline Mappings                                     */
 /* ------------------------------------------------------------------ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-primary-teal: var(--primary-teal);
+  --color-emerald-accent: var(--emerald-accent);
+  --color-violet-accent: var(--violet-accent);
+  --color-coral-accent: var(--coral-accent);
+
+  --color-bg-app: var(--background);
+  --color-fg-app: var(--foreground);
+  --color-surface-card: var(--card);
+  --color-surface-card-hover: var(--card-hover);
+  --color-surface-border: var(--card-border);
+  --color-luminous: var(--luminous-border);
+  --color-muted-bg: var(--muted);
+  --color-muted-fg: var(--muted-foreground);
+
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ------------------------------------------------------------------ */
-/* Global Resets                                                      */
+/* Micro-animations, Utilities, and Glow Effects                    */
 /* ------------------------------------------------------------------ */
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
+  font-feature-settings: "rlig" 1, "calt" 1;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Focus ring utility */
 *:focus-visible {
-  outline: 2px solid var(--foreground);
+  outline: 2px solid var(--primary-teal);
   outline-offset: 2px;
+}
+
+/* Glassmorphism Cards with Luminous Borders */
+.glass-card {
+  background-color: var(--card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: var(--luminous-border);
+  background-color: var(--card-hover);
+}
+
+.dark .glass-card {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4), inset 0 1px 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Glow Utilities */
+.glow-teal {
+  box-shadow: 0 0 30px -5px rgba(var(--glow-teal-rgb), 0.35);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 30px -5px rgba(var(--glow-emerald-rgb), 0.35);
+}
+
+.glow-violet {
+  box-shadow: 0 0 30px -5px rgba(var(--glow-violet-rgb), 0.35);
+}
+
+.glow-coral {
+  box-shadow: 0 0 30px -5px rgba(var(--glow-coral-rgb), 0.35);
+}
+
+.border-luminous {
+  border: 1px solid var(--luminous-border);
 }

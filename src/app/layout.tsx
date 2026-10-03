@@ -2,21 +2,14 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { StoreProvider } from "@/redux/provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
-
-// ---------------------------------------------------------------------------
-// Font
-// ---------------------------------------------------------------------------
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
-
-// ---------------------------------------------------------------------------
-// Global Metadata (title template, OG defaults, Twitter card)
-// ---------------------------------------------------------------------------
 
 export const metadata: Metadata = {
   title: {
@@ -49,30 +42,26 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
-    creator: "@acme",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
+    creator: "@shebamitro",
   },
 };
 
-// ---------------------------------------------------------------------------
-// Root Layout
-// ---------------------------------------------------------------------------
-
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
-        <StoreProvider>{children}</StoreProvider>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col font-sans bg-bg-app text-fg-app transition-colors duration-300">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange={false}
+        >
+          <StoreProvider>{children}</StoreProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

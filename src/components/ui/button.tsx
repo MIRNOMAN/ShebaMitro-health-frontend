@@ -2,29 +2,35 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
-// Variant definitions
+// Variant definitions matching explicit theme palette
 // ---------------------------------------------------------------------------
 
 const baseStyles =
-  "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95";
 
 const variantStyles = {
   primary:
-    "bg-foreground text-background shadow hover:bg-foreground/90 focus-visible:ring-foreground",
+    "bg-primary-teal text-white shadow-md hover:opacity-95 focus-visible:ring-primary-teal glow-teal border border-primary-teal/30",
+  emerald:
+    "bg-emerald-accent text-white shadow-md hover:opacity-95 focus-visible:ring-emerald-accent glow-emerald border border-emerald-accent/30",
+  violet:
+    "bg-violet-accent text-white shadow-md hover:opacity-95 focus-visible:ring-violet-accent glow-violet border border-violet-accent/30",
+  coral:
+    "bg-coral-accent text-white shadow-md hover:opacity-95 focus-visible:ring-coral-accent glow-coral border border-coral-accent/30",
   secondary:
-    "bg-foreground/10 text-foreground shadow-sm hover:bg-foreground/20 focus-visible:ring-foreground/50",
+    "bg-muted-bg text-fg-app border border-surface-border shadow-xs hover:bg-surface-card-hover focus-visible:ring-primary-teal",
   outline:
-    "border border-foreground/20 bg-transparent text-foreground shadow-sm hover:bg-foreground/5 focus-visible:ring-foreground/50",
+    "border border-surface-border bg-surface-card/60 text-fg-app shadow-xs hover:border-luminous hover:bg-surface-card-hover focus-visible:ring-primary-teal",
   ghost:
-    "text-foreground hover:bg-foreground/5 focus-visible:ring-foreground/50",
+    "text-fg-app hover:bg-muted-bg focus-visible:ring-primary-teal",
   destructive:
-    "bg-red-600 text-white shadow hover:bg-red-700 focus-visible:ring-red-600",
+    "bg-red-600 text-white shadow-md hover:bg-red-700 focus-visible:ring-red-600",
 } as const;
 
 const sizeStyles = {
-  sm: "h-8 px-3 text-xs",
-  md: "h-10 px-4 text-sm",
-  lg: "h-12 px-6 text-base",
+  sm: "h-9 px-3.5 text-xs rounded-lg",
+  md: "h-11 px-5 text-sm rounded-xl",
+  lg: "h-13 px-7 text-base rounded-2xl",
 } as const;
 
 // ---------------------------------------------------------------------------
