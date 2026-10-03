@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { StoreProvider } from "@/redux/provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
+import { CustomCursor } from "@/components/ui/custom-cursor";
 import "./globals.css";
 
 const inter = Inter({
@@ -60,7 +62,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
-          <StoreProvider>{children}</StoreProvider>
+          <SmoothScrollProvider>
+            <CustomCursor />
+            <StoreProvider>{children}</StoreProvider>
+          </SmoothScrollProvider>
         </ThemeProvider>
       </body>
     </html>
