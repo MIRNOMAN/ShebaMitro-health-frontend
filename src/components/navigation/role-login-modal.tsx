@@ -38,7 +38,7 @@ const roleConfigs: {
 }[] = [
   {
     id: "patient",
-    titleKey: "patientTitle",
+    titleKey: "rolePatientTitle",
     badgeKey: "patientBadge",
     descKey: "patientRoleDesc",
     icon: <User className="w-5 h-5" />,
@@ -48,7 +48,7 @@ const roleConfigs: {
   },
   {
     id: "doctor",
-    titleKey: "doctorTitle",
+    titleKey: "roleDoctorTitle",
     badgeKey: "doctorBadge",
     descKey: "doctorRoleDesc",
     icon: <Stethoscope className="w-5 h-5" />,
@@ -58,7 +58,7 @@ const roleConfigs: {
   },
   {
     id: "lab",
-    titleKey: "labTitle",
+    titleKey: "roleLabTitle",
     badgeKey: "labBadge",
     descKey: "labRoleDesc",
     icon: <TestTube className="w-5 h-5" />,
@@ -68,7 +68,7 @@ const roleConfigs: {
   },
   {
     id: "pharmacy",
-    titleKey: "pharmacyTitle",
+    titleKey: "rolePharmacyTitle",
     badgeKey: "pharmacyBadge",
     descKey: "pharmacyRoleDesc",
     icon: <Pill className="w-5 h-5" />,
@@ -92,7 +92,7 @@ export function RoleLoginModal({
     }
   }, [isOpen, defaultRole]);
 
-  const activeRoleConfig = roleConfigs.find((r) => r.id === selectedRole) || roleConfigs[0];
+  const activeRoleConfig = roleConfigs.find((r) => r.id === selectedRole) ?? roleConfigs[0]!;
 
   return (
     <AnimatePresence>
@@ -107,105 +107,96 @@ export function RoleLoginModal({
             className="fixed inset-0 bg-black/70 backdrop-blur-md"
           />
 
-          {/* Modal Box */}
+          {/* Modal Content */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 350 }}
-            className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-surface-border bg-surface-card p-6 sm:p-8 backdrop-blur-xl shadow-2xl z-10 space-y-6"
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="relative w-full max-w-xl rounded-3xl border border-surface-border bg-surface-card p-6 sm:p-8 shadow-2xl z-10 luminous-border"
             style={{ backgroundColor: "var(--card)" }}
           >
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-5 right-5 p-2 rounded-xl text-muted-fg hover:text-fg-app hover:bg-muted-bg transition-colors"
+              className="absolute top-5 right-5 p-2 rounded-full border border-surface-border bg-muted-bg text-muted-fg hover:text-fg-app hover:border-primary-teal transition-all"
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
             </button>
 
-            {/* Modal Title */}
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-teal/15 text-primary-teal text-xs font-bold uppercase tracking-wider">
-                <ShieldCheck className="w-3.5 h-3.5" />
+            {/* Header */}
+            <div className="space-y-2 pr-8">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-teal/15 text-primary-teal text-xs font-black uppercase tracking-wider">
+                <ShieldCheck className="w-4 h-4" />
                 <span>{t("multiRoleTitle")}</span>
               </div>
-              <h2 className="text-2xl font-extrabold tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
                 {t("selectAccountRole")}
               </h2>
-              <p className="text-xs text-muted-fg font-medium">
+              <p className="text-xs sm:text-sm text-muted-fg">
                 {t("chooseRoleDesc")}
               </p>
             </div>
 
-            {/* Role Badge Switcher */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* Role Grid Selectors */}
+            <div className="grid grid-cols-2 gap-3 my-6">
               {roleConfigs.map((role) => {
                 const isSelected = selectedRole === role.id;
                 return (
                   <button
                     key={role.id}
                     onClick={() => setSelectedRole(role.id)}
-                    className={`p-3.5 rounded-2xl border text-left transition-all duration-200 flex flex-col justify-between space-y-2 relative ${
+                    className={`p-4 rounded-2xl border text-left transition-all duration-200 relative ${
                       isSelected
-                        ? `${role.borderColor} ${role.bgActive} shadow-sm ring-1 ring-primary-teal/30`
-                        : "border-surface-border bg-surface-card/60 hover:bg-muted-bg/50"
+                        ? `${role.borderColor} ${role.bgActive} shadow-md`
+                        : "border-surface-border bg-muted-bg/50 hover:bg-muted-bg"
                     }`}
                   >
-                    {isSelected && (
-                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary-teal text-white flex items-center justify-center text-xs">
-                        <Check className="w-3 h-3" />
+                    <div className="flex items-center justify-between mb-2">
+                      <div className={`p-2 rounded-xl bg-surface-card ${role.color}`}>
+                        {role.icon}
                       </div>
-                    )}
-                    <div className={`p-2 rounded-xl w-fit ${role.bgActive} ${role.color}`}>
-                      {role.icon}
+                      {isSelected && (
+                        <span className="w-5 h-5 rounded-full bg-emerald-accent text-white flex items-center justify-center">
+                          <Check className="w-3.5 h-3.5" />
+                        </span>
+                      )}
                     </div>
-                    <div>
-                      <p className={`text-sm font-bold ${isSelected ? role.color : "text-fg-app"}`}>
-                        {t(role.titleKey)}
-                      </p>
-                      <p className="text-[11px] text-muted-fg leading-relaxed mt-0.5 font-medium">
-                        {t(role.descKey)}
-                      </p>
-                    </div>
+                    <p className="text-xs font-black text-fg-app">{t(role.titleKey)}</p>
+                    <span className="text-[10px] font-bold text-muted-fg uppercase tracking-wider">
+                      {t(role.badgeKey)}
+                    </span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Dynamic Action Buttons */}
-            <div className="pt-2 space-y-3">
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <Link
-                  href={`/login?role=${selectedRole}`}
-                  onClick={onClose}
-                  className="w-full"
-                >
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="w-full justify-center gap-2 font-bold shadow-md"
-                  >
-                    <span>{t("logIn")} ({t(activeRoleConfig?.badgeKey || "patientBadge")})</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-
-                <Link
-                  href={`/signup?role=${selectedRole}`}
-                  onClick={onClose}
-                  className="w-full"
-                >
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full justify-center gap-2 font-bold"
-                  >
-                    <span>{t("registerNewAccount")}</span>
-                  </Button>
-                </Link>
+            {/* Selected Role Action Summary */}
+            <div className="p-4 rounded-2xl border border-surface-border bg-muted-bg/60 space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-muted-fg">Role Selected:</span>
+                <span className={`font-black uppercase tracking-wider ${activeRoleConfig.color}`}>
+                  {t(activeRoleConfig.titleKey)}
+                </span>
               </div>
+              <p className="text-xs text-muted-fg leading-relaxed">
+                {t(activeRoleConfig.descKey)}
+              </p>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-6">
+              <Link
+                href={`/login?role=${selectedRole}`}
+                onClick={onClose}
+                className="w-full"
+              >
+                <Button variant="primary" size="lg" className="w-full justify-center gap-2">
+                  <span>{t("loginAs")} {t(activeRoleConfig.badgeKey)}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
             </div>
           </motion.div>
         </div>

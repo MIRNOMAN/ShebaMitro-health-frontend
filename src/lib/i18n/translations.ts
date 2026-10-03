@@ -27,6 +27,82 @@ export const translations = {
     signUp: "Sign Up",
     selectRole: "Select Portal Role",
 
+    // Omni Search
+    searchPlaceholder: "Search by Doctor, Symptom e.g. Chest Pain, or Diagnostic Test...",
+    searchButton: "Search",
+    trendingSearches: "Trending Medical Searches",
+    noResultsFound: "No medical services found",
+    noResultsSub: "Try searching for 'Cardiologist', 'Chest Pain', or 'MRI Scan'.",
+
+    // Hero Section
+    heroBadge: "ShebaMitro • Smart Digital Healthcare",
+    heroTitleLine1: "Simple & Reliable",
+    heroTitleLine2: "Digital Healthcare",
+    heroTitleLine3: "Right At Your Fingertips.",
+    heroSubtitle: "BMDC certified doctor video consultations, 2-hour pharmacy delivery, and home lab tests.",
+    bmdcVerifiedBadge: "BMDC Certified",
+    telemedActiveBadge: "24/7 Tele-Care",
+    expressDeliveryBadge: "2-Hour Delivery",
+
+    // Hero Slider
+    slide1Badge: "BMDC Certified Doctors",
+    slide1Title: "Specialist Doctor Consultations",
+    slide1Sub: "1,200+ Experienced BMDC Registered Specialists",
+
+    slide2Badge: "Family Health Shield",
+    slide2Title: "Complete Family Healthcare",
+    slide2Sub: "All-in-one medical care from the comfort of home",
+
+    slide3Badge: "24/7 Instant Video Call",
+    slide3Title: "Instant Telemedicine Service",
+    slide3Sub: "Connect with certified doctors within 60 seconds",
+
+    slide4Badge: "2-Hour Express Delivery",
+    slide4Title: "100% Genuine Medicine",
+    slide4Sub: "Cold-chain express delivery from model pharmacies",
+
+    // Bento Grid
+    bentoHeaderBadge: "ShebaMitro Health Ecosystem",
+    bentoHeaderTitle: "Modern Digital Healthcare",
+    bentoHeaderTitleHighlight: "Solutions Built For You",
+    bentoHeaderSubtitle: "From smart medicine alarms to 2-hour express delivery — complete health protection for your family.",
+    
+    alarmBadge: "AI Medicine Reminder",
+    alarmTitle: "Smart Medicine Alarms & Dose Tracker",
+    alarmDesc: "Never miss a dose. Automated push notifications, WhatsApp alerts, and audio reminders.",
+    alarmBtn: "Add Medication Schedule",
+
+    telemedBadge: "BMDC Registered Doctors",
+    telemedTitle: "24/7 Live HD Video Consultations",
+    telemedDesc: "Connect with verified specialist doctors within 60 seconds and get instant e-prescriptions.",
+    telemedBtn: "Consult Doctor Now",
+
+    pharmacyCardBadge: "100% Genuine Medicine",
+    pharmacyTitle: "2-Hour Express Pharmacy Delivery",
+    pharmacyDesc: "Temperature-controlled cold-chain delivery directly from certified model pharmacies.",
+    pharmacyBtn: "Order Prescription Medicine",
+
+    labCardBadge: "ISO 15189 Accredited",
+    labTitle: "Home Lab Sample Collection",
+    labDesc: "Certified phlebotomist collects blood samples at your doorstep with digital reports in <12 hours.",
+    labBtn: "Book Home Lab Test",
+
+    // Specialty Carousel
+    specialtyCategory: "Comprehensive Medical Care",
+    specialtyTitle: "Browse Medical Specialties",
+
+    // Stats Counter
+    liveActivity: "Live Activity:",
+    liveActivityFeed: "Dr. Farah Ahmed completed a live video consultation in Dhaka • 14s ago",
+    statConsultations: "Completed Consultations",
+    statConsultationsSub: "Across 64 districts in Bangladesh",
+    statDoctors: "BMDC Certified Specialists",
+    statDoctorsSub: "Verified credentials & BMDC IDs",
+    statDelivery: "On-Time Express Delivery",
+    statDeliverySub: "Average delivery time 42 mins",
+    statRating: "Patient Satisfaction Rating",
+    statRatingSub: "Based on 14,000+ verified reviews",
+
     // Mega Menu Descriptions & Services
     findDoctorsDesc: "Connect with verified specialists & online consultations",
     specialistSearch: "Specialist Search",
@@ -44,7 +120,7 @@ export const translations = {
     reportVault: "E-Report Vault",
     reportVaultDesc: "Secure digital lab test reports delivered in <24 hours",
 
-    pharmacyDesc: "Order genuine medicines & healthcare products online",
+    pharmacyMenuDesc: "Order genuine medicines & healthcare products online",
     uploadPrescription: "Upload Prescription",
     uploadPrescriptionDesc: "Instant AI prescription parsing & pharmacist validation",
     rapidExpress: "Rapid Medicine Express",
@@ -64,22 +140,22 @@ export const translations = {
     multiRoleTitle: "Multi-Role Access Control",
     selectAccountRole: "Select Portal Account Role",
     chooseRoleDesc: "Choose your designated role to log in or register your account.",
-    patientTitle: "Patient / General User",
+    rolePatientTitle: "Patient / General User",
     patientBadge: "Patient Portal",
     patientRoleDesc: "Book doctor appointments, view lab reports, & order medicines.",
     patientRole: "Patient Portal",
 
-    doctorTitle: "Licensed Doctor",
+    roleDoctorTitle: "Licensed Doctor",
     doctorBadge: "Doctor Portal",
     doctorRoleDesc: "Manage consultations, e-prescriptions, & patient health history.",
     doctorRole: "Doctor Portal",
 
-    labTitle: "Diagnostic Lab",
+    roleLabTitle: "Diagnostic Lab",
     labBadge: "Lab Portal",
     labRoleDesc: "Upload diagnostic test reports & process home sample collection.",
     labRole: "Lab Portal",
 
-    pharmacyTitle: "Pharmacy Partner",
+    rolePharmacyTitle: "Pharmacy Partner",
     pharmacyBadge: "Pharmacy Portal",
     pharmacyRoleDesc: "Fulfill digital e-prescriptions & manage medicine dispatches.",
     pharmacyRole: "Pharmacy Portal",
@@ -144,6 +220,82 @@ export const translations = {
     signUp: "সাইন আপ",
     selectRole: "পোর্টাল রোল নির্বাচন করুন",
 
+    // Omni Search
+    searchPlaceholder: "ডাক্তার, উপসর্গ (যেমন: বুক ব্যথা), বা ল্যাব টেস্ট অনুসন্ধান করুন...",
+    searchButton: "খুঁজুন",
+    trendingSearches: "জনপ্রিয় ট্রেন্ডিং সার্চ",
+    noResultsFound: "কোনো সেবা পাওয়া যায়নি",
+    noResultsSub: "'কার্ডিওলজিস্ট', 'বুক ব্যথা', বা 'এমআরআই স্ক্যান' লিখে চেষ্টা করুন।",
+
+    // Hero Section
+    heroBadge: "সেবামিত্র • স্মার্ট ডিজিটাল স্বাস্থ্যসেবা",
+    heroTitleLine1: "সহজ ও নির্ভরযোগ্য",
+    heroTitleLine2: "ডিজিটাল স্বাস্থ্যসেবা",
+    heroTitleLine3: "আপনার হাতের মুঠোয়।",
+    heroSubtitle: "বিএমডিসি রেজিস্টার্ড ডাক্তারদের ভিডিও পরামর্শ, ২ ঘণ্টার মধ্যে ওষুধ ডেলিভারি ও হোম ল্যাব টেস্ট।",
+    bmdcVerifiedBadge: "বিএমডিসি রেজিস্টার্ড",
+    telemedActiveBadge: "২৪/৭ ভিডিও কল",
+    expressDeliveryBadge: "২ ঘণ্টা ডেলিভারি",
+
+    // Hero Slider
+    slide1Badge: "বিএমডিসি রেজিস্টার্ড ডাক্তার",
+    slide1Title: "বিশেষজ্ঞ চিকিৎসকের পরামর্শ",
+    slide1Sub: "১,২০০+ অভিজ্ঞ বিএমডিসি নিবন্ধিত ডাক্তার",
+
+    slide2Badge: "পারিবারিক স্বাস্থ্য সুরক্ষা",
+    slide2Title: "সম্পূর্ণ পরিবারের স্বাস্থ্যসেবা",
+    slide2Sub: "সহজে ঘরে বসেই সব ধরনের সেবা নিন",
+
+    slide3Badge: "২৪/৭ লাইভ ভিডিও কল",
+    slide3Title: "তাত্ক্ষণিক টেলিমেডিসিন সেবা",
+    slide3Sub: "৬০ সেকেন্ডের মধ্যে ডাক্তারের সাথে যুক্ত হন",
+
+    slide4Badge: "২ ঘণ্টায় দ্রুত ডেলিভারি",
+    slide4Title: "১ ১০০% আসল ওষুধ সরবরাহ",
+    slide4Sub: "মডেল ফার্মেসি থেকে সরাসরি হোম ডেলিভারি",
+
+    // Bento Grid
+    bentoHeaderBadge: "সেবামিত্র হেলথ ইকোসিস্টেম",
+    bentoHeaderTitle: "ডিজিটাল স্বাস্থ্যসেবার",
+    bentoHeaderTitleHighlight: "আধুনিক সমাধান",
+    bentoHeaderSubtitle: "স্মার্ট মেডিসিন রিমাইন্ডার থেকে শুরু করে ২ ঘণ্টার এক্সপ্রেস ওষুধ ডেলিভারি — আপনার পরিবারের সকল স্বাস্থ্য সেবায় সেবামিত্র।",
+
+    alarmBadge: "এআই মেডিসিন রিমাইন্ডার",
+    alarmTitle: "স্মার্ট মেডিসিন অ্যালার্ম ও ডোজ ট্র্যাকার",
+    alarmDesc: "সময়মতো ওষুধ খেতে কখনো ভুলবেন না। অটোমেটেড পুশ নোটিফিকেশন, হোয়াটসঅ্যাপ অ্যালার্ট এবং ভয়েস রিমাইন্ডার সুবিধা।",
+    alarmBtn: "ওষুধের সময়সূচী যোগ করুন",
+
+    telemedBadge: "বিএমডিসি রেজিস্টার্ড ডাক্তার",
+    telemedTitle: "২৪/৭ লাইভ এইচডি ভিডিও টেলিকন্সালটেশন",
+    telemedDesc: "মাত্র ৬০ সেকেন্ডের মধ্যে অভিজ্ঞ ডাক্তারের সাথে সরাসরি ভিডিও কলে কথা বলুন এবং সাথে সাথে ডিজিটাল প্রেসক্রিপশন গ্রহণ করুন।",
+    telemedBtn: "ডাক্তারের সাথে কথা বলুন",
+
+    pharmacyCardBadge: "১০০% আসল ওষুধ",
+    pharmacyTitle: "২ ঘণ্টায় এক্সপ্রেস ফার্মেসি ডেলিভারি",
+    pharmacyDesc: "তাপমাত্রা-নিয়ন্ত্রিত কোল্ড চেইন বক্সে সরাসরি মডেল ফার্মেসি থেকে শতভাগ আসল প্রেসক্রিপশন ওষুধ পৌঁছে দেওয়া হয়।",
+    pharmacyBtn: "প্রেসক্রিপশন আপলোড করে ওষুধ অর্ডার করুন",
+
+    labCardBadge: "ISO 15189 অ্যাক্রেডিটেড",
+    labTitle: "হোম ল্যাব স্যাম্পল কালেকশন",
+    labDesc: "দক্ষ ও সার্টিফাইড টেকনিশিয়ান আপনার বাসায় গিয়ে রক্তের নমুনা সংগ্রহ করবেন। ১২ ঘণ্টার মধ্যে ডিজিটাল স্মার্ট রিপোর্ট।",
+    labBtn: "হোম ল্যাব টেস্ট বুক করুন",
+
+    // Specialty Carousel
+    specialtyCategory: "বিশেষজ্ঞ চিকিৎসা ক্যাটাগরি",
+    specialtyTitle: "সকল মেডিকেল স্পেশালিটি",
+
+    // Stats Counter
+    liveActivity: "লাইভ অ্যাক্টিভিটি:",
+    liveActivityFeed: "ডাঃ ফারাহ আহমেদ ঢাকা থেকে লাইভ ভিডিও কনসালটেশন সম্পন্ন করেছেন • ১৪ সে পূর্বে",
+    statConsultations: "সফল চিকিৎসা সেবা",
+    statConsultationsSub: "বাংলাদেশের ৬৪টি জেলায় বিস্তৃত",
+    statDoctors: "বিএমডিসি নিবন্ধিত ডাক্তার",
+    statDoctorsSub: "যাচাইকৃত রেজিস্টার্ড বিশেষজ্ঞ প্যানেল",
+    statDelivery: "দ্রুত ওষুধ সরবরাহ",
+    statDeliverySub: "গড় ডেলিভারি সময় মাত্র ৪২ মিনিট",
+    statRating: "রোগীদের সন্তুষ্টি রেটিং",
+    statRatingSub: "১৪,০০০+ পেশেন্ট রিভিউ এর ভিত্তিতে",
+
     // Mega Menu Descriptions & Services
     findDoctorsDesc: "যাচাইকৃত বিশেষজ্ঞ ডাক্তার ও অনলাইন পরামর্শ নিন",
     specialistSearch: "বিশেষজ্ঞ ডাক্তার অনুসন্ধান",
@@ -161,7 +313,7 @@ export const translations = {
     reportVault: "ডিজিটাল ল্যাব রিপোর্ট ভল্ট",
     reportVaultDesc: "২৪ ঘণ্টার মধ্যে ডিজিটাল ল্যাব রিপোর্ট অনলাইনে পান",
 
-    pharmacyDesc: "অনলাইনে আসল ওষুধ ও হেলথকেয়ার পণ্য অর্ডার করুন",
+    pharmacyMenuDesc: "অনলাইনে আসল ওষুধ ও হেলথকেয়ার পণ্য অর্ডার করুন",
     uploadPrescription: "প্রেসক্রিপশন আপলোড করুন",
     uploadPrescriptionDesc: "এআই প্রেসক্রিপশন স্ক্যান ও ফার্মাসিস্ট ভ্যালিডেশন",
     rapidExpress: "২ ঘণ্টায় এক্সপ্রেস ডেলিভারি",
@@ -181,22 +333,22 @@ export const translations = {
     multiRoleTitle: "মাল্টি-রোল অ্যাক্সেস কন্ট্রোল",
     selectAccountRole: "পোর্টাল অ্যাকাউন্ট রোল নির্বাচন করুন",
     chooseRoleDesc: "লগইন বা রেজিস্টার করার জন্য আপনার নির্দিষ্ট পোর্টাল রোল বেছে নিন।",
-    patientTitle: "রোগী / সাধারণ ব্যবহারকারী",
+    rolePatientTitle: "রোগী / সাধারণ ব্যবহারকারী",
     patientBadge: "রোগী পোর্টাল",
     patientRoleDesc: "ডাক্তার বুক করুন, ল্যাব রিপোর্ট দেখুন ও ওষুধ অর্ডার করুন।",
     patientRole: "রোগী পোর্টাল",
 
-    doctorTitle: "লাইসেন্সপ্রাপ্ত ডাক্তার",
+    roleDoctorTitle: "লাইসেন্সপ্রাপ্ত ডাক্তার",
     doctorBadge: "ডাক্তার পোর্টাল",
     doctorRoleDesc: "রোগীর ভিডিও কনসালটেশন ও ই-প্রেসক্রিপশন প্রদান করুন।",
     doctorRole: "ডাক্তার পোর্টাল",
 
-    labTitle: "ডায়াগনস্টিক ল্যাব",
+    roleLabTitle: "ডায়াগনস্টিক ল্যাব",
     labBadge: "ল্যাব পোর্টাল",
     labRoleDesc: "ল্যাব রিপোর্ট আপলোড করুন ও হোম স্যাম্পল কালেকশন প্রসেস করুন।",
     labRole: "ল্যাব পোর্টাল",
 
-    pharmacyTitle: "ফার্মেসি পার্টনার",
+    rolePharmacyTitle: "ফার্মেসি পার্টনার",
     pharmacyBadge: "ফার্মেসি পোর্টাল",
     pharmacyRoleDesc: "ডিজিটাল ই-প্রেসক্রিপশন প্রসেস ও ওষুধ ডেলিভারি পরিচালনা করুন।",
     pharmacyRole: "ফার্মেসি পোর্টাল",
@@ -261,6 +413,82 @@ export const translations = {
     signUp: "साइन अप",
     selectRole: "पोर्टल भूमिका चुनें",
 
+    // Omni Search
+    searchPlaceholder: "डॉक्टर, लक्षण (जैसे: सीने में दर्द), या डायग्नोस्टिक टेस्ट खोजें...",
+    searchButton: "खोजें",
+    trendingSearches: "लोकप्रिय ट्रेंडिंग खोजें",
+    noResultsFound: "कोई स्वास्थ्य सेवा नहीं मिली",
+    noResultsSub: "'कार्डियोलॉजिस्ट', 'सीने में दर्द', या 'एमआरआई स्कैन' खोजकर प्रयास करें।",
+
+    // Hero Section
+    heroBadge: "सेवामित्र • स्मार्ट डिजिटल स्वास्थ्य सेवा",
+    heroTitleLine1: "सरल और विश्वसनीय",
+    heroTitleLine2: "डिजिटल स्वास्थ्य सेवा",
+    heroTitleLine3: "आपकी उंगलियों पर।",
+    heroSubtitle: "बीएमडीसी पंजीकृत डॉक्टरों द्वारा वीडियो परामर्श, 2 घंटे में दवा वितरण और होम लैब टेस्ट।",
+    bmdcVerifiedBadge: "बीएमडीसी प्रमाणित",
+    telemedActiveBadge: "24/7 वीडियो कॉल",
+    expressDeliveryBadge: "2 घंटे डिलीवरी",
+
+    // Hero Slider
+    slide1Badge: "बीएमडीसी प्रमाणित डॉक्टर",
+    slide1Title: "विशेषज्ञ डॉक्टर परामर्श",
+    slide1Sub: "1,200+ अनुभवी बीएमडीसी पंजीकृत डॉक्टर",
+
+    slide2Badge: "पारिवारिक स्वास्थ्य सुरक्षा",
+    slide2Title: "संपूर्ण परिवार की स्वास्थ्य सेवा",
+    slide2Sub: "घर बैठे आसानी से सभी सुविधाएं प्राप्त करें",
+
+    slide3Badge: "24/7 तुरंत वीडियो कॉल",
+    slide3Title: "तत्काल टेलीमेडिसिन सेवा",
+    slide3Sub: "60 सेकंड के भीतर प्रमाणित डॉक्टरों से जुड़ें",
+
+    slide4Badge: "2 घंटे में त्वरित डिलीवरी",
+    slide4Title: "100% असली दवा आपूर्ति",
+    slide4Sub: "मॉडल फार्मेसी से सीधे होम डिलीवरी",
+
+    // Bento Grid
+    bentoHeaderBadge: "सेवामित्र स्वास्थ्य इकोसिस्टम",
+    bentoHeaderTitle: "डिजिटल स्वास्थ्य सेवा का",
+    bentoHeaderTitleHighlight: "आधुनिक समाधान",
+    bentoHeaderSubtitle: "स्मार्ट दवा रिमाइंडर से लेकर 2 घंटे की एक्सप्रेस दवा डिलीवरी तक — आपके परिवार की संपूर्ण स्वास्थ्य सेवा।",
+
+    alarmBadge: "एआई दवा रिमाइंडर",
+    alarmTitle: "स्मार्ट दवा अलार्म और खुराक ट्रैकर",
+    alarmDesc: "समय पर दवा खाना कभी न भूलें। स्वचालित पुश सूचनाएं, व्हाट्सएप अलर्ट और वॉयस रिमाइंडर सुविधा।",
+    alarmBtn: "दवा की अनुसूची जोड़ें",
+
+    telemedBadge: "बीएमडीसी पंजीकृत डॉक्टर",
+    telemedTitle: "24/7 लाइव एचडी वीडियो परामर्श",
+    telemedDesc: "केवल 60 सेकंड में अनुभवी डॉक्टरों के साथ लाइव वीडियो परामर्श प्राप्त करें और डिजिटल प्रिस्क्रिप्शन पाएं।",
+    telemedBtn: "डॉक्टर से अभी परामर्श करें",
+
+    pharmacyCardBadge: "100% असली दवाएं",
+    pharmacyTitle: "2 घंटे में एक्सप्रेस फार्मेसी डिलीवरी",
+    pharmacyDesc: "तापमान नियंत्रित कोल्ड-चेन बॉक्स में सीधे मॉडल फार्मेसी से 100% असली दवाएं प्राप्त करें।",
+    pharmacyBtn: "प्रिस्क्रिप्शन के साथ दवा ऑर्डर करें",
+
+    labCardBadge: "ISO 15189 प्रमाणित",
+    labTitle: "होम लैब सैंपल कलेक्शन",
+    labDesc: "प्रमाणित लैब तकनीशियन आपके घर से सैंपल एकत्र करेंगे। 12 घंटे के भीतर डिजिटल रिपोर्ट।",
+    labBtn: "होम लैब टेस्ट बुक करें",
+
+    // Specialty Carousel
+    specialtyCategory: "विशेषज्ञ चिकित्सा श्रेणियां",
+    specialtyTitle: "सभी चिकित्सा विशेषज्ञताएं",
+
+    // Stats Counter
+    liveActivity: "लाइव गतिविधि:",
+    liveActivityFeed: "डॉ. फराह अहमद ने ढाका में लाइव वीडियो परामर्श पूरा किया • 14 सेकंड पहले",
+    statConsultations: "सफल चिकित्सा परामर्श",
+    statConsultationsSub: "बांग्लादेश के 64 जिलों में उपलब्ध",
+    statDoctors: "बीएमडीसी प्रमाणित डॉक्टर",
+    statDoctorsSub: "सत्यापित बीएमडीसी डॉक्टर",
+    statDelivery: "समय पर एक्सप्रेस डिलीवरी",
+    statDeliverySub: "औसत डिलीवरी समय केवल 42 मिनट",
+    statRating: "मरीजों की संतुष्टि रेटिंग",
+    statRatingSub: "14,000+ सत्यापित समीक्षाओं पर आधारित",
+
     // Mega Menu Descriptions & Services
     findDoctorsDesc: "सत्यापित विशेषज्ञों से जुड़ें और ऑनलाइन परामर्श लें",
     specialistSearch: "विशेषज्ञ डॉक्टर खोजें",
@@ -278,10 +506,10 @@ export const translations = {
     reportVault: "डिजिटल लैब रिपोर्ट तिजोरी",
     reportVaultDesc: "24 घंटे के भीतर डिजिटल लैब रिपोर्ट प्राप्त करें",
 
-    pharmacyDesc: "असली दवाएं और स्वास्थ्य उत्पाद ऑनलाइन ऑर्डर करें",
+    pharmacyMenuDesc: "असली दवाएं और स्वास्थ्य उत्पाद ऑनलाइन ऑर्डर करें",
     uploadPrescription: "प्रिस्क्रिप्शन अपलोड करें",
     uploadPrescriptionDesc: "एआई प्रिस्क्रिप्शन स्कैन और फार्मासिस्ट सत्यापन",
-    rapidExpress: "2 घंटे में रैपिड डिलीवरी",
+    rapidExpress: "2 घंटे में रैपिড डिलीवरी",
     rapidExpressDesc: "आपातकालीन दवाएं केवल 2 घंटे में प्राप्त करें",
     chronicSubscriptions: "मासिक दवा रिफिल (15% छूट)",
     chronicSubscriptionsDesc: "नियमित दवाओं के लिए स्वचालित ऑटो-रिफिल",
@@ -298,22 +526,22 @@ export const translations = {
     multiRoleTitle: "मल्टी-रोल एक्सेस कंट्रोल",
     selectAccountRole: "पोर्टल खाता भूमिका चुनें",
     chooseRoleDesc: "लॉग इन या रजिस्टर करने के लिए अपनी पोर्टल भूमिका चुनें।",
-    patientTitle: "मरीज़ / सामान्य उपयोगकर्ता",
+    rolePatientTitle: "मरीज़ / सामान्य उपयोगकर्ता",
     patientBadge: "मरीज़ पोर्टल",
     patientRoleDesc: "डॉक्टर बुक करें, लैब रिपोर्ट देखें और दवाएं ऑर्डर करें।",
     patientRole: "मरीज़ पोर्टल",
 
-    doctorTitle: "सत्यापित डॉक्टर",
+    roleDoctorTitle: "सत्यापित डॉक्टर",
     doctorBadge: "डॉक्टर पोर्टल",
     doctorRoleDesc: "मरीज़ वीडियो परामर्श और ई-प्रिस्क्रिप्शन प्रबंधित करें।",
     doctorRole: "डॉक्टर पोर्टल",
 
-    labTitle: "डायग्नोस्टिक लैब",
+    roleLabTitle: "डायग्नोस्टिक लैब",
     labBadge: "लैब पोर्टल",
     labRoleDesc: "लैब रिपोर्ट अपलोड करें और होम सैंपल कलेक्शन प्रोसेस करें।",
     labRole: "लैब पोर्टल",
 
-    pharmacyTitle: "फार्मेसी पार्टनर",
+    rolePharmacyTitle: "फार्मेसी पार्टनर",
     pharmacyBadge: "फार्मेसी पोर्टल",
     pharmacyRoleDesc: "डिजिटल ई-प्रिस्क्रिप्शन और दवा डिलीवरी प्रबंधित करें।",
     pharmacyRole: "फार्मेसी पोर्टल",
