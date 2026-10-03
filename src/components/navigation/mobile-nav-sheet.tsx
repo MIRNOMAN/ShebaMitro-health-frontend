@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
-  HeartPulse,
   Siren,
   ChevronRight,
   User,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ShebaMitroLogo } from "@/components/ui/logo";
 import { megaMenuData } from "./mega-menu";
 import type { HealthcareRole } from "./role-login-modal";
 
@@ -61,17 +61,8 @@ export function MobileNavSheet({
             {/* Sheet Header */}
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-surface-border/60 pb-4">
-                <Link
-                  href="/"
-                  onClick={onClose}
-                  className="flex items-center gap-2.5 text-lg font-extrabold"
-                >
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary-teal via-emerald-accent to-violet-accent flex items-center justify-center text-white shadow-md">
-                    <HeartPulse className="w-4 h-4 animate-pulse" />
-                  </div>
-                  <span className="bg-gradient-to-r from-primary-teal via-emerald-accent to-violet-accent bg-clip-text text-transparent">
-                    ShebaMitro
-                  </span>
+                <Link href="/" onClick={onClose}>
+                  <ShebaMitroLogo size="sm" showText={true} />
                 </Link>
 
                 <button
@@ -89,7 +80,7 @@ export function MobileNavSheet({
                   onClose();
                   onOpenSosModal();
                 }}
-                className="w-full p-3.5 rounded-2xl bg-red-600 text-white font-black uppercase text-xs tracking-wider flex items-center justify-center gap-2 glow-coral animate-pulse"
+                className="w-full p-3.5 rounded-2xl bg-gradient-to-r from-red-500 to-coral-accent text-white font-black uppercase text-xs tracking-wider flex items-center justify-center gap-2 glow-coral animate-pulse"
               >
                 <Siren className="w-4 h-4" />
                 <span>Emergency SOS Dispatch 24/7</span>
@@ -201,7 +192,7 @@ export function MobileNavSheet({
             {/* Sheet Footer */}
             <div className="space-y-4 border-t border-surface-border/60 pt-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-fg">Theme Preset</span>
+                <span className="text-xs font-semibold text-muted-fg">Theme</span>
                 <ThemeToggle />
               </div>
 
@@ -214,7 +205,7 @@ export function MobileNavSheet({
                 size="md"
                 className="w-full justify-center font-bold"
               >
-                Sign In / Register
+                Log In to Portal
               </Button>
             </div>
           </motion.div>
