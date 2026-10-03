@@ -9,18 +9,21 @@ import {
   User,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
 import { MegaMenu } from "@/components/navigation/mega-menu";
 import { EmergencySosModal } from "@/components/navigation/emergency-sos-modal";
 import { RoleLoginModal, type HealthcareRole } from "@/components/navigation/role-login-modal";
 import { MobileNavSheet } from "@/components/navigation/mobile-nav-sheet";
 import { ShebaMitroLogo } from "@/components/ui/logo";
 import { Footer } from "./components/Footer";
+import { useLanguage } from "@/components/providers/language-provider";
 
 export default function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useLanguage();
   const [isSosModalOpen, setIsSosModalOpen] = React.useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = React.useState(false);
   const [selectedRole, setSelectedRole] = React.useState<HealthcareRole>("patient");
@@ -37,7 +40,7 @@ export default function PublicLayout({
       <header className="sticky top-0 z-40 w-full border-b border-surface-border/80 bg-bg-app/85 backdrop-blur-2xl transition-colors duration-300 shadow-xs">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           
-          {/* 1. Official ShebaMitro Logo (Image 2) */}
+          {/* 1. Official ShebaMitro Logo */}
           <Link href="/" className="group flex items-center">
             <ShebaMitroLogo size="md" showText={true} />
           </Link>
@@ -48,6 +51,9 @@ export default function PublicLayout({
           {/* 3. Right Header Action Controls */}
           <div className="flex items-center gap-3 sm:gap-4">
             
+            {/* Language Selector Dropdown (Bangla, English, Hindi) */}
+            <LanguageToggle />
+
             {/* Pulsating Emergency SOS Button */}
             <button
               onClick={() => setIsSosModalOpen(true)}
@@ -55,21 +61,21 @@ export default function PublicLayout({
               aria-label="Trigger Emergency SOS"
             >
               <Siren className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-              <span className="hidden sm:inline-block">SOS 24/7</span>
+              <span className="hidden sm:inline-block">{t("emergencySos")}</span>
               <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-400 animate-ping" />
             </button>
 
-            {/* Compact Icon-Only Theme Toggle (User Spec 1) */}
+            {/* Compact Icon-Only Theme Toggle */}
             <ThemeToggle />
 
-            {/* Role Login Button (No Sign Up button, User Spec 2) */}
+            {/* Role Login Button */}
             <button
               onClick={() => handleOpenRoleModal("patient")}
               className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-surface-border/80 bg-surface-card/90 backdrop-blur-md text-xs font-bold text-fg-app hover:border-luminous hover:bg-surface-card-hover transition-all duration-300 shadow-xs group"
-              title="Select portal role to log in"
+              title={t("selectRole")}
             >
               <User className="w-4 h-4 text-primary-teal group-hover:scale-110 transition-transform" />
-              <span>Log In</span>
+              <span>{t("logIn")}</span>
               <ChevronDown className="w-3.5 h-3.5 text-muted-fg group-hover:text-primary-teal transition-colors" />
             </button>
 

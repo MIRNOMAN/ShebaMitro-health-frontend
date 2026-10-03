@@ -17,46 +17,48 @@ import {
   Activity,
   ChevronDown,
 } from "lucide-react";
+import { useLanguage } from "@/components/providers/language-provider";
+import type { translations } from "@/lib/i18n/translations";
 
 export interface MegaMenuItem {
   id: string;
-  label: string;
+  labelKey: keyof typeof translations.en;
+  descKey: keyof typeof translations.en;
   href: string;
-  description: string;
   icon: React.ReactNode;
   accentColor: string;
   subItems: {
-    title: string;
-    description: string;
+    titleKey: keyof typeof translations.en;
+    descKey: keyof typeof translations.en;
     href: string;
     icon: React.ReactNode;
   }[];
 }
 
-const megaMenuData: MegaMenuItem[] = [
+export const megaMenuConfig: MegaMenuItem[] = [
   {
     id: "doctors",
-    label: "Find Doctors",
+    labelKey: "findDoctors",
+    descKey: "findDoctorsDesc",
     href: "/doctors",
-    description: "Connect with verified specialists & online consultations",
     icon: <Stethoscope className="w-4 h-4" />,
     accentColor: "text-primary-teal",
     subItems: [
       {
-        title: "Specialist Search",
-        description: "Browse 50+ medical specialties & book in-person visits",
+        titleKey: "specialistSearch",
+        descKey: "findDoctorsDesc",
         href: "/doctors/specialists",
         icon: <Stethoscope className="w-4 h-4 text-primary-teal" />,
       },
       {
-        title: "Telemedicine Video Consult",
-        description: "Instant HD video consultations with top physicians 24/7",
+        titleKey: "telemedicine",
+        descKey: "findDoctorsDesc",
         href: "/doctors/telemedicine",
         icon: <Video className="w-4 h-4 text-emerald-accent" />,
       },
       {
-        title: "Emergency Specialists",
-        description: "Urgent care & ICU specialists available for immediate dispatch",
+        titleKey: "emergencySpecialists",
+        descKey: "findDoctorsDesc",
         href: "/doctors/emergency",
         icon: <ShieldAlert className="w-4 h-4 text-coral-accent" />,
       },
@@ -64,27 +66,27 @@ const megaMenuData: MegaMenuItem[] = [
   },
   {
     id: "diagnostics",
-    label: "Diagnostics",
+    labelKey: "diagnostics",
+    descKey: "diagnosticsDesc",
     href: "/diagnostics",
-    description: "Book accredited lab tests & home sample collection",
     icon: <TestTube className="w-4 h-4" />,
     accentColor: "text-violet-accent",
     subItems: [
       {
-        title: "Home Lab Sample Collection",
-        description: "Certified phlebotomists collect samples at your doorstep",
+        titleKey: "homeCollection",
+        descKey: "diagnosticsDesc",
         href: "/diagnostics/home-collection",
         icon: <Microscope className="w-4 h-4 text-violet-accent" />,
       },
       {
-        title: "Diagnostic Imaging Centers",
-        description: "Book MRI, CT Scans, X-Rays, & Ultrasound appointments",
+        titleKey: "imagingCenters",
+        descKey: "diagnosticsDesc",
         href: "/diagnostics/imaging",
         icon: <Activity className="w-4 h-4 text-primary-teal" />,
       },
       {
-        title: "E-Report Vault",
-        description: "Secure digital lab test reports delivered in <24 hours",
+        titleKey: "reportVault",
+        descKey: "diagnosticsDesc",
         href: "/diagnostics/reports",
         icon: <FileCheck className="w-4 h-4 text-emerald-accent" />,
       },
@@ -92,27 +94,27 @@ const megaMenuData: MegaMenuItem[] = [
   },
   {
     id: "pharmacy",
-    label: "Pharmacy",
+    labelKey: "pharmacy",
+    descKey: "pharmacyDesc",
     href: "/pharmacy",
-    description: "Order genuine medicines & healthcare products online",
     icon: <Pill className="w-4 h-4" />,
     accentColor: "text-emerald-accent",
     subItems: [
       {
-        title: "Upload Prescription",
-        description: "Instant AI prescription parsing & pharmacist validation",
+        titleKey: "uploadPrescription",
+        descKey: "pharmacyDesc",
         href: "/pharmacy/upload",
         icon: <FileCheck className="w-4 h-4 text-emerald-accent" />,
       },
       {
-        title: "Rapid Medicine Express",
-        description: "Guaranteed 2-hour home delivery for critical medications",
+        titleKey: "rapidExpress",
+        descKey: "pharmacyDesc",
         href: "/pharmacy/express",
         icon: <Truck className="w-4 h-4 text-coral-accent" />,
       },
       {
-        title: "Chronic Care Subscriptions",
-        description: "Automatic monthly refill orders with 15% discount",
+        titleKey: "chronicSubscriptions",
+        descKey: "pharmacyDesc",
         href: "/pharmacy/subscriptions",
         icon: <HeartPulse className="w-4 h-4 text-primary-teal" />,
       },
@@ -120,27 +122,27 @@ const megaMenuData: MegaMenuItem[] = [
   },
   {
     id: "packages",
-    label: "Health Packages",
+    labelKey: "healthPackages",
+    descKey: "packagesDesc",
     href: "/packages",
-    description: "Comprehensive health checkups for individuals & families",
     icon: <PackageCheck className="w-4 h-4" />,
     accentColor: "text-coral-accent",
     subItems: [
       {
-        title: "Full Body Checkups",
-        description: "80+ vital health parameters tested in a single package",
+        titleKey: "fullBodyCheckup",
+        descKey: "packagesDesc",
         href: "/packages/full-body",
         icon: <PackageCheck className="w-4 h-4 text-coral-accent" />,
       },
       {
-        title: "Diabetes Care Shield",
-        description: "HbA1c, lipid profile, kidney & eye screening bundle",
+        titleKey: "diabetesShield",
+        descKey: "packagesDesc",
         href: "/packages/diabetes",
         icon: <Activity className="w-4 h-4 text-primary-teal" />,
       },
       {
-        title: "Senior Citizen Wellness",
-        description: "Comprehensive cardiac, bone density, & organ screening",
+        titleKey: "seniorWellness",
+        descKey: "packagesDesc",
         href: "/packages/senior-care",
         icon: <HeartPulse className="w-4 h-4 text-violet-accent" />,
       },
@@ -149,11 +151,12 @@ const megaMenuData: MegaMenuItem[] = [
 ];
 
 export function MegaMenu() {
+  const { t } = useLanguage();
   const [activeMenuId, setActiveMenuId] = React.useState<string | null>(null);
 
   return (
     <nav className="hidden lg:flex items-center gap-1.5" onMouseLeave={() => setActiveMenuId(null)}>
-      {megaMenuData.map((menu) => {
+      {megaMenuConfig.map((menu) => {
         const isOpen = activeMenuId === menu.id;
 
         return (
@@ -172,7 +175,7 @@ export function MegaMenu() {
               }`}
               aria-expanded={isOpen}
             >
-              <span>{menu.label}</span>
+              <span>{t(menu.labelKey)}</span>
               <ChevronDown
                 className={`w-3.5 h-3.5 transition-transform duration-300 ${
                   isOpen ? "rotate-180 text-white" : "text-muted-fg"
@@ -196,17 +199,17 @@ export function MegaMenu() {
                 >
                   <div className="border-b border-surface-border/80 pb-3">
                     <p className={`text-xs font-black uppercase tracking-wider ${menu.accentColor}`}>
-                      {menu.label} Services
+                      {t(menu.labelKey)} Services
                     </p>
                     <p className="text-xs text-muted-fg font-medium mt-1 leading-relaxed">
-                      {menu.description}
+                      {t(menu.descKey)}
                     </p>
                   </div>
 
                   <div className="space-y-1.5">
                     {menu.subItems.map((sub) => (
                       <Link
-                        key={sub.title}
+                        key={sub.titleKey}
                         href={sub.href}
                         onClick={() => setActiveMenuId(null)}
                         className="flex items-start gap-3.5 p-3 rounded-2xl transition-all duration-200 hover:bg-muted-bg/90 hover:translate-x-1 group"
@@ -216,10 +219,10 @@ export function MegaMenu() {
                         </div>
                         <div>
                           <p className="text-xs font-extrabold text-fg-app group-hover:text-primary-teal transition-colors">
-                            {sub.title}
+                            {t(sub.titleKey)}
                           </p>
                           <p className="text-[11px] text-muted-fg font-medium leading-relaxed mt-0.5">
-                            {sub.description}
+                            {t(sub.descKey)}
                           </p>
                         </div>
                       </Link>
@@ -234,5 +237,3 @@ export function MegaMenu() {
     </nav>
   );
 }
-
-export { megaMenuData };

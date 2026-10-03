@@ -15,6 +15,8 @@ import {
   Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/providers/language-provider";
+import type { translations } from "@/lib/i18n/translations";
 
 export type HealthcareRole = "patient" | "doctor" | "lab" | "pharmacy";
 
@@ -24,55 +26,55 @@ interface RoleLoginModalProps {
   defaultRole?: HealthcareRole;
 }
 
-const roles: {
+const roleConfigs: {
   id: HealthcareRole;
-  title: string;
-  badge: string;
+  titleKey: keyof typeof translations.en;
+  badgeKey: keyof typeof translations.en;
+  descKey: keyof typeof translations.en;
   icon: React.ReactNode;
   color: string;
   borderColor: string;
   bgActive: string;
-  description: string;
 }[] = [
   {
     id: "patient",
-    title: "Patient / General User",
-    badge: "Patient Portal",
+    titleKey: "patientTitle",
+    badgeKey: "patientBadge",
+    descKey: "patientRoleDesc",
     icon: <User className="w-5 h-5" />,
     color: "text-primary-teal",
     borderColor: "border-primary-teal/40",
     bgActive: "bg-primary-teal/15",
-    description: "Book doctor appointments, view lab reports, & order medicines.",
   },
   {
     id: "doctor",
-    title: "Licensed Doctor",
-    badge: "Doctor Portal",
+    titleKey: "doctorTitle",
+    badgeKey: "doctorBadge",
+    descKey: "doctorRoleDesc",
     icon: <Stethoscope className="w-5 h-5" />,
     color: "text-emerald-accent",
     borderColor: "border-emerald-accent/40",
     bgActive: "bg-emerald-accent/15",
-    description: "Manage consultations, e-prescriptions, & patient health history.",
   },
   {
     id: "lab",
-    title: "Diagnostic Lab",
-    badge: "Lab Portal",
+    titleKey: "labTitle",
+    badgeKey: "labBadge",
+    descKey: "labRoleDesc",
     icon: <TestTube className="w-5 h-5" />,
     color: "text-violet-accent",
     borderColor: "border-violet-accent/40",
     bgActive: "bg-violet-accent/15",
-    description: "Upload diagnostic test reports & process home sample collection.",
   },
   {
     id: "pharmacy",
-    title: "Pharmacy Partner",
-    badge: "Pharmacy Portal",
+    titleKey: "pharmacyTitle",
+    badgeKey: "pharmacyBadge",
+    descKey: "pharmacyRoleDesc",
     icon: <Pill className="w-5 h-5" />,
     color: "text-coral-accent",
     borderColor: "border-coral-accent/40",
     bgActive: "bg-coral-accent/15",
-    description: "Fulfill digital e-prescriptions & manage medicine dispatches.",
   },
 ];
 
@@ -81,6 +83,7 @@ export function RoleLoginModal({
   onClose,
   defaultRole = "patient",
 }: RoleLoginModalProps) {
+  const { t } = useLanguage();
   const [selectedRole, setSelectedRole] = React.useState<HealthcareRole>(defaultRole);
 
   React.useEffect(() => {
@@ -89,7 +92,7 @@ export function RoleLoginModal({
     }
   }, [isOpen, defaultRole]);
 
-  const activeRoleConfig = roles.find((r) => r.id === selectedRole) || roles[0];
+  const activeRoleConfig = roleConfigs.find((r) => r.id === selectedRole) || roleConfigs[0];
 
   return (
     <AnimatePresence>
@@ -111,6 +114,7 @@ export function RoleLoginModal({
             exit={{ opacity: 0, scale: 0.92, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
             className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-surface-border bg-surface-card p-6 sm:p-8 backdrop-blur-xl shadow-2xl z-10 space-y-6"
+            style={{ backgroundColor: "var(--card)" }}
           >
             {/* Close Button */}
             <button
@@ -125,19 +129,19 @@ export function RoleLoginModal({
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-teal/15 text-primary-teal text-xs font-bold uppercase tracking-wider">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Multi-Role Access Control</span>
+                <span>{t("multiRoleTitle")}</span>
               </div>
               <h2 className="text-2xl font-extrabold tracking-tight">
-                Select Portal Account Role
+                {t("selectAccountRole")}
               </h2>
-              <p className="text-xs text-muted-fg">
-                Choose your designated role to log in or register your account.
+              <p className="text-xs text-muted-fg font-medium">
+                {t("chooseRoleDesc")}
               </p>
             </div>
 
             {/* Role Badge Switcher */}
             <div className="grid grid-cols-2 gap-3">
-              {roles.map((role) => {
+              {roleConfigs.map((role) => {
                 const isSelected = selectedRole === role.id;
                 return (
                   <button
@@ -159,10 +163,10 @@ export function RoleLoginModal({
                     </div>
                     <div>
                       <p className={`text-sm font-bold ${isSelected ? role.color : "text-fg-app"}`}>
-                        {role.title}
+                        {t(role.titleKey)}
                       </p>
-                      <p className="text-[11px] text-muted-fg line-clamp-2 mt-0.5">
-                        {role.description}
+                      <p className="text-[11px] text-muted-fg leading-relaxed mt-0.5 font-medium">
+                        {t(role.descKey)}
                       </p>
                     </div>
                   </button>
@@ -183,7 +187,7 @@ export function RoleLoginModal({
                     size="lg"
                     className="w-full justify-center gap-2 font-bold shadow-md"
                   >
-                    <span>Log In as {activeRoleConfig?.badge}</span>
+                    <span>{t("logIn")} ({t(activeRoleConfig?.badgeKey || "patientBadge")})</span>
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
@@ -198,7 +202,7 @@ export function RoleLoginModal({
                     size="lg"
                     className="w-full justify-center gap-2 font-bold"
                   >
-                    <span>Register New Account</span>
+                    <span>{t("registerNewAccount")}</span>
                   </Button>
                 </Link>
               </div>

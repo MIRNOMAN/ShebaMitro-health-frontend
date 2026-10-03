@@ -15,6 +15,7 @@ import {
   Navigation,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/providers/language-provider";
 
 interface EmergencySosModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ interface LocationState {
 }
 
 export function EmergencySosModal({ isOpen, onClose }: EmergencySosModalProps) {
+  const { t } = useLanguage();
   const [location, setLocation] = React.useState<LocationState>({
     lat: null,
     lng: null,
@@ -108,7 +110,8 @@ export function EmergencySosModal({ isOpen, onClose }: EmergencySosModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
-            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-red-500/40 bg-surface-card/95 p-6 sm:p-8 backdrop-blur-xl shadow-2xl glow-coral z-10 space-y-6"
+            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-red-500/40 bg-surface-card p-6 sm:p-8 backdrop-blur-xl shadow-2xl glow-coral z-10 space-y-6"
+            style={{ backgroundColor: "var(--card)" }}
           >
             {/* Close Button */}
             <button
@@ -126,10 +129,10 @@ export function EmergencySosModal({ isOpen, onClose }: EmergencySosModalProps) {
               </div>
               <div>
                 <h2 className="text-xl font-black text-red-500 tracking-tight flex items-center gap-2">
-                  <span>EMERGENCY SOS DISPATCH</span>
+                  <span>{t("emergencySosDispatch")}</span>
                 </h2>
-                <p className="text-xs text-muted-fg">
-                  24/7 Rapid Ambulance &amp; Medical Emergency Unit
+                <p className="text-xs text-muted-fg font-medium">
+                  {t("sosSubtitle")}
                 </p>
               </div>
             </div>
@@ -139,21 +142,21 @@ export function EmergencySosModal({ isOpen, onClose }: EmergencySosModalProps) {
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="text-muted-fg flex items-center gap-1.5">
                   <Navigation className="w-3.5 h-3.5 text-primary-teal" />
-                  GPS Location Status
+                  {t("gpsStatus")}
                 </span>
                 {location.status === "locating" && (
-                  <span className="text-amber-500 flex items-center gap-1">
-                    <Loader2 className="w-3 h-3 animate-spin" /> Locating...
+                  <span className="text-amber-500 flex items-center gap-1 font-bold">
+                    <Loader2 className="w-3 h-3 animate-spin" /> {t("locatingGps")}
                   </span>
                 )}
                 {location.status === "success" && (
-                  <span className="text-emerald-accent flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> GPS Locked
+                  <span className="text-emerald-accent flex items-center gap-1 font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> {t("gpsLocked")}
                   </span>
                 )}
                 {location.status === "error" && (
-                  <span className="text-red-400 flex items-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Demo Location
+                  <span className="text-red-400 flex items-center gap-1 font-bold">
+                    <AlertTriangle className="w-3.5 h-3.5" /> {t("demoLocation")}
                   </span>
                 )}
               </div>
@@ -161,13 +164,13 @@ export function EmergencySosModal({ isOpen, onClose }: EmergencySosModalProps) {
               {location.status === "success" && (
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="p-2.5 rounded-xl bg-surface-card border border-surface-border">
-                    <p className="text-[10px] text-muted-fg uppercase">Latitude</p>
+                    <p className="text-[10px] text-muted-fg uppercase font-bold">{t("latitude")}</p>
                     <p className="font-mono font-bold text-primary-teal">
                       {location.lat?.toFixed(4)}° N
                     </p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-surface-card border border-surface-border">
-                    <p className="text-[10px] text-muted-fg uppercase">Longitude</p>
+                    <p className="text-[10px] text-muted-fg uppercase font-bold">{t("longitude")}</p>
                     <p className="font-mono font-bold text-violet-accent">
                       {location.lng?.toFixed(4)}° E
                     </p>
@@ -178,13 +181,13 @@ export function EmergencySosModal({ isOpen, onClose }: EmergencySosModalProps) {
               <div className="flex items-center justify-between text-[11px] text-muted-fg pt-1">
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-coral-accent" />
-                  Estimated Arrival: <strong className="text-fg-app font-bold">6 - 10 Mins</strong>
+                  {t("estimatedArrival")} <strong className="text-fg-app font-bold">{t("minsArrival")}</strong>
                 </span>
                 <button
                   onClick={requestGpsLocation}
-                  className="text-primary-teal hover:underline text-[11px]"
+                  className="text-primary-teal hover:underline text-[11px] font-bold"
                 >
-                  Refresh GPS
+                  {t("refreshGps")}
                 </button>
               </div>
             </div>
@@ -193,9 +196,9 @@ export function EmergencySosModal({ isOpen, onClose }: EmergencySosModalProps) {
             {dispatchStatus === "dispatched" ? (
               <div className="p-4 rounded-2xl bg-emerald-accent/15 border border-emerald-accent/40 text-emerald-accent text-center space-y-2">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-accent animate-bounce" />
-                <h3 className="font-bold text-base">Ambulance Dispatched!</h3>
-                <p className="text-xs text-muted-fg">
-                  Emergency Medical Unit #409 is en route to your GPS coordinates. Medical dispatch will call you immediately.
+                <h3 className="font-bold text-base">{t("ambulanceDispatched")}</h3>
+                <p className="text-xs text-muted-fg font-medium">
+                  {t("ambulanceEnRoute")}
                 </p>
               </div>
             ) : (
@@ -205,27 +208,27 @@ export function EmergencySosModal({ isOpen, onClose }: EmergencySosModalProps) {
                   disabled={dispatchStatus === "dispatching"}
                   variant="coral"
                   size="lg"
-                  className="w-full h-12 text-base font-extrabold uppercase tracking-wide gap-2 bg-red-600 hover:bg-red-700 glow-coral text-white"
+                  className="w-full h-12 text-sm font-extrabold uppercase tracking-wide gap-2 bg-red-600 hover:bg-red-700 glow-coral text-white"
                 >
                   {dispatchStatus === "dispatching" ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Transmitting GPS to Dispatch...</span>
+                      <span>{t("transmittingGps")}</span>
                     </>
                   ) : (
                     <>
                       <Ambulance className="w-5 h-5" />
-                      <span>Dispatch Emergency Ambulance Now</span>
+                      <span>{t("dispatchAmbulanceNow")}</span>
                     </>
                   )}
                 </Button>
 
                 <a
                   href="tel:999"
-                  className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl border border-surface-border bg-surface-card hover:bg-muted-bg text-sm font-bold transition-colors"
+                  className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl border border-surface-border bg-surface-card hover:bg-muted-bg text-xs font-extrabold transition-colors"
                 >
                   <PhoneCall className="w-4 h-4 text-emerald-accent" />
-                  <span>Call National Hotline (999)</span>
+                  <span>{t("callNationalHotline")}</span>
                 </a>
               </div>
             )}

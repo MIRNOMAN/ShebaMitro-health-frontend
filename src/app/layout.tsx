@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { StoreProvider } from "@/redux/provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LanguageProvider } from "@/components/providers/language-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { CustomCursor } from "@/components/ui/custom-cursor";
 import "./globals.css";
@@ -56,17 +57,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-bg-app text-fg-app transition-colors duration-300">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange={false}
-        >
-          <SmoothScrollProvider>
-            <CustomCursor />
-            <StoreProvider>{children}</StoreProvider>
-          </SmoothScrollProvider>
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange={false}
+          >
+            <SmoothScrollProvider>
+              <CustomCursor />
+              <StoreProvider>{children}</StoreProvider>
+            </SmoothScrollProvider>
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

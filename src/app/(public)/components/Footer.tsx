@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InfiniteMarquee, type MarqueeItem } from "@/components/ui/infinite-marquee";
+import { useLanguage } from "@/components/providers/language-provider";
 
 // Trust badge items for InfiniteMarquee
 const trustMarqueeItems: MarqueeItem[] = [
@@ -84,6 +85,7 @@ const trustMarqueeItems: MarqueeItem[] = [
 ];
 
 export function Footer() {
+  const { t } = useLanguage();
   const [email, setEmail] = React.useState("");
   const [subscriptionState, setSubscriptionState] = React.useState<
     "idle" | "loading" | "success"
@@ -93,7 +95,6 @@ export function Footer() {
     e.preventDefault();
     if (!email || !email.includes("@")) return;
 
-    // Optimistic UI state update
     setSubscriptionState("loading");
     setTimeout(() => {
       setSubscriptionState("success");
@@ -108,10 +109,10 @@ export function Footer() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-muted-fg">
             <Award className="w-4 h-4 text-primary-teal" />
-            <span>Accredited Healthcare Partners &amp; BMDC Trust Badges</span>
+            <span>{t("footerPartnerHeader")}</span>
           </div>
           <span className="text-[11px] font-semibold text-emerald-accent hidden sm:inline-block">
-            Verified Network &bull; 100% Certified
+            {t("footerVerifiedNetwork")}
           </span>
         </div>
 
@@ -133,8 +134,8 @@ export function Footer() {
               </span>
             </Link>
 
-            <p className="text-xs text-muted-fg leading-relaxed">
-              Bangladesh&apos;s premier connected healthcare ecosystem uniting Patients, Doctors, Diagnostic Labs, and Pharmacies into a single seamless, high-speed digital platform.
+            <p className="text-xs text-muted-fg leading-relaxed font-medium">
+              {t("footerCompanyDesc")}
             </p>
 
             <div className="pt-2 flex flex-wrap gap-2 text-[10px] font-bold uppercase text-muted-fg">
@@ -153,7 +154,7 @@ export function Footer() {
           {/* Column 2: Quick Links for 4 Healthcare Roles */}
           <div className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-wider text-muted-fg border-b border-surface-border/60 pb-2">
-              Healthcare Portals
+              {t("footerPortalsHeader")}
             </h3>
 
             <ul className="space-y-2.5 text-xs font-semibold">
@@ -163,7 +164,7 @@ export function Footer() {
                   className="flex items-center gap-2 text-muted-fg hover:text-primary-teal transition-colors group"
                 >
                   <User className="w-4 h-4 text-primary-teal group-hover:scale-110 transition-transform" />
-                  <span>Patient Portal &amp; Telehealth</span>
+                  <span>{t("patientRole")}</span>
                 </Link>
               </li>
               <li>
@@ -172,7 +173,7 @@ export function Footer() {
                   className="flex items-center gap-2 text-muted-fg hover:text-emerald-accent transition-colors group"
                 >
                   <Stethoscope className="w-4 h-4 text-emerald-accent group-hover:scale-110 transition-transform" />
-                  <span>Doctor E-Prescription Portal</span>
+                  <span>{t("doctorRole")}</span>
                 </Link>
               </li>
               <li>
@@ -181,7 +182,7 @@ export function Footer() {
                   className="flex items-center gap-2 text-muted-fg hover:text-violet-accent transition-colors group"
                 >
                   <TestTube className="w-4 h-4 text-violet-accent group-hover:scale-110 transition-transform" />
-                  <span>Diagnostic Lab Dispatch</span>
+                  <span>{t("labRole")}</span>
                 </Link>
               </li>
               <li>
@@ -190,7 +191,7 @@ export function Footer() {
                   className="flex items-center gap-2 text-muted-fg hover:text-coral-accent transition-colors group"
                 >
                   <Pill className="w-4 h-4 text-coral-accent group-hover:scale-110 transition-transform" />
-                  <span>Pharmacy Order Fulfillment</span>
+                  <span>{t("pharmacyRole")}</span>
                 </Link>
               </li>
             </ul>
@@ -199,7 +200,7 @@ export function Footer() {
           {/* Column 3: Emergency & Urgent Care Hotlines */}
           <div className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-wider text-muted-fg border-b border-surface-border/60 pb-2">
-              Emergency &amp; Hotlines
+              {t("footerEmergencyHeader")}
             </h3>
 
             <div className="space-y-3">
@@ -211,9 +212,9 @@ export function Footer() {
                   <Siren className="w-5 h-5 text-red-500 animate-pulse" />
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wider text-red-400">
-                      National Hotline
+                      {t("footerNationalHotlineLabel")}
                     </p>
-                    <p className="text-sm font-black">Call 999 Ambulance</p>
+                    <p className="text-sm font-black">{t("footerNationalHotlineSub")}</p>
                   </div>
                 </div>
                 <PhoneCall className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
@@ -221,10 +222,10 @@ export function Footer() {
 
               <div className="p-3 rounded-2xl border border-surface-border bg-surface-card/80 space-y-1 text-xs">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-primary-teal">
-                  24/7 Telemedicine Hotline
+                  {t("footerTelemedHotlineLabel")}
                 </p>
                 <p className="font-extrabold text-fg-app">+880 (9612) 800-900</p>
-                <p className="text-[10px] text-muted-fg">Instant Doctor Consultations</p>
+                <p className="text-[10px] text-muted-fg">{t("footerTelemedHotlineSub")}</p>
               </div>
             </div>
           </div>
@@ -232,17 +233,17 @@ export function Footer() {
           {/* Column 4: Newsletter Subscription with Optimistic Confirmation */}
           <div className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-wider text-muted-fg border-b border-surface-border/60 pb-2">
-              Health Insights &amp; Updates
+              {t("footerSubscribeHeader")}
             </h3>
 
-            <p className="text-xs text-muted-fg leading-relaxed">
-              Subscribe to receiving weekly medical tips, wellness reports, and instant emergency alerts.
+            <p className="text-xs text-muted-fg leading-relaxed font-medium">
+              {t("footerSubscribeDesc")}
             </p>
 
             {subscriptionState === "success" ? (
               <div className="p-3.5 rounded-2xl bg-emerald-accent/15 border border-emerald-accent/40 text-emerald-accent text-xs font-bold flex items-center gap-2.5 animate-fadeIn">
                 <CheckCircle2 className="w-5 h-5 text-emerald-accent flex-shrink-0" />
-                <span>Thank you for subscribing! Check your email for health updates.</span>
+                <span>{t("subscribeSuccessMessage")}</span>
               </div>
             ) : (
               <form onSubmit={handleNewsletterSubscribe} className="space-y-2">
@@ -251,7 +252,7 @@ export function Footer() {
                   <input
                     type="email"
                     required
-                    placeholder="Enter your email address..."
+                    placeholder={t("enterEmailPlaceholder")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full h-11 pl-10 pr-3 text-xs rounded-xl border border-surface-border bg-bg-app text-fg-app focus:outline-none focus:ring-2 focus:ring-primary-teal transition-all"
@@ -268,12 +269,12 @@ export function Footer() {
                   {subscriptionState === "loading" ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Subscribing...</span>
+                      <span>{t("subscribingButton")}</span>
                     </>
                   ) : (
                     <>
                       <Send className="w-3.5 h-3.5" />
-                      <span>Subscribe to Health Updates</span>
+                      <span>{t("subscribeButton")}</span>
                     </>
                   )}
                 </Button>
@@ -283,12 +284,12 @@ export function Footer() {
         </div>
 
         {/* Bottom copyright bar */}
-        <div className="mt-12 pt-6 border-t border-surface-border/60 flex flex-col sm:flex-row items-center justify-between text-xs text-muted-fg gap-4">
+        <div className="mt-12 pt-6 border-t border-surface-border/60 flex flex-col sm:flex-row items-center justify-between text-xs text-muted-fg gap-4 font-medium">
           <p>&copy; {new Date().getFullYear()} ShebaMitro Health Platform. All rights reserved.</p>
           <div className="flex items-center gap-4 font-semibold">
-            <Link href="/privacy" className="hover:text-primary-teal transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-primary-teal transition-colors">Terms of Service</Link>
-            <Link href="/security" className="hover:text-primary-teal transition-colors">Security &amp; HIPAA</Link>
+            <Link href="/privacy" className="hover:text-primary-teal transition-colors">{t("privacyPolicy")}</Link>
+            <Link href="/terms" className="hover:text-primary-teal transition-colors">{t("termsOfService")}</Link>
+            <Link href="/security" className="hover:text-primary-teal transition-colors">{t("securityHipaa")}</Link>
           </div>
         </div>
       </div>

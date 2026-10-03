@@ -14,9 +14,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
 import { ShebaMitroLogo } from "@/components/ui/logo";
-import { megaMenuData } from "./mega-menu";
+import { megaMenuConfig } from "./mega-menu";
 import type { HealthcareRole } from "./role-login-modal";
+import { useLanguage } from "@/components/providers/language-provider";
 
 interface MobileNavSheetProps {
   isOpen: boolean;
@@ -31,6 +33,7 @@ export function MobileNavSheet({
   onOpenSosModal,
   onOpenRoleModal,
 }: MobileNavSheetProps) {
+  const { t } = useLanguage();
   const [expandedSection, setExpandedSection] = React.useState<string | null>(null);
 
   const toggleSection = (sectionId: string) => {
@@ -83,7 +86,7 @@ export function MobileNavSheet({
                 className="w-full p-3.5 rounded-2xl bg-gradient-to-r from-red-500 to-coral-accent text-white font-black uppercase text-xs tracking-wider flex items-center justify-center gap-2 glow-coral animate-pulse"
               >
                 <Siren className="w-4 h-4" />
-                <span>Emergency SOS Dispatch 24/7</span>
+                <span>{t("emergencySosFull")}</span>
               </button>
 
               {/* Navigation Accordion */}
@@ -92,7 +95,7 @@ export function MobileNavSheet({
                   Healthcare Services
                 </p>
 
-                {megaMenuData.map((menu) => {
+                {megaMenuConfig.map((menu) => {
                   const isExpanded = expandedSection === menu.id;
 
                   return (
@@ -106,7 +109,7 @@ export function MobileNavSheet({
                       >
                         <span className="flex items-center gap-2">
                           <span className={menu.accentColor}>{menu.icon}</span>
-                          <span>{menu.label}</span>
+                          <span>{t(menu.labelKey)}</span>
                         </span>
                         <ChevronRight
                           className={`w-4 h-4 text-muted-fg transition-transform duration-300 ${
@@ -119,13 +122,13 @@ export function MobileNavSheet({
                         <div className="p-3 pt-0 border-t border-surface-border/40 space-y-1 bg-muted-bg/30">
                           {menu.subItems.map((sub) => (
                             <Link
-                              key={sub.title}
+                              key={sub.titleKey}
                               href={sub.href}
                               onClick={onClose}
                               className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-semibold text-muted-fg hover:text-fg-app hover:bg-surface-card transition-colors"
                             >
                               {sub.icon}
-                              <span>{sub.title}</span>
+                              <span>{t(sub.titleKey)}</span>
                             </Link>
                           ))}
                         </div>
@@ -150,7 +153,7 @@ export function MobileNavSheet({
                     className="p-2.5 rounded-xl border border-primary-teal/30 bg-primary-teal/10 text-primary-teal text-xs font-bold flex items-center gap-1.5"
                   >
                     <User className="w-3.5 h-3.5" />
-                    <span>Patient</span>
+                    <span>{t("patientRole")}</span>
                   </button>
 
                   <button
@@ -161,7 +164,7 @@ export function MobileNavSheet({
                     className="p-2.5 rounded-xl border border-emerald-accent/30 bg-emerald-accent/10 text-emerald-accent text-xs font-bold flex items-center gap-1.5"
                   >
                     <Stethoscope className="w-3.5 h-3.5" />
-                    <span>Doctor</span>
+                    <span>{t("doctorRole")}</span>
                   </button>
 
                   <button
@@ -172,7 +175,7 @@ export function MobileNavSheet({
                     className="p-2.5 rounded-xl border border-violet-accent/30 bg-violet-accent/10 text-violet-accent text-xs font-bold flex items-center gap-1.5"
                   >
                     <TestTube className="w-3.5 h-3.5" />
-                    <span>Lab</span>
+                    <span>{t("labRole")}</span>
                   </button>
 
                   <button
@@ -183,7 +186,7 @@ export function MobileNavSheet({
                     className="p-2.5 rounded-xl border border-coral-accent/30 bg-coral-accent/10 text-coral-accent text-xs font-bold flex items-center gap-1.5"
                   >
                     <Pill className="w-3.5 h-3.5" />
-                    <span>Pharmacy</span>
+                    <span>{t("pharmacyRole")}</span>
                   </button>
                 </div>
               </div>
@@ -192,7 +195,7 @@ export function MobileNavSheet({
             {/* Sheet Footer */}
             <div className="space-y-4 border-t border-surface-border/60 pt-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-fg">Theme</span>
+                <LanguageToggle />
                 <ThemeToggle />
               </div>
 
@@ -205,7 +208,7 @@ export function MobileNavSheet({
                 size="md"
                 className="w-full justify-center font-bold"
               >
-                Log In to Portal
+                {t("logIn")}
               </Button>
             </div>
           </motion.div>
