@@ -20,7 +20,38 @@ export interface TimeSlot {
 export interface DayAvailability {
   date: string; // ISO date string YYYY-MM-DD
   dayLabel: string; // e.g. "Today, Oct 5"
+  dayName: string; // e.g. "Mon"
+  dayNum: string; // e.g. "05"
   slots: TimeSlot[];
+}
+
+export interface EducationItem {
+  degree: string;
+  institution: string;
+  year: string;
+  location?: string;
+  description?: string;
+}
+
+export interface PatientReview {
+  id: string;
+  patientName: string;
+  rating: number;
+  date: string;
+  comment: string;
+  verified: boolean;
+  consultationType: "Video Consultation" | "Chamber Visit";
+}
+
+export interface ReviewCategory {
+  name: string;
+  rating: number;
+}
+
+export interface RatingStarBreakdown {
+  stars: number;
+  count: number;
+  percentage: number;
 }
 
 export interface Doctor {
@@ -35,6 +66,8 @@ export interface Doctor {
   designation: string;
   hospital: string;
   chambers: Chamber[];
+  videoConsultationFee: number;
+  chamberConsultationFee: number;
   rating: number;
   reviewCount: number;
   experienceYears: number;
@@ -45,7 +78,12 @@ export interface Doctor {
   languages: string[];
   totalPatientsTreated: number;
   availability: DayAvailability[];
+  videoAvailability?: DayAvailability[];
   about?: string;
+  educationTimeline?: EducationItem[];
+  patientReviews?: PatientReview[];
+  reviewCategories?: ReviewCategory[];
+  ratingStarBreakdown?: RatingStarBreakdown[];
 }
 
 export interface SpecialtyOption {

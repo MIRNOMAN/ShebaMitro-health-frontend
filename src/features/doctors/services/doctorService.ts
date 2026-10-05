@@ -6,6 +6,12 @@ export const getMinFee = (doctor: Doctor): number => {
   return Math.min(...doctor.chambers.map((c) => c.consultationFee));
 };
 
+export const fetchDoctorById = async (id: string): Promise<Doctor | null> => {
+  await new Promise((res) => setTimeout(res, 200));
+  const doc = MOCK_DOCTORS.find((d) => d.id === id);
+  return doc || MOCK_DOCTORS[0] || null; // Fallback to first doctor if demo ID is requested
+};
+
 export const fetchDoctors = async (
   filters: DoctorFilterState
 ): Promise<{ doctors: Doctor[]; total: number }> => {
