@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { CustomCursor } from "@/components/ui/custom-cursor";
+import { QueryProvider } from "@/components/providers/query-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -57,19 +58,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-bg-app text-fg-app transition-colors duration-300">
-        <LanguageProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange={false}
-          >
-            <SmoothScrollProvider>
-              <CustomCursor />
-              <StoreProvider>{children}</StoreProvider>
-            </SmoothScrollProvider>
-          </ThemeProvider>
-        </LanguageProvider>
+        <QueryProvider>
+          <LanguageProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange={false}
+            >
+              <SmoothScrollProvider>
+                <CustomCursor />
+                <StoreProvider>{children}</StoreProvider>
+              </SmoothScrollProvider>
+            </ThemeProvider>
+          </LanguageProvider>
+        </QueryProvider>
       </body>
     </html>
   );
