@@ -24,6 +24,7 @@
     "react-dom": "19.2.8",
     "react-i18next": "^17.0.15",
     "react-redux": "^9.3.0",
+    "recharts": "^3.10.1",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },
