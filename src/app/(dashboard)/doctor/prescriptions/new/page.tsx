@@ -26,6 +26,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { VoiceDictationSOAPWidget } from "@/features/doctors/components/VoiceDictationSOAPWidget";
 
 export interface PrescribedDrug {
   id: string;
@@ -266,6 +267,36 @@ export default function NewPrescriptionPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Voice Dictation AI SOAP Microphone Widget */}
+      <VoiceDictationSOAPWidget
+        onApplySOAP={({ chiefComplaints: newCC, clinicalFindings: newCF, vitals: newVitals, medications: newMeds }) => {
+          if (newCC) setChiefComplaints(newCC);
+          if (newCF) setClinicalFindings(newCF);
+          if (newVitals) {
+            setVitals((prev) => ({
+              ...prev,
+              bp: newVitals.bp || prev.bp,
+              pulse: newVitals.pulse || prev.pulse,
+              temp: newVitals.temp || prev.temp,
+              weight: newVitals.weight || prev.weight,
+            }));
+          }
+          if (newMeds && newMeds.length > 0) {
+            const converted: PrescribedDrug[] = newMeds.map((m) => ({
+              id: `dictated-${Date.now()}-${m.id}`,
+              brandName: m.brandName,
+              genericName: m.genericName,
+              dosageForm: m.dosageForm,
+              strength: m.strength,
+              pattern: m.pattern,
+              durationDays: m.durationDays,
+              timing: m.timing,
+            }));
+            setPrescribedDrugs((prev) => [...prev, ...converted]);
+          }
+        }}
+      />
 
       {/* Main 2-Column Clinical Editor Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
