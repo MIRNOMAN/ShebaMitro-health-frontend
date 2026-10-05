@@ -1,0 +1,32 @@
+{
+  "name": "ShebaMitro Healthcare - Digital Health & Medicine Portal",
+  "short_name": "ShebaMitro",
+  "description": "Integrated Bangladeshi Healthcare Platform for Specialist Doctor Appointments, Medicine Alarms, Diagnostic Packages, and Express Pharmacy Delivery.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#06b6d4",
+  "orientation": "portrait",
+  "scope": "/",
+  "categories": ["medical", "health", "lifestyle", "shopping"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
