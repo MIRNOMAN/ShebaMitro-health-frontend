@@ -68,7 +68,7 @@ const ROLE_NAV_LINKS: Record<UserRole, NavLinkItem[]> = {
     { label: "Overview", href: "/dashboard/lab", icon: LayoutDashboard },
     { label: "Sample Dispatch", href: "/lab/dispatch", icon: Truck, badge: "5 Live" },
     { label: "Test Requisitions", href: "/lab", icon: FlaskConical, badge: "8 Active" },
-    { label: "Upload Reports", href: "/dashboard/lab/upload-reports", icon: FileText },
+    { label: "Upload Reports", href: "/lab/reports/upload", icon: FileText },
     { label: "Lab Branch Status", href: "/dashboard/lab/branches", icon: Activity },
     { label: "Financial Reports", href: "/dashboard/lab/financials", icon: TrendingUp },
   ],
