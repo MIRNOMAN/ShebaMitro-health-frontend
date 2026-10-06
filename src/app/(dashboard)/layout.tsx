@@ -73,7 +73,7 @@ const ROLE_NAV_LINKS: Record<UserRole, NavLinkItem[]> = {
     { label: "Financial Reports", href: "/dashboard/lab/financials", icon: TrendingUp },
   ],
   pharmacy: [
-    { label: "Overview", href: "/dashboard/pharmacy", icon: LayoutDashboard },
+    { label: "Pharmacy Overview", href: "/dashboard/pharmacy", icon: LayoutDashboard },
     { label: "Order Dispatch Queue", href: "/dashboard/pharmacy/dispatch-queue", icon: Package, badge: "5 New" },
     { label: "Express Delivery Riders", href: "/dashboard/pharmacy/express-riders", icon: Truck, badge: "⚡ 2-Hour" },
     { label: "Inventory Stock", href: "/dashboard/pharmacy/inventory", icon: Pill },
