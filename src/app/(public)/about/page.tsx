@@ -2,6 +2,7 @@
 
 import React from "react";
 import { AboutHeroSection } from "@/features/about/components/AboutHeroSection";
+import { AboutMissionGoalSection } from "@/features/about/components/AboutMissionGoalSection";
 import { AboutStatsSection } from "@/features/about/components/AboutStatsSection";
 import { AboutMissionValues } from "@/features/about/components/AboutMissionValues";
 import { AboutLeadershipTeam } from "@/features/about/components/AboutLeadershipTeam";
@@ -12,6 +13,9 @@ export default function PublicAboutUsPage() {
     <div className="p-6 sm:p-8 lg:p-10 space-y-12 max-w-7xl mx-auto">
       {/* High Impact Hero Section */}
       <AboutHeroSection />
+
+      {/* Dedicated Mission & Goal Spotlight Section */}
+      <AboutMissionGoalSection />
 
       {/* Impact Statistics */}
       <AboutStatsSection />

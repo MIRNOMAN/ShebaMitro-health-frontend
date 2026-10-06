@@ -1,4 +1,28 @@
-import { PlatformStatItem, CoreValueItem, LeadershipMember } from "../types/about";
+import { PlatformStatItem, CoreValueItem, LeadershipMember, MissionGoalDetail } from "../types/about";
+
+export const OUR_MISSION_DATA: MissionGoalDetail = {
+  title: "Our Mission (আমাদের মিশন)",
+  tagline: "Bridging the Healthcare Divide in Bangladesh Through Trusted Digital Innovations",
+  summary: "Our mission is to democratize access to specialist healthcare across all 64 districts of Bangladesh. We empower every individual—regardless of location or socioeconomic status—to consult verified BMDC doctors, receive cryptographically secure electronic prescriptions, access accredited home diagnostic testing, and get authentic medicines delivered to their doorstep.",
+  keyPoints: [
+    "Provide instant, low-latency 24/7 video consultations with top BMDC registered specialists.",
+    "Eliminate counterfeit medications with SHA-256 digital signature prescription seals.",
+    "Deliver DGDA-compliant express cold-chain medicine dispatch from model dark stores.",
+    "Ensure zero-barrier healthcare access for rural, suburban, and urban communities.",
+  ],
+};
+
+export const OUR_GOAL_DATA: MissionGoalDetail = {
+  title: "Our Goal (আমাদের লক্ষ্য)",
+  tagline: "Building Bangladesh’s Most Secure & Comprehensive Integrated Digital Health Network",
+  summary: "Our goal is to serve over 10 Million patients by 2028 with a zero-compromise, end-to-end digital health infrastructure. By unifying doctors, phlebotomists, diagnostic laboratories, model pharmacies, and automated insurance billing, ShebaMitro aims to reduce patient out-of-pocket medical expenditure by 35% while elevating clinical diagnostic accuracy nationwide.",
+  keyPoints: [
+    "Onboard 10,000+ BMDC specialist doctors across 40+ clinical specialties.",
+    "Achieve under 30-minute express doorstep delivery for essential medications in major cities.",
+    "Expand automated AI triage & biomarker analysis to flag critical laboratory anomalies in real-time.",
+    "Maintain 100% cryptographic ledger auditability for patient privacy & HIPAA/DGHS compliance.",
+  ],
+};
 
 export const MOCK_PLATFORM_STATS: PlatformStatItem[] = [
   {

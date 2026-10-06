@@ -19,3 +19,10 @@ export interface LeadershipMember {
   bio: string;
   imageUrl: string;
 }
+
+export interface MissionGoalDetail {
+  title: string;
+  tagline: string;
+  summary: string;
+  keyPoints: string[];
+}
