@@ -47,3 +47,38 @@ export interface OcrScanResult {
   isScanning: boolean;
   isComplete: boolean;
 }
+
+export interface MedicineInventoryItem {
+  id: string;
+  brandName: string;
+  genericName: string;
+  formulation: "Tablet" | "Capsule" | "Syrup" | "Injection" | "Ointment" | "Drops";
+  strength: string;
+  batchNo: string;
+  expiryDate: string; // YYYY-MM-DD
+  availableUnits: number;
+  unitPrice: number;
+  manufacturer: string;
+  supplierDepot: string;
+  minimumThreshold: number;
+}
+
+export interface WholesaleReorderItem {
+  inventoryId: string;
+  brandName: string;
+  genericName: string;
+  manufacturer: string;
+  currentUnits: number;
+  reorderUnits: number;
+  estimatedUnitPrice: number;
+  reason: "Low Stock (< 20)" | "Expiring Soon (< 60 Days)";
+}
+
+export interface WholesalePurchaseOrder {
+  poNumber: string;
+  generatedAt: string;
+  totalItems: number;
+  totalEstimatedCost: number;
+  supplier: string;
+  items: WholesaleReorderItem[];
+}
