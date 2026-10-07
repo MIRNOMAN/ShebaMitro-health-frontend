@@ -19,6 +19,8 @@ import { playSoftChimeSound, stopChimeSound } from "../utils/chime";
 import { ConfettiBurst } from "./ConfettiBurst";
 import { Button } from "@/components/ui/button";
 
+import { BengaliVoiceAudioPlayer } from "./BengaliVoiceAudioPlayer";
+
 export interface DosageItem {
   id: string;
   medicineName: string;
@@ -28,26 +30,29 @@ export interface DosageItem {
   instructions: string;
   status: "UPCOMING" | "DUE_NOW" | "TAKEN" | "SNOOZED" | "MISSED";
   snoozedUntil?: string;
+  preferredLanguage?: "bn" | "en";
 }
 
 const INITIAL_DOSAGES: DosageItem[] = [
   {
     id: "dose-1",
     medicineName: "Napa Extra 500mg",
-    dosageText: "1 Tablet",
+    dosageText: "১টি ট্যাবলেট",
     scheduledTime: "08:30 AM",
     period: "Morning",
-    instructions: "Take after meal with water",
+    instructions: "খাওয়ার পর পানির সাথে সেবন করুন",
     status: "TAKEN",
+    preferredLanguage: "bn",
   },
   {
     id: "dose-2",
-    medicineName: "Seclo 20mg",
-    dosageText: "1 Capsule",
+    medicineName: "মেটফর্মিন ৫০০mg (Metformin)",
+    dosageText: "১টি ট্যাবলেট",
     scheduledTime: "01:30 PM",
     period: "Afternoon",
-    instructions: "Take 30 mins before meal",
+    instructions: "খাওয়ার ৩০ মিনিট আগে সেবন করুন",
     status: "DUE_NOW",
+    preferredLanguage: "bn",
   },
   {
     id: "dose-3",
@@ -57,6 +62,7 @@ const INITIAL_DOSAGES: DosageItem[] = [
     period: "Night",
     instructions: "Take before bedtime",
     status: "UPCOMING",
+    preferredLanguage: "en",
   },
 ];
 
@@ -65,6 +71,7 @@ export function HeroMedicineAlarmWidget() {
   const [activeAlarmDosage, setActiveAlarmDosage] = useState<DosageItem | null>(null);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const [isChiming, setIsChiming] = useState<boolean>(false);
+  const [patientPreferredLanguage, setPatientPreferredLanguage] = useState<"bn" | "en">("bn");
 
   // Auto trigger DUE_NOW alarm modal on load
   useEffect(() => {
@@ -133,25 +140,54 @@ export function HeroMedicineAlarmWidget() {
             <Clock className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="font-extrabold text-lg text-fg-app">Hero Medicine Alarm Widget</h2>
+            <h2 className="font-extrabold text-lg text-fg-app">Patient Medicine Alarm Deck</h2>
             <p className="text-xs text-muted-foreground">
-              Today's dosage schedule, Web Audio API chime, and weekly adherence progress
+              NestJS TTS Bengali Audio Voice Notes, adherence tracker & Web Audio chime
             </p>
           </div>
         </div>
 
-        {/* Manual Test Sound Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            const dueOrFirst = dosages.find((d) => d.status === "DUE_NOW") || dosages[1]!;
-            triggerAlarm(dueOrFirst);
-          }}
-          className="text-xs font-semibold text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
-        >
-          <Volume2 className="h-3.5 w-3.5 mr-1" /> Test Alarm Ring
-        </Button>
+        {/* Voice Language Preference & Test Alarm Ring Controls */}
+        <div className="flex items-center gap-2">
+          {/* Patient Preferred Audio Voice Language Toggle */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-card-border bg-surface-card-hover text-xs font-bold">
+            <span className="text-muted-foreground text-[10px] uppercase">Voice Language:</span>
+            <button
+              type="button"
+              onClick={() => setPatientPreferredLanguage("bn")}
+              className={`px-2 py-0.5 rounded-lg text-xs font-extrabold transition-all ${
+                patientPreferredLanguage === "bn"
+                  ? "bg-emerald-500 text-slate-950 shadow-xs"
+                  : "text-muted-foreground hover:text-fg-app"
+              }`}
+            >
+              🇧🇩 বাংলা
+            </button>
+            <button
+              type="button"
+              onClick={() => setPatientPreferredLanguage("en")}
+              className={`px-2 py-0.5 rounded-lg text-xs font-extrabold transition-all ${
+                patientPreferredLanguage === "en"
+                  ? "bg-emerald-500 text-slate-950 shadow-xs"
+                  : "text-muted-foreground hover:text-fg-app"
+              }`}
+            >
+              🇺🇸 EN
+            </button>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const dueOrFirst = dosages.find((d) => d.status === "DUE_NOW") || dosages[1]!;
+              triggerAlarm(dueOrFirst);
+            }}
+            className="text-xs font-semibold text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
+          >
+            <Volume2 className="h-3.5 w-3.5 mr-1" /> Test Alarm Voice Note
+          </Button>
+        </div>
       </div>
 
       {/* Weekly Adherence Progress Bar */}
@@ -288,7 +324,7 @@ export function HeroMedicineAlarmWidget() {
         </div>
       </div>
 
-      {/* Alarm Triggered Modal Popup with Looping Visual Pulse */}
+      {/* Alarm Triggered Modal Popup with Accessible Bengali Audio Voice Player */}
       <AnimatePresence>
         {activeAlarmDosage && (
           <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4">
@@ -302,7 +338,7 @@ export function HeroMedicineAlarmWidget() {
                 setIsChiming(false);
                 setActiveAlarmDosage(null);
               }}
-              className="fixed inset-0 bg-black/70 backdrop-blur-xs"
+              className="fixed inset-0 bg-black/75 backdrop-blur-md"
             />
 
             {/* Modal Box */}
@@ -311,45 +347,49 @@ export function HeroMedicineAlarmWidget() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 22, stiffness: 280 }}
-              className="relative w-full max-w-md bg-card border-2 border-amber-500 rounded-3xl p-6 shadow-2xl z-10 text-center space-y-6 overflow-hidden"
+              className="relative w-full max-w-lg bg-card border-2 border-amber-500 rounded-3xl p-6 shadow-2xl z-10 text-center space-y-5 overflow-hidden"
             >
               {/* Looping Radial Pulse Animation Rings */}
-              <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+              <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
                 <div className="absolute inset-0 rounded-full bg-amber-500/20 animate-ping" />
                 <div className="absolute inset-2 rounded-full bg-emerald-500/20 animate-pulse" />
 
-                <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500 text-slate-950 shadow-xl ring-4 ring-amber-500/40">
-                  <Pill className="h-8 w-8 animate-bounce" />
+                <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500 text-slate-950 shadow-xl ring-4 ring-amber-500/40">
+                  <Pill className="h-7 w-7 animate-bounce" />
                 </div>
               </div>
 
               {/* Title & Instructions */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-xs font-bold animate-pulse">
                   <Bell className="h-3.5 w-3.5" /> MEDICINE ALARM DUE NOW
                 </span>
 
-                <h3 className="text-2xl font-extrabold text-fg-app">
+                <h3 className="text-2xl font-black text-fg-app">
                   {activeAlarmDosage.medicineName}
                 </h3>
 
-                <p className="text-sm font-semibold text-primary-teal">
-                  Dosage: {activeAlarmDosage.dosageText}
-                </p>
-
-                <p className="text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-xl border border-card-border">
-                  {activeAlarmDosage.instructions}
+                <p className="text-sm font-bold text-primary-teal">
+                  মাত্রাসমূহ (Dosage): {activeAlarmDosage.dosageText}
                 </p>
               </div>
 
-              {/* Web Audio Chime Playing Status */}
-              <div className="flex items-center justify-center gap-2 text-xs font-semibold text-amber-500">
-                <Volume2 className="h-4 w-4 animate-pulse" />
-                <span>Web Audio Soft Chime Ringing...</span>
-              </div>
+              {/* Accessible Bengali Audio Voice Player Component */}
+              {patientPreferredLanguage === "bn" ? (
+                <BengaliVoiceAudioPlayer
+                  medicineName={activeAlarmDosage.medicineName}
+                  dosageText={activeAlarmDosage.dosageText}
+                  instructions={activeAlarmDosage.instructions}
+                  autoPlay={true}
+                />
+              ) : (
+                <div className="p-3 rounded-xl bg-muted/40 border border-card-border text-xs text-muted-foreground">
+                  Take dosage: {activeAlarmDosage.instructions}
+                </div>
+              )}
 
               {/* Modal Buttons: Take Now & Snooze 15m */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="grid grid-cols-2 gap-3 pt-1">
                 <Button
                   variant="outline"
                   size="lg"
