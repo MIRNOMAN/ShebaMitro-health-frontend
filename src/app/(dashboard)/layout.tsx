@@ -190,19 +190,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-screen bg-bg-app text-fg-app transition-colors duration-300">
       {/* ── Sidebar (Desktop Collapsible) ────────────────────────────────── */}
       <aside
-        className={`hidden lg:flex flex-col border-r border-card-border bg-card shadow-sm transition-all duration-300 relative z-30 shrink-0 ${
+        className={`hidden lg:flex flex-col border-r border-surface-border bg-surface-card shadow-xs transition-all duration-300 relative z-30 shrink-0 ${
           isCollapsed ? "w-20" : "w-64"
         }`}
       >
         {/* Sidebar Header */}
-        <div className="flex h-16 items-center justify-between border-b border-card-border px-4">
+        <div className="flex h-16 items-center justify-between border-b border-surface-border px-4">
           <Link href="/" className="flex items-center gap-2.5 min-w-0">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-teal text-white shadow-md glow-teal shrink-0">
               <HeartPulse className="h-5 w-5" />
             </div>
             {!isCollapsed && (
               <div className="min-w-0">
-                <span className="font-extrabold text-base tracking-tight text-fg-app block truncate">
+                <span className="font-black text-base tracking-tight text-fg-app block truncate">
                   ShebaMitro
                 </span>
                 <span className="text-[10px] font-bold text-primary-teal uppercase tracking-wider block">
@@ -214,8 +214,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Collapse Toggle Button */}
           <button
+            type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex h-7 w-7 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground hover:bg-muted hover:text-fg-app transition-colors"
+            className="hidden lg:flex h-7 w-7 items-center justify-center rounded-lg bg-muted-bg text-muted-fg hover:bg-surface-card-hover hover:text-fg-app transition-colors cursor-pointer"
           >
             {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
@@ -224,7 +225,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Navigation Links */}
         <nav className="flex-1 space-y-1.5 p-3 overflow-y-auto">
           {!isCollapsed && (
-            <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-fg">
               {currentRole} Navigation
             </span>
           )}
@@ -239,13 +240,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href={link.href}
                 className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all duration-200 ${
                   isActive
-                    ? "bg-primary-teal/15 text-primary-teal border border-primary-teal/30 shadow-xs"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-fg-app"
+                    ? "bg-primary-teal/15 text-primary-teal font-bold border border-primary-teal/30 shadow-2xs"
+                    : "text-muted-fg hover:bg-muted-bg/60 hover:text-fg-app"
                 }`}
                 title={link.label}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary-teal" : "text-muted-foreground"}`} />
+                  <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary-teal" : "text-muted-fg"}`} />
                   {!isCollapsed && <span className="truncate">{link.label}</span>}
                 </div>
 
@@ -261,16 +262,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Sidebar Footer Role Badge */}
         {!isCollapsed && (
-          <div className="p-3 border-t border-card-border">
-            <div className="p-3 rounded-xl bg-surface-card-hover border border-card-border flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-500 font-bold flex items-center justify-center text-xs">
+          <div className="p-3 border-t border-surface-border">
+            <div className="p-3 rounded-xl bg-muted-bg/50 border border-surface-border flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-emerald-accent/10 text-emerald-accent font-bold flex items-center justify-center text-xs">
                 <ShieldCheck className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
                 <span className="text-xs font-bold text-fg-app block capitalize">
                   {currentRole} Mode
                 </span>
-                <span className="text-[10px] text-muted-foreground block truncate">
+                <span className="text-[10px] text-muted-fg block truncate">
                   RBAC Verified Session
                 </span>
               </div>
@@ -282,25 +283,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ── Main Content Area & Masthead ───────────────────────────── */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Top Masthead Header */}
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-card-border bg-card/80 px-4 sm:px-6 backdrop-blur-md">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-surface-border bg-surface-card/90 px-4 sm:px-6 backdrop-blur-md">
           {/* Left: Mobile Menu Toggle & Breadcrumbs */}
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={() => setIsMobileOpen(!isMobileOpen)}
-              className="lg:hidden p-2 rounded-xl bg-muted text-fg-app"
+              className="lg:hidden p-2 rounded-xl bg-muted-bg text-fg-app"
             >
               <Menu className="h-5 w-5" />
             </button>
 
             {/* Breadcrumbs */}
-            <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <nav className="flex items-center gap-1.5 text-xs text-muted-fg">
               {breadcrumbs.map((bc, idx) => (
                 <React.Fragment key={bc.href}>
-                  {idx > 0 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />}
+                  {idx > 0 && <ChevronRight className="h-3.5 w-3.5 text-muted-fg/50" />}
                   <Link
                     href={bc.href}
                     className={`font-semibold transition-colors hover:text-primary-teal ${
-                      idx === breadcrumbs.length - 1 ? "text-fg-app font-bold" : "text-muted-foreground"
+                      idx === breadcrumbs.length - 1 ? "text-fg-app font-bold" : "text-muted-fg"
                     }`}
                   >
                     {bc.label}
@@ -321,11 +323,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Notification Bell Dropdown */}
             <div className="relative">
               <button
+                type="button"
                 onClick={() => {
                   setIsNotifOpen(!isNotifOpen);
                   setIsProfileOpen(false);
                 }}
-                className="relative p-2 rounded-xl border border-card-border bg-card hover:bg-surface-card-hover transition-colors text-fg-app shadow-xs"
+                className="relative p-2 rounded-xl border border-surface-border bg-surface-card hover:bg-surface-card-hover transition-colors text-fg-app shadow-xs cursor-pointer active:scale-95"
               >
                 <Bell className="h-4 w-4" />
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-bold animate-pulse">
@@ -336,14 +339,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <AnimatePresence>
                 {isNotifOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 6, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-80 rounded-2xl border border-card-border bg-card p-4 shadow-2xl z-50 space-y-3"
+                    exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="absolute right-0 mt-2.5 w-80 rounded-2xl border border-surface-border bg-surface-card p-4 shadow-2xl z-50 space-y-3"
+                    style={{ backgroundColor: "var(--card)" }}
                   >
-                    <div className="flex items-center justify-between pb-2 border-b border-card-border">
-                      <span className="font-bold text-xs text-fg-app">Notifications</span>
-                      <span className="text-[10px] font-semibold text-primary-teal bg-primary-teal/10 px-2 py-0.5 rounded-full">
+                    <div className="flex items-center justify-between pb-2 border-b border-surface-border">
+                      <span className="font-black text-xs text-fg-app">Notifications</span>
+                      <span className="text-[10px] font-bold text-primary-teal bg-primary-teal/10 px-2 py-0.5 rounded-full border border-primary-teal/20">
                         2 Unread
                       </span>
                     </div>
@@ -352,15 +357,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       {NOTIFICATIONS.map((n) => (
                         <div
                           key={n.id}
-                          className={`p-2.5 rounded-xl text-xs space-y-1 transition-colors border ${
-                            n.unread ? "bg-primary-teal/10 border-primary-teal/30" : "bg-muted/40 border-card-border/40"
+                          className={`p-3 rounded-xl text-xs space-y-1 transition-colors border ${
+                            n.unread ? "bg-primary-teal/10 border-primary-teal/30" : "bg-muted-bg/40 border-surface-border"
                           }`}
                         >
                           <div className="flex items-center justify-between font-bold text-fg-app">
                             <span>{n.title}</span>
-                            <span className="text-[10px] font-normal text-muted-foreground">{n.time}</span>
+                            <span className="text-[10px] font-medium text-muted-fg">{n.time}</span>
                           </div>
-                          <p className="text-[11px] text-muted-foreground leading-tight">{n.desc}</p>
+                          <p className="text-[11px] text-muted-fg leading-tight">{n.desc}</p>
                         </div>
                       ))}
                     </div>
@@ -376,43 +381,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   setIsProfileOpen(!isProfileOpen);
                   setIsNotifOpen(false);
                 }}
-                className="flex items-center gap-2 p-1.5 pl-2.5 rounded-full border border-card-border bg-card hover:bg-surface-card-hover transition-colors shadow-xs"
+                className="flex items-center gap-2 p-1.5 pl-2.5 rounded-full border border-surface-border bg-surface-card hover:bg-surface-card-hover transition-all shadow-xs cursor-pointer active:scale-95"
               >
-                <div className="h-7 w-7 rounded-full bg-primary-teal text-white font-bold flex items-center justify-center text-xs">
+                <div className="h-7 w-7 rounded-full bg-primary-teal text-white font-black flex items-center justify-center text-xs shadow-xs">
                   {currentRole.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-xs font-bold text-fg-app capitalize hidden sm:inline">
                   {currentRole}
                 </span>
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+                <ChevronDown className="h-3.5 w-3.5 text-muted-fg mr-1" />
               </button>
 
               <AnimatePresence>
                 {isProfileOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 6, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-72 rounded-2xl border border-card-border bg-card p-3 shadow-2xl z-50 space-y-3"
+                    exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="absolute right-0 mt-2.5 w-76 rounded-2xl border border-surface-border bg-surface-card p-3.5 shadow-2xl z-50 space-y-3"
+                    style={{ backgroundColor: "var(--card)" }}
                   >
                     {/* Profile Header Info */}
-                    <div className="p-2.5 rounded-xl bg-surface-card-hover border border-card-border flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-primary-teal text-white font-extrabold flex items-center justify-center text-sm shadow-xs">
+                    <div className="p-3 rounded-xl bg-muted-bg/50 border border-surface-border flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-primary-teal text-white font-black flex items-center justify-center text-sm shadow-xs">
                         {currentRole.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <span className="font-bold text-xs text-fg-app block truncate capitalize">
+                        <span className="font-black text-xs text-fg-app block truncate capitalize">
                           {currentRole} User
                         </span>
-                        <span className="text-[10px] text-muted-foreground block truncate">
+                        <span className="text-[11px] font-medium text-muted-fg block truncate">
                           user@shebamitro.health
                         </span>
                       </div>
                     </div>
 
                     {/* Workspace Switcher Section */}
-                    <div className="space-y-1 pt-1 border-t border-card-border">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-2">
+                    <div className="space-y-1.5 pt-1 border-t border-surface-border">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-muted-fg px-2 block">
                         Switch Workspace / Role
                       </span>
                       <div className="space-y-1">
@@ -425,17 +432,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               key={ws.role}
                               type="button"
                               onClick={() => handleSwitchWorkspace(ws.role)}
-                              className={`w-full flex items-center justify-between p-2 rounded-xl text-xs text-left transition-all ${
+                              className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs text-left transition-all cursor-pointer ${
                                 isSelected
-                                  ? "bg-primary-teal/15 text-primary-teal font-bold"
-                                  : "text-fg-app hover:bg-muted/50 font-medium"
+                                  ? "bg-primary-teal/15 text-primary-teal font-black border border-primary-teal/30 shadow-2xs"
+                                  : "text-fg-app hover:bg-muted-bg/70 font-semibold"
                               }`}
                             >
-                              <div className="flex items-center gap-2 min-w-0">
+                              <div className="flex items-center gap-2.5 min-w-0">
                                 <Icon className="h-4 w-4 shrink-0 text-primary-teal" />
                                 <div className="min-w-0">
                                   <span className="block text-xs truncate">{ws.name}</span>
-                                  <span className="block text-[10px] text-muted-foreground truncate font-normal">
+                                  <span className="block text-[10px] text-muted-fg truncate font-medium">
                                     {ws.subtitle}
                                   </span>
                                 </div>
@@ -448,10 +455,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
 
                     {/* Sign Out */}
-                    <div className="pt-2 border-t border-card-border">
+                    <div className="pt-2 border-t border-surface-border">
                       <button
                         onClick={handleSignOut}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors"
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                       >
                         <span className="flex items-center gap-2">
                           <LogOut className="h-4 w-4" /> Sign Out

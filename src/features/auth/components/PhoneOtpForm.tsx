@@ -1,19 +1,39 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Phone, ArrowRight, ShieldCheck, KeyRound, RotateCcw, CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Phone,
+  ArrowRight,
+  ShieldCheck,
+  KeyRound,
+  RotateCcw,
+  CheckCircle2,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
+import { toast } from "sonner";
 import { phoneSchema, otpSchema } from "../schemas/authSchema";
 import { UserRole } from "../types";
 import { Button } from "@/components/ui/button";
 
 interface PhoneOtpFormProps {
   role: UserRole;
-  onSuccessAuth: (role: UserRole) => void;
+  onSuccessAuth?: (role: UserRole) => void;
 }
 
+const DEMO_PHONES: Record<UserRole, string> = {
+  patient: "01711223344",
+  doctor: "01811223344",
+  pharmacy: "01911223344",
+  lab: "01611223344",
+  admin: "01511223344",
+};
+
 export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
+  const router = useRouter();
   const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [phoneNumber, setPhoneNumber] = useState<string>("01712345678");
+  const [phoneNumber, setPhoneNumber] = useState<string>(DEMO_PHONES[role] || "01712345678");
   const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
@@ -22,6 +42,13 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Update phone when role changes
+  useEffect(() => {
+    if (DEMO_PHONES[role]) {
+      setPhoneNumber(DEMO_PHONES[role]);
+    }
+  }, [role]);
 
   // 60-second countdown timer for resend OTP
   useEffect(() => {
@@ -36,9 +63,19 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
     e.preventDefault();
     setPhoneError(null);
 
-    const result = phoneSchema.safeParse({ phone: phoneNumber });
+    const formattedPhone = phoneNumber.startsWith("+880")
+      ? phoneNumber
+      : phoneNumber.startsWith("880")
+      ? `+${phoneNumber}`
+      : phoneNumber.startsWith("01")
+      ? `+88${phoneNumber}`
+      : `+880${phoneNumber}`;
+
+    const result = phoneSchema.safeParse({ phone: formattedPhone });
     if (!result.success) {
-      setPhoneError(result.error.issues[0]?.message || "Invalid phone number");
+      const msg = "Enter a valid 11-digit Bangladeshi number (e.g. 01712345678)";
+      setPhoneError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -47,28 +84,35 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
       setIsSubmitting(false);
       setStep("otp");
       setResendTimer(60);
-    }, 500);
+      toast.success(`6-Digit OTP sent to ${phoneNumber}! (Demo code: 123456)`);
+      // Auto-focus first digit on next tick
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
+    }, 600);
   };
 
   const handleDigitChange = (index: number, value: string) => {
+    // Handle paste of full 6 digits
     if (value.length > 1) {
-      // Handle paste of 6 digits
-      const digits = value.slice(0, 6).split("");
+      const digits = value.replace(/\D/g, "").slice(0, 6).split("");
       const newOtp = [...otpDigits];
       digits.forEach((d, i) => {
-        newOtp[i] = d;
+        if (i < 6) newOtp[i] = d;
       });
       setOtpDigits(newOtp);
-      inputRefs.current[Math.min(digits.length, 5)]?.focus();
+      const nextIndex = Math.min(digits.length, 5);
+      inputRefs.current[nextIndex]?.focus();
       return;
     }
 
+    const cleanDigit = value.replace(/\D/g, "");
     const newOtp = [...otpDigits];
-    newOtp[index] = value;
+    newOtp[index] = cleanDigit;
     setOtpDigits(newOtp);
 
     // Auto-focus next input
-    if (value && index < 5) {
+    if (cleanDigit && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -86,14 +130,37 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
     const fullOtp = otpDigits.join("");
     const result = otpSchema.safeParse({ otp: fullOtp });
     if (!result.success) {
-      setOtpError(result.error.issues[0]?.message || "Invalid 6-digit OTP code");
+      const msg = "Please enter all 6 numeric digits";
+      setOtpError(msg);
+      toast.error(msg);
       return;
     }
 
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
-      onSuccessAuth(role);
+      toast.success(`Phone verified! Logged in as ${role.toUpperCase()}`);
+      if (onSuccessAuth) {
+        onSuccessAuth(role);
+      }
+      switch (role) {
+        case "doctor":
+          router.push("/dashboard/doctor");
+          break;
+        case "lab":
+          router.push("/dashboard/lab");
+          break;
+        case "pharmacy":
+          router.push("/dashboard/pharmacy");
+          break;
+        case "admin":
+          router.push("/dashboard/admin");
+          break;
+        case "patient":
+        default:
+          router.push("/dashboard/patient");
+          break;
+      }
     }, 600);
   };
 
@@ -101,58 +168,106 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
     <div className="space-y-4">
       {step === "phone" ? (
         <form onSubmit={handleSendOtp} className="space-y-4">
+          {/* Mobile Number Input */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Mobile Phone Number
+            <label className="text-xs font-black uppercase tracking-wider text-muted-fg">
+              Mobile Phone Number <span className="text-rose-500">*</span>
             </label>
-            <div className="relative flex items-center">
-              <div className="absolute left-3 flex items-center gap-1.5 text-xs font-bold text-fg-app border-r border-card-border pr-2.5">
+
+            <div className="relative flex items-center group">
+              {/* Country Code Pill */}
+              <div className="absolute left-2.5 z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-muted-bg border border-surface-border text-xs font-black text-fg-app select-none shadow-2xs">
                 <span>🇧🇩</span>
-                <span>+880</span>
+                <span className="font-mono text-primary-teal">+880</span>
               </div>
+
+              {/* Number Input */}
               <input
                 type="tel"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^\d]/g, "");
+                  setPhoneNumber(val);
+                }}
                 placeholder="1712345678"
-                className="w-full h-11 pl-24 pr-4 rounded-xl bg-card border border-card-border text-sm text-fg-app placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-teal transition-all shadow-xs"
+                required
+                className="w-full h-12 pl-24 pr-4 rounded-2xl bg-surface-card border border-surface-border text-sm font-semibold text-fg-app placeholder:text-muted-fg focus:outline-none focus:ring-2 focus:ring-primary-teal focus:border-transparent transition-all shadow-xs"
               />
             </div>
+
             {phoneError && (
-              <p className="text-xs font-semibold text-rose-500 pt-0.5">{phoneError}</p>
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs font-bold text-rose-500 animate-in fade-in duration-200">
+                {phoneError}
+              </div>
             )}
           </div>
 
+          {/* Submit CTA */}
           <Button
             type="submit"
-            variant="primary"
             disabled={isSubmitting}
-            className="w-full h-11 justify-center text-sm shadow-md"
+            className="w-full h-12 justify-center text-sm font-black uppercase tracking-wider rounded-2xl bg-gradient-to-r from-primary-teal via-teal-500 to-emerald-accent text-white shadow-lg shadow-primary-teal/25 hover:shadow-primary-teal/40 hover:brightness-110 transition-all cursor-pointer"
           >
             {isSubmitting ? (
-              "Sending OTP..."
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" /> Sending SMS OTP...
+              </span>
             ) : (
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-2">
                 Get Verification Code <ArrowRight className="h-4 w-4" />
               </span>
             )}
           </Button>
+
+          {/* 1-Click Demo Fill for Phones */}
+          <div className="pt-2">
+            <div className="p-3.5 rounded-2xl bg-muted-bg/60 border border-surface-border space-y-2">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-extrabold text-fg-app flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-primary-teal" />
+                  1-Click Demo Phone:
+                </span>
+                <span className="text-muted-fg text-[10px]">Instant SMS OTP</span>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                {(["patient", "doctor", "pharmacy", "lab", "admin"] as UserRole[]).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => {
+                      setPhoneNumber(DEMO_PHONES[r]);
+                      toast.info(`Filled demo phone for ${r.toUpperCase()}`);
+                    }}
+                    className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all cursor-pointer ${
+                      role === r
+                        ? "bg-primary-teal/20 text-primary-teal border-primary-teal/40 font-extrabold"
+                        : "bg-surface-card border-surface-border text-muted-fg hover:text-fg-app hover:border-primary-teal/30"
+                    }`}
+                  >
+                    {r.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </form>
       ) : (
         <form onSubmit={handleVerifyOtp} className="space-y-5">
           <div className="space-y-2 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500 mx-auto border border-emerald-500/20">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-accent/15 text-emerald-accent mx-auto border border-emerald-accent/30 shadow-md">
               <KeyRound className="h-6 w-6" />
             </div>
-            <h4 className="font-bold text-base text-fg-app">Enter 6-Digit OTP Code</h4>
-            <p className="text-xs text-muted-foreground">
-              Code sent to <span className="font-bold text-fg-app">{phoneNumber}</span>.{" "}
+            <h3 className="font-black text-lg text-fg-app tracking-tight">Enter 6-Digit OTP</h3>
+            <p className="text-xs text-muted-fg">
+              SMS code sent to{" "}
+              <span className="font-mono font-bold text-fg-app">+880 {phoneNumber}</span>.{" "}
               <button
                 type="button"
                 onClick={() => setStep("phone")}
-                className="text-primary-teal font-semibold hover:underline"
+                className="text-primary-teal font-black hover:underline ml-1"
               >
-                Change
+                Change Number
               </button>
             </p>
           </div>
@@ -166,48 +281,56 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
                   inputRefs.current[idx] = el;
                 }}
                 type="text"
-                maxLength={6}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={1}
                 value={digit}
                 onChange={(e) => handleDigitChange(idx, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(idx, e)}
-                className="w-10 h-12 sm:w-11 sm:h-12 text-center text-lg font-bold rounded-xl bg-card border border-card-border text-fg-app focus:outline-none focus:ring-2 focus:ring-primary-teal transition-all shadow-xs"
+                className="w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-black rounded-2xl bg-surface-card border border-surface-border text-fg-app focus:outline-none focus:ring-2 focus:ring-emerald-accent focus:border-transparent transition-all shadow-md"
               />
             ))}
           </div>
 
           {otpError && (
-            <p className="text-xs font-semibold text-rose-500 text-center">{otpError}</p>
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs font-bold text-rose-500 text-center animate-in fade-in duration-200">
+              {otpError}
+            </div>
           )}
 
           {/* Resend Timer */}
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Didn't receive code?</span>
+          <div className="flex items-center justify-between text-xs text-muted-fg px-1">
+            <span>Didn&apos;t receive code?</span>
             {resendTimer > 0 ? (
-              <span className="font-mono text-primary-teal font-semibold">
+              <span className="font-mono text-primary-teal font-bold">
                 Resend in {resendTimer}s
               </span>
             ) : (
               <button
                 type="button"
-                onClick={() => setResendTimer(60)}
-                className="text-primary-teal font-semibold hover:underline flex items-center gap-1"
+                onClick={() => {
+                  setResendTimer(60);
+                  toast.success("New OTP sent via SMS!");
+                }}
+                className="text-primary-teal font-bold hover:underline flex items-center gap-1 cursor-pointer"
               >
-                <RotateCcw className="h-3 w-3" /> Resend OTP
+                <RotateCcw className="h-3 w-3" /> Resend Code
               </button>
             )}
           </div>
 
           <Button
             type="submit"
-            variant="emerald"
             disabled={isSubmitting}
-            className="w-full h-11 justify-center text-sm shadow-md"
+            className="w-full h-12 justify-center text-sm font-black uppercase tracking-wider rounded-2xl bg-gradient-to-r from-emerald-accent via-teal-500 to-primary-teal text-white shadow-lg shadow-emerald-accent/25 hover:shadow-emerald-accent/40 hover:brightness-110 transition-all cursor-pointer"
           >
             {isSubmitting ? (
-              "Verifying..."
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" /> Verifying Code...
+              </span>
             ) : (
-              <span className="flex items-center gap-1.5">
-                Verify & Login <CheckCircle2 className="h-4 w-4" />
+              <span className="flex items-center gap-2">
+                Verify & Sign In <CheckCircle2 className="h-4 w-4" />
               </span>
             )}
           </Button>

@@ -45,30 +45,30 @@ export function BiomarkerTrendCharts() {
   const [activeTab, setActiveTab] = useState<"fbs" | "hba1c" | "bp">("fbs");
 
   return (
-    <div className="rounded-2xl border border-card-border bg-card p-6 space-y-6 shadow-md relative overflow-hidden">
+    <div className="rounded-3xl border border-surface-border bg-surface-card p-6 sm:p-7 space-y-6 shadow-sm relative overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-card-border">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-surface-border">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-accent/10 text-emerald-accent border border-emerald-accent/20">
             <TrendingUp className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="font-extrabold text-lg text-fg-app">Biomarker Historical Trends</h2>
-            <p className="text-xs text-muted-foreground">
+            <h2 className="font-black text-lg text-fg-app tracking-tight">Biomarker Historical Trends</h2>
+            <p className="text-xs text-muted-fg">
               6-month longitudinal tracking with healthy reference range shading & abnormal flags
             </p>
           </div>
         </div>
 
         {/* Tab selector */}
-        <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-xl border border-card-border text-xs font-semibold">
+        <div className="flex items-center gap-1 bg-muted-bg/60 p-1 rounded-xl border border-surface-border text-xs font-bold">
           <button
             type="button"
             onClick={() => setActiveTab("fbs")}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
               activeTab === "fbs"
                 ? "bg-primary-teal text-white shadow-xs"
-                : "text-muted-foreground hover:text-fg-app"
+                : "text-muted-fg hover:text-fg-app"
             }`}
           >
             Blood Sugar (FBS)
@@ -76,10 +76,10 @@ export function BiomarkerTrendCharts() {
           <button
             type="button"
             onClick={() => setActiveTab("hba1c")}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
               activeTab === "hba1c"
                 ? "bg-primary-teal text-white shadow-xs"
-                : "text-muted-foreground hover:text-fg-app"
+                : "text-muted-fg hover:text-fg-app"
             }`}
           >
             HbA1c (%)
@@ -87,10 +87,10 @@ export function BiomarkerTrendCharts() {
           <button
             type="button"
             onClick={() => setActiveTab("bp")}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
               activeTab === "bp"
                 ? "bg-primary-teal text-white shadow-xs"
-                : "text-muted-foreground hover:text-fg-app"
+                : "text-muted-fg hover:text-fg-app"
             }`}
           >
             Blood Pressure (BP)
@@ -99,14 +99,14 @@ export function BiomarkerTrendCharts() {
       </div>
 
       {/* Abnormal Warning Flag Alert Banner */}
-      <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 flex items-center justify-between text-xs text-fg-app">
-        <div className="flex items-center gap-2">
+      <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-center justify-between text-xs text-fg-app">
+        <div className="flex items-center gap-2.5">
           <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
           <span>
             <strong className="text-amber-600 dark:text-amber-400">Abnormal Value Flagged:</strong> In July 2026, Fasting Sugar spiked to 7.2 mmol/L and BP reached 142/92. Current October values returned to healthy target zone.
           </span>
         </div>
-        <span className="text-[11px] font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 shrink-0">
+        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 shrink-0">
           Oct: Normal Zone ✓
         </span>
       </div>

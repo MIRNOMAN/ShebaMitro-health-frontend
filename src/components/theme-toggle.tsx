@@ -85,12 +85,13 @@ export function ThemeToggle() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.95 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute right-0 mt-2 w-44 rounded-2xl border border-surface-border bg-surface-card/95 p-1.5 backdrop-blur-2xl shadow-xl z-50 luminous-border"
+            className="absolute right-0 mt-2.5 w-44 rounded-2xl border border-surface-border bg-surface-card p-2 shadow-2xl z-50 overflow-hidden"
+            style={{ backgroundColor: "var(--card)" }}
           >
-            <p className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-fg border-b border-surface-border/50 mb-1">
+            <p className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-muted-fg border-b border-surface-border/50 mb-1">
               Select Theme
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {options.map((opt) => {
                 const isSelected = theme === opt.id;
 
@@ -101,9 +102,9 @@ export function ThemeToggle() {
                       setTheme(opt.id);
                       setIsOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isSelected
-                        ? "bg-primary-teal/15 text-primary-teal"
+                        ? "bg-primary-teal/15 text-primary-teal border border-primary-teal/30"
                         : "text-muted-fg hover:text-fg-app hover:bg-muted-bg/60"
                     }`}
                   >

@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/components/providers/language-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { CustomCursor } from "@/components/ui/custom-cursor";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 import { SymptomTriageModal } from "@/features/triage/components/SymptomTriageModal";
@@ -73,6 +74,7 @@ export default function RootLayout({
                 <StoreProvider>
                   {children}
                   <SymptomTriageModal />
+                  <Toaster position="top-right" richColors closeButton />
                 </StoreProvider>
               </SmoothScrollProvider>
             </ThemeProvider>

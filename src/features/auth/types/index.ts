@@ -1,4 +1,4 @@
-export type UserRole = "patient" | "doctor" | "lab" | "pharmacy";
+export type UserRole = "patient" | "doctor" | "lab" | "pharmacy" | "admin";
 
 export type AuthMode = "otp" | "password";
 

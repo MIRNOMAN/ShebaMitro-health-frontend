@@ -103,22 +103,22 @@ export function MedicalDocumentVault() {
   };
 
   return (
-    <div className="rounded-2xl border border-card-border bg-card p-6 space-y-6 shadow-md">
+    <div className="rounded-3xl border border-surface-border bg-surface-card p-6 sm:p-7 space-y-6 shadow-sm">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-card-border">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-surface-border">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-teal/10 text-primary-teal">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-teal/10 text-primary-teal border border-primary-teal/20">
             <FileText className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="font-extrabold text-lg text-fg-app">Medical Document Vault</h2>
-            <p className="text-xs text-muted-foreground">
+            <h2 className="font-black text-lg text-fg-app tracking-tight">Medical Document Vault</h2>
+            <p className="text-xs text-muted-fg">
               Filterable vault for digital prescriptions, lab reports & imaging scans
             </p>
           </div>
         </div>
 
-        <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-emerald-accent/10 text-emerald-600 dark:text-emerald-400 border border-emerald-accent/20">
           <ShieldCheck className="h-3.5 w-3.5" /> 256-Bit Encrypted Vault
         </span>
       </div>
@@ -134,10 +134,10 @@ export function MedicalDocumentVault() {
                 key={cat}
                 type="button"
                 onClick={() => setActiveCategory(cat)}
-                className={`py-2 px-3.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`py-2 px-3.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-primary-teal text-white border border-primary-teal shadow-xs"
-                    : "border border-card-border bg-card hover:bg-muted/40 text-fg-app"
+                    ? "bg-primary-teal text-white shadow-xs"
+                    : "border border-surface-border bg-muted-bg/40 hover:bg-surface-card-hover text-fg-app"
                 }`}
               >
                 {cat}
@@ -148,13 +148,13 @@ export function MedicalDocumentVault() {
 
         {/* Search Bar */}
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-fg pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search report title or hospital..."
-            className="w-full h-10 pl-10 pr-3 rounded-xl bg-card border border-card-border text-xs text-fg-app placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-teal shadow-xs"
+            className="w-full h-10 pl-10 pr-3 rounded-xl bg-muted-bg/30 border border-surface-border text-xs text-fg-app placeholder:text-muted-fg focus:outline-none focus:ring-2 focus:ring-primary-teal shadow-xs"
           />
         </div>
       </div>
@@ -167,11 +167,11 @@ export function MedicalDocumentVault() {
           return (
             <div
               key={doc.id}
-              className="group rounded-2xl border border-card-border bg-card p-4 space-y-3 hover:border-luminous transition-all duration-300 shadow-xs flex flex-col justify-between"
+              className="group rounded-2xl border border-surface-border bg-surface-card p-4 space-y-3 hover:border-primary-teal/50 hover:shadow-md transition-all duration-300 flex flex-col justify-between"
             >
               <div className="space-y-3">
                 {/* Thumbnail Preview Image */}
-                <div className="relative h-36 w-full rounded-xl overflow-hidden bg-slate-900 border border-card-border/60">
+                <div className="relative h-36 w-full rounded-xl overflow-hidden bg-slate-900 border border-surface-border">
                   {doc.thumbnailUrl ? (
                     <img
                       src={doc.thumbnailUrl}
@@ -179,13 +179,13 @@ export function MedicalDocumentVault() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                    <div className="w-full h-full flex items-center justify-center text-muted-fg">
                       <FileImage className="h-10 w-10" />
                     </div>
                   )}
 
                   {/* Category Pill Badge */}
-                  <span className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-950/80 text-white border border-primary-teal/40 backdrop-blur-xs">
+                  <span className="absolute top-2 left-2 text-[10px] font-black px-2 py-0.5 rounded-md bg-slate-950/80 text-white border border-primary-teal/40 backdrop-blur-xs">
                     {doc.category}
                   </span>
                 </div>
@@ -195,11 +195,11 @@ export function MedicalDocumentVault() {
                   <h3 className="font-bold text-sm text-fg-app line-clamp-1 group-hover:text-primary-teal transition-colors">
                     {doc.title}
                   </h3>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <p className="text-xs text-muted-fg flex items-center gap-1">
                     <Building2 className="h-3 w-3 text-primary-teal shrink-0" />
                     <span className="truncate">{doc.issuer}</span>
                   </p>
-                  <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <p className="text-[11px] text-muted-fg flex items-center gap-1">
                     <Calendar className="h-3 w-3 shrink-0" />
                     <span>{doc.date} • {doc.fileSize}</span>
                   </p>
@@ -207,23 +207,26 @@ export function MedicalDocumentVault() {
               </div>
 
               {/* 1-Click PDF Download Button */}
-              <div className="pt-2 border-t border-card-border">
-                <Button
-                  variant={isDownloading ? "emerald" : "outline"}
-                  size="sm"
+              <div className="pt-2 border-t border-surface-border">
+                <button
+                  type="button"
                   onClick={() => handleDownload(doc.id, doc.title)}
-                  className="w-full h-9 justify-center text-xs"
+                  className={`w-full h-9 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 ${
+                    isDownloading
+                      ? "bg-emerald-accent text-white shadow-xs"
+                      : "bg-muted-bg/60 hover:bg-surface-card-hover text-fg-app border border-surface-border"
+                  }`}
                 >
                   {isDownloading ? (
-                    <span className="flex items-center gap-1">
+                    <>
                       <CheckCircle2 className="h-3.5 w-3.5" /> PDF Downloaded
-                    </span>
+                    </>
                   ) : (
-                    <span className="flex items-center gap-1">
+                    <>
                       <Download className="h-3.5 w-3.5" /> 1-Click PDF Download
-                    </span>
+                    </>
                   )}
-                </Button>
+                </button>
               </div>
             </div>
           );

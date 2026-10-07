@@ -1,5 +1,5 @@
 import { baseApi } from "./baseApi";
-import type { User } from "../features/authSlice";
+import { setCredentials, logout, type User } from "../features/authSlice";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -11,20 +11,23 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  name: string;
   email: string;
   password: string;
+  phone?: string;
+  role?: string;
 }
 
 export interface AuthResponse {
   user: User;
   accessToken: string;
   refreshToken: string;
+  expiresIn?: number;
 }
 
 export interface RefreshResponse {
   accessToken: string;
   refreshToken: string;
+  expiresIn?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -39,6 +42,20 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            setCredentials({
+              user: data.user,
+              accessToken: data.accessToken,
+              refreshToken: data.refreshToken,
+            }),
+          );
+        } catch {
+          // Handled by component
+        }
+      },
       invalidatesTags: ["Auth"],
     }),
 
@@ -48,14 +65,36 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            setCredentials({
+              user: data.user,
+              accessToken: data.accessToken,
+              refreshToken: data.refreshToken,
+            }),
+          );
+        } catch {
+          // Handled by component
+        }
+      },
       invalidatesTags: ["Auth"],
     }),
 
-    logout: builder.mutation<void, void>({
+    logout: builder.mutation<{ success: boolean }, void>({
       query: () => ({
         url: "/auth/logout",
         method: "POST",
       }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(logout());
+        } catch {
+          dispatch(logout());
+        }
+      },
       invalidatesTags: ["Auth", "User"],
     }),
 
@@ -68,7 +107,7 @@ export const authApi = baseApi.injectEndpoints({
     }),
 
     getMe: builder.query<User, void>({
-      query: () => "/auth/me",
+      query: () => "/users/me",
       providesTags: ["User"],
     }),
   }),

@@ -4,7 +4,7 @@
 import * as React from "react";
 import { motion, useSpring, useReducedMotion, type HTMLMotionProps } from "framer-motion";
 
-export interface MagneticButtonProps extends HTMLMotionProps<"button"> {
+export interface MagneticButtonProps extends HTMLMotionProps<"div"> {
   children: React.ReactNode;
   /** Radius in pixels around the button center where magnetic attraction activates (default: 35px) */
   distance?: number;
@@ -16,7 +16,7 @@ export interface MagneticButtonProps extends HTMLMotionProps<"button"> {
 /**
  * MagneticButton Component
  *
- * A reusable Framer Motion button component that calculates cursor proximity
+ * A reusable Framer Motion wrapper component that calculates cursor proximity
  * (35px radius) and gently attracts toward the mouse position before snapping back on leave.
  * Bypassed when `prefers-reduced-motion` is enabled.
  */
@@ -27,7 +27,7 @@ export function MagneticButton({
   className = "",
   ...props
 }: MagneticButtonProps) {
-  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
   // Smooth spring configuration for magnetic physics
@@ -35,10 +35,10 @@ export function MagneticButton({
   const positionX = useSpring(0, springConfig);
   const positionY = useSpring(0, springConfig);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (prefersReducedMotion || !buttonRef.current) return;
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion || !containerRef.current) return;
 
-    const rect = buttonRef.current.getBoundingClientRect();
+    const rect = containerRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
@@ -63,15 +63,15 @@ export function MagneticButton({
 
   if (prefersReducedMotion) {
     return (
-      <button ref={buttonRef} className={className} {...(props as any)}>
+      <div ref={containerRef} className={className} {...(props as any)}>
         {children}
-      </button>
+      </div>
     );
   }
 
   return (
-    <motion.button
-      ref={buttonRef}
+    <motion.div
+      ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ x: positionX, y: positionY }}
@@ -79,6 +79,6 @@ export function MagneticButton({
       {...props}
     >
       {children}
-    </motion.button>
+    </motion.div>
   );
 }

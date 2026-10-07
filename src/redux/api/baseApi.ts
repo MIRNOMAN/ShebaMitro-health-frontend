@@ -17,7 +17,8 @@ const rawBaseQuery = fetchBaseQuery({
   baseUrl:
     process.env.NEXT_PUBLIC_API_BASE_URL ??
     process.env.NEXT_PUBLIC_BACKEND_URL ??
-    "http://localhost:5000/api/v1",
+    "http://localhost:5010/api/v1",
+  credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.accessToken;
 

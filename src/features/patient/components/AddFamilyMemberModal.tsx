@@ -88,29 +88,33 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            className="fixed inset-0 bg-slate-950/70 backdrop-blur-md"
           />
 
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", damping: 22, stiffness: 280 }}
-            className="relative w-full max-w-lg bg-card border border-card-border rounded-3xl p-6 shadow-2xl z-10 space-y-5 overflow-y-auto max-h-[90vh]"
+            initial={{ scale: 0.92, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-lg bg-surface-card border border-surface-border rounded-3xl p-6 sm:p-7 shadow-2xl z-10 space-y-5 overflow-y-auto max-h-[90vh]"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-card-border">
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-teal/10 text-primary-teal">
+            <div className="flex items-center justify-between pb-3 border-b border-surface-border">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-teal/10 text-primary-teal border border-primary-teal/20">
                   <UserPlus className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-fg-app">Add Family Member / Dependent</h3>
-                  <p className="text-xs text-muted-foreground">Manage health records & alarms for family</p>
+                  <h3 className="font-black text-lg text-fg-app tracking-tight">Add Family Member / Dependent</h3>
+                  <p className="text-xs text-muted-fg">Manage health records & alarms for family</p>
                 </div>
               </div>
 
-              <button onClick={onClose} className="p-1.5 rounded-lg bg-muted text-fg-app">
-                <X className="h-5 w-5" />
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-2 rounded-xl bg-muted-bg text-fg-app hover:bg-surface-card-hover border border-surface-border transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
               </button>
             </div>
 
@@ -118,7 +122,7 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
               {/* Name & Relationship */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold uppercase tracking-wider text-muted-foreground">
+                  <label className="font-bold uppercase tracking-wider text-muted-fg">
                     Full Name
                   </label>
                   <input
@@ -127,18 +131,18 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Lateef Ahmed"
-                    className="w-full h-10 px-3 rounded-xl bg-card border border-card-border text-xs text-fg-app focus:outline-none focus:ring-2 focus:ring-primary-teal"
+                    className="w-full h-10 px-3.5 rounded-xl bg-muted-bg/30 border border-surface-border text-xs text-fg-app focus:outline-none focus:ring-2 focus:ring-primary-teal"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold uppercase tracking-wider text-muted-foreground">
+                  <label className="font-bold uppercase tracking-wider text-muted-fg">
                     Relationship
                   </label>
                   <select
                     value={relationship}
                     onChange={(e) => setRelationship(e.target.value as RelationshipType)}
-                    className="w-full h-10 px-3 rounded-xl bg-card border border-card-border text-xs font-semibold text-fg-app"
+                    className="w-full h-10 px-3 rounded-xl bg-muted-bg/30 border border-surface-border text-xs font-bold text-fg-app"
                   >
                     <option value="Father">Father</option>
                     <option value="Mother">Mother</option>
@@ -154,7 +158,7 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
               {/* Age, Gender, Blood Group */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="font-bold uppercase tracking-wider text-muted-foreground">
+                  <label className="font-bold uppercase tracking-wider text-muted-fg">
                     Age
                   </label>
                   <input
@@ -163,18 +167,18 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
                     max={110}
                     value={age}
                     onChange={(e) => setAge(Number(e.target.value))}
-                    className="w-full h-10 px-3 rounded-xl bg-card border border-card-border text-xs font-bold text-fg-app"
+                    className="w-full h-10 px-3 rounded-xl bg-muted-bg/30 border border-surface-border text-xs font-bold text-fg-app"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold uppercase tracking-wider text-muted-foreground">
+                  <label className="font-bold uppercase tracking-wider text-muted-fg">
                     Gender
                   </label>
                   <select
                     value={gender}
                     onChange={(e) => setGender(e.target.value as "male" | "female")}
-                    className="w-full h-10 px-3 rounded-xl bg-card border border-card-border text-xs font-semibold text-fg-app"
+                    className="w-full h-10 px-3 rounded-xl bg-muted-bg/30 border border-surface-border text-xs font-bold text-fg-app"
                   >
                     <option value="male">Male</option>
                     <option value="female">Female</option>
@@ -182,13 +186,13 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold uppercase tracking-wider text-muted-foreground">
+                  <label className="font-bold uppercase tracking-wider text-muted-fg">
                     Blood Group
                   </label>
                   <select
                     value={bloodGroup}
                     onChange={(e) => setBloodGroup(e.target.value as BloodGroup)}
-                    className="w-full h-10 px-3 rounded-xl bg-card border border-card-border text-xs font-bold text-fg-app"
+                    className="w-full h-10 px-3 rounded-xl bg-muted-bg/30 border border-surface-border text-xs font-bold text-fg-app"
                   >
                     {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
                       <option key={bg} value={bg}>
@@ -201,7 +205,7 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
 
               {/* Chronic Medical Conditions */}
               <div className="space-y-1.5">
-                <label className="font-bold uppercase tracking-wider text-muted-foreground block">
+                <label className="font-bold uppercase tracking-wider text-muted-fg block">
                   Chronic Medical Conditions
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -212,10 +216,10 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
                         key={cond}
                         type="button"
                         onClick={() => toggleCondition(cond)}
-                        className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all ${
+                        className={`px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all cursor-pointer ${
                           isSelected
                             ? "bg-primary-teal text-white border-primary-teal shadow-xs"
-                            : "border-card-border bg-card hover:bg-muted/40 text-fg-app"
+                            : "border-surface-border bg-muted-bg/40 hover:bg-surface-card-hover text-fg-app"
                         }`}
                       >
                         {cond} {isSelected && "✓"}
@@ -228,7 +232,7 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
               {/* Allergies & Emergency Contact */}
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <label className="font-bold uppercase tracking-wider text-muted-foreground">
+                  <label className="font-bold uppercase tracking-wider text-muted-fg">
                     Known Drug/Food Allergies
                   </label>
                   <input
@@ -236,12 +240,12 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
                     value={allergies}
                     onChange={(e) => setAllergies(e.target.value)}
                     placeholder="e.g. Penicillin, Sulfa drugs, Peanuts"
-                    className="w-full h-10 px-3 rounded-xl bg-card border border-card-border text-xs text-fg-app"
+                    className="w-full h-10 px-3.5 rounded-xl bg-muted-bg/30 border border-surface-border text-xs text-fg-app"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold uppercase tracking-wider text-muted-foreground">
+                  <label className="font-bold uppercase tracking-wider text-muted-fg">
                     Emergency Contact Phone
                   </label>
                   <input
@@ -249,15 +253,18 @@ export function AddFamilyMemberModal({ isOpen, onClose, onAddMember }: AddFamily
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+880 1712-345678"
-                    className="w-full h-10 px-3 rounded-xl bg-card border border-card-border text-xs text-fg-app"
+                    className="w-full h-10 px-3.5 rounded-xl bg-muted-bg/30 border border-surface-border text-xs text-fg-app"
                   />
                 </div>
               </div>
 
               <div className="pt-2">
-                <Button variant="emerald" type="submit" className="w-full h-11 justify-center text-xs shadow-md">
-                  Save Family Member Profile
-                </Button>
+                <button
+                  type="submit"
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-accent to-primary-teal text-white font-bold text-xs shadow-lg shadow-emerald-500/20 hover:brightness-105 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <Check className="h-4 w-4" /> Save Family Member Profile
+                </button>
               </div>
             </form>
           </motion.div>

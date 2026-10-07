@@ -18,17 +18,17 @@
   --violet-accent: hsl(262 83% 58%);
   --coral-accent: hsl(14 90% 55%);
 
-  /* Light Mode Surfaces & Text (Solid Opaque Surfaces for crisp readability) */
-  --background: hsl(210 40% 98%);
+  /* Light Mode Surfaces & Text */
+  --background: hsl(210 35% 98%);
   --foreground: hsl(222 47% 11%);
 
-  --card: hsl(0 0% 100%);
-  --card-hover: hsl(210 40% 98%);
-  --card-border: hsl(214 32% 88%);
-  --luminous-border: hsl(189 80% 45% / 0.5);
+  --card: #ffffff;
+  --card-hover: hsl(210 35% 97%);
+  --card-border: hsl(214 24% 88%);
+  --luminous-border: hsl(189 80% 45% / 0.4);
 
-  --muted: hsl(210 40% 94%);
-  --muted-foreground: hsl(215 16% 42%);
+  --muted: hsl(210 25% 95%);
+  --muted-foreground: hsl(215 16% 46%);
 
   --glow-teal-rgb: 6 182 212;
   --glow-emerald-rgb: 16 185 129;
@@ -36,22 +36,22 @@
   --glow-coral-rgb: 249 115 22;
 
   /* Radial Mouse Tracking Glow */
-  --glow-radial-color: rgba(6, 182, 212, 0.15);
-  --luminous-border-highlight: rgba(16, 185, 129, 0.6);
+  --glow-radial-color: rgba(6, 182, 212, 0.12);
+  --luminous-border-highlight: rgba(16, 185, 129, 0.5);
 }
 
 .dark {
-  /* Dark Mode: Deep rich slate-blue background (hsl 222 47% 11%) */
+  /* Dark Mode: Deep rich slate-blue background */
   --background: hsl(222 47% 11%);
   --foreground: hsl(210 40% 98%);
 
   --card: hsl(222 47% 14%);
   --card-hover: hsl(222 45% 18%);
-  --card-border: hsl(222 35% 26%);
-  --luminous-border: hsl(189 80% 50% / 0.65);
+  --card-border: hsl(222 30% 22%);
+  --luminous-border: hsl(189 80% 50% / 0.55);
 
-  --muted: hsl(222 40% 18%);
-  --muted-foreground: hsl(215 20% 75%);
+  --muted: hsl(222 35% 18%);
+  --muted-foreground: hsl(215 20% 72%);
 
   --glow-teal-rgb: 20 184 215;
   --glow-emerald-rgb: 24 180 126;
@@ -59,8 +59,8 @@
   --glow-coral-rgb: 240 90 48;
 
   /* Radial Mouse Tracking Glow */
-  --glow-radial-color: rgba(142, 81, 240, 0.25);
-  --luminous-border-highlight: rgba(142, 81, 240, 0.75);
+  --glow-radial-color: rgba(142, 81, 240, 0.2);
+  --luminous-border-highlight: rgba(142, 81, 240, 0.6);
 }
 
 /* ------------------------------------------------------------------ */
@@ -75,19 +75,35 @@
 
   --color-bg-app: var(--background);
   --color-fg-app: var(--foreground);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-card-border: var(--card-border);
+
   --color-surface-card: var(--card);
   --color-surface-card-hover: var(--card-hover);
   --color-surface-border: var(--card-border);
   --color-luminous: var(--luminous-border);
+
+  --color-muted: var(--muted);
   --color-muted-bg: var(--muted);
   --color-muted-fg: var(--muted-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-border: var(--card-border);
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ------------------------------------------------------------------ */
-/* Micro-animations, Utilities, and Glow Effects                    */
+/* Global Element & Border Defaults                                  */
 /* ------------------------------------------------------------------ */
+
+*, ::after, ::before {
+  border-color: var(--card-border);
+}
 
 body {
   background-color: var(--background);
