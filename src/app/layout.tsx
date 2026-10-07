@@ -9,6 +9,8 @@ import { CustomCursor } from "@/components/ui/custom-cursor";
 import { QueryProvider } from "@/components/providers/query-provider";
 import "./globals.css";
 
+import { SymptomTriageModal } from "@/features/triage/components/SymptomTriageModal";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -68,7 +70,10 @@ export default function RootLayout({
             >
               <SmoothScrollProvider>
                 <CustomCursor />
-                <StoreProvider>{children}</StoreProvider>
+                <StoreProvider>
+                  {children}
+                  <SymptomTriageModal />
+                </StoreProvider>
               </SmoothScrollProvider>
             </ThemeProvider>
           </LanguageProvider>

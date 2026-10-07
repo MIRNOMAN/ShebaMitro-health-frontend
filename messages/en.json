@@ -1,0 +1,34 @@
+{
+  "triage": {
+    "title": "AI Symptom Triage & Specialist Finder",
+    "subtitle": "Type or speak your symptoms in English, Bangla, or Banglish",
+    "placeholder": "e.g., 'Severe chest pain and shortness of breath' or 'buke khub betha ar shash kosto'...",
+    "speakBtn": "Voice Input",
+    "listening": "Listening... Speak now",
+    "stopListening": "Stop Voice Input",
+    "analyzeBtn": "Run AI Symptom Triage",
+    "analyzing": "Analyzing symptoms with AI microservice...",
+    "quickPresets": "Common Symptoms / দ্রুত বাচাই করুন:",
+    "urgencyLabel": "Triage Urgency Level",
+    "emergencyTitle": "CRITICAL EMERGENCY - IMMEDIATE ATTENTION REQUIRED",
+    "emergencyDesc": "Based on your reported symptoms, please call 999 or visit the nearest Emergency Room immediately.",
+    "urgentTitle": "URGENT MEDICAL CONSULTATION RECOMMENDED",
+    "urgentDesc": "Your symptoms warrant prompt evaluation by a specialist doctor within 12-24 hours.",
+    "routineTitle": "ROUTINE CONSULTATION RECOMMENDED",
+    "routineDesc": "Schedule a teleconsultation or visit a specialist doctor at your earliest convenience.",
+    "selfCareTitle": "MILD SYMPTOMS / SELF CARE",
+    "selfCareDesc": "Your symptoms appear mild. Rest, hydrate, and monitor. Consult if symptoms worsen.",
+    "recommendedSpecialties": "Recommended Specialist Doctors",
+    "matchConfidence": "Match Confidence",
+    "availableDoctors": "available doctors online",
+    "bookNow": "Book Doctor Now",
+    "emergencySos": "Dispatch Emergency SOS (999)",
+    "disclaimer": "AI Triage is for guidance only and does not replace official medical advice."
+  },
+  "common": {
+    "language": "Language",
+    "bangla": "বাংলা",
+    "english": "English",
+    "toggleLanguage": "EN / বাংলা"
+  }
+}
