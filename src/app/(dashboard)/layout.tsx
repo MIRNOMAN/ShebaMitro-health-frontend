@@ -35,6 +35,8 @@ import {
 import { LanguageToggle } from "@/components/language-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { logout } from "@/redux/features/authSlice";
 
 type UserRole = "patient" | "doctor" | "lab" | "pharmacy";
 
@@ -116,6 +118,8 @@ const NOTIFICATIONS = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
@@ -135,13 +139,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setCurrentRole("pharmacy");
     } else if (pathname.includes("/dashboard/patient")) {
       setCurrentRole("patient");
+    } else if (user?.role) {
+      setCurrentRole(user.role.toLowerCase() as UserRole);
     } else {
       const match = document.cookie.match(/sheba_role=([^;]+)/);
       if (match && ["patient", "doctor", "lab", "pharmacy"].includes(match[1]!)) {
         setCurrentRole(match[1] as UserRole);
       }
     }
-  }, [pathname]);
+  }, [pathname, user]);
 
   const handleSwitchWorkspace = (role: UserRole) => {
     setCurrentRole(role);
@@ -166,9 +172,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const handleSignOut = () => {
-    document.cookie = "sheba_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    document.cookie = "sheba_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    router.push("/auth");
+    dispatch(logout());
+    setIsProfileOpen(false);
+    setIsMobileOpen(false);
+    router.push("/login");
   };
 
   const navLinks = ROLE_NAV_LINKS[currentRole] || ROLE_NAV_LINKS.patient;
@@ -383,11 +390,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 }}
                 className="flex items-center gap-2 p-1.5 pl-2.5 rounded-full border border-surface-border bg-surface-card hover:bg-surface-card-hover transition-all shadow-xs cursor-pointer active:scale-95"
               >
-                <div className="h-7 w-7 rounded-full bg-primary-teal text-white font-black flex items-center justify-center text-xs shadow-xs">
-                  {currentRole.charAt(0).toUpperCase()}
+                <div className="h-7 w-7 rounded-full bg-primary-teal text-white font-black flex items-center justify-center text-xs shadow-xs uppercase">
+                  {user?.name?.[0] || user?.email?.[0] || currentRole.charAt(0)}
                 </div>
-                <span className="text-xs font-bold text-fg-app capitalize hidden sm:inline">
-                  {currentRole}
+                <span className="text-xs font-bold text-fg-app capitalize hidden sm:inline max-w-[100px] truncate">
+                  {user?.name || currentRole}
                 </span>
                 <ChevronDown className="h-3.5 w-3.5 text-muted-fg mr-1" />
               </button>
@@ -404,15 +411,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   >
                     {/* Profile Header Info */}
                     <div className="p-3 rounded-xl bg-muted-bg/50 border border-surface-border flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-primary-teal text-white font-black flex items-center justify-center text-sm shadow-xs">
-                        {currentRole.charAt(0).toUpperCase()}
+                      <div className="h-10 w-10 rounded-xl bg-primary-teal text-white font-black flex items-center justify-center text-sm shadow-xs uppercase">
+                        {user?.name?.[0] || user?.email?.[0] || currentRole.charAt(0)}
                       </div>
                       <div className="min-w-0">
                         <span className="font-black text-xs text-fg-app block truncate capitalize">
-                          {currentRole} User
+                          {user?.name || `${currentRole} User`}
                         </span>
                         <span className="text-[11px] font-medium text-muted-fg block truncate">
-                          user@shebamitro.health
+                          {user?.email || "user@shebamitro.health"}
                         </span>
                       </div>
                     </div>

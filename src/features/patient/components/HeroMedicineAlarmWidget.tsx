@@ -81,8 +81,7 @@ export function HeroMedicineAlarmWidget() {
 
   const triggerAlarm = (dosage: DosageItem) => {
     setActiveAlarmDosage(dosage);
-    setIsChiming(true);
-    playSoftChimeSound();
+    setIsChiming(false);
   };
 
   const handleTakeNow = (id: string) => {

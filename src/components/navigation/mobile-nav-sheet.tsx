@@ -11,7 +11,10 @@ import {
   Stethoscope,
   TestTube,
   Pill,
+  LayoutDashboard,
+  LogOut,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -19,6 +22,8 @@ import { ShebaMitroLogo } from "@/components/ui/logo";
 import { megaMenuConfig } from "./mega-menu";
 import type { HealthcareRole } from "./role-login-modal";
 import { useLanguage } from "@/components/providers/language-provider";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { logout } from "@/redux/features/authSlice";
 
 interface MobileNavSheetProps {
   isOpen: boolean;
@@ -34,11 +39,25 @@ export function MobileNavSheet({
   onOpenRoleModal,
 }: MobileNavSheetProps) {
   const { t } = useLanguage();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+
   const [expandedSection, setExpandedSection] = React.useState<string | null>(null);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSection(expandedSection === sectionId ? null : sectionId);
   };
+
+  const handleSignOut = () => {
+    dispatch(logout());
+    onClose();
+    router.push("/login");
+  };
+
+  const userRoleLower = (user?.role?.toLowerCase() || "patient") as HealthcareRole;
+  const userInitial = (user?.name?.[0] || user?.email?.[0] || "U").toUpperCase();
+  const displayName = user?.name || (user?.email ? user.email.split("@")[0] : "User");
 
   return (
     <AnimatePresence>
@@ -77,13 +96,33 @@ export function MobileNavSheet({
                 </button>
               </div>
 
+              {/* Authenticated User Quick Card */}
+              {isAuthenticated && user && (
+                <div className="p-3.5 rounded-2xl bg-muted-bg/50 border border-surface-border flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary-teal text-white font-black flex items-center justify-center text-sm shadow-xs uppercase shrink-0">
+                    {userInitial}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-black text-xs text-fg-app block truncate capitalize">
+                      {displayName}
+                    </span>
+                    <span className="text-[11px] font-medium text-muted-fg block truncate">
+                      {user.email}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-primary-teal/15 text-primary-teal uppercase">
+                    {user.role}
+                  </span>
+                </div>
+              )}
+
               {/* Emergency SOS Button */}
               <button
                 onClick={() => {
                   onClose();
                   onOpenSosModal();
                 }}
-                className="w-full p-3.5 rounded-2xl bg-gradient-to-r from-red-500 to-coral-accent text-white font-black uppercase text-xs tracking-wider flex items-center justify-center gap-2 glow-coral animate-pulse"
+                className="w-full p-3.5 rounded-2xl bg-gradient-to-r from-red-500 to-coral-accent text-white font-black uppercase text-xs tracking-wider flex items-center justify-center gap-2 glow-coral animate-pulse cursor-pointer"
               >
                 <Siren className="w-4 h-4" />
                 <span>{t("emergencySosFull")}</span>
@@ -150,7 +189,7 @@ export function MobileNavSheet({
                       onClose();
                       onOpenRoleModal("patient");
                     }}
-                    className="p-2.5 rounded-xl border border-primary-teal/30 bg-primary-teal/10 text-primary-teal text-xs font-bold flex items-center gap-1.5"
+                    className="p-2.5 rounded-xl border border-primary-teal/30 bg-primary-teal/10 text-primary-teal text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                   >
                     <User className="w-3.5 h-3.5" />
                     <span>{t("patientRole")}</span>
@@ -161,7 +200,7 @@ export function MobileNavSheet({
                       onClose();
                       onOpenRoleModal("doctor");
                     }}
-                    className="p-2.5 rounded-xl border border-emerald-accent/30 bg-emerald-accent/10 text-emerald-accent text-xs font-bold flex items-center gap-1.5"
+                    className="p-2.5 rounded-xl border border-emerald-accent/30 bg-emerald-accent/10 text-emerald-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                   >
                     <Stethoscope className="w-3.5 h-3.5" />
                     <span>{t("doctorRole")}</span>
@@ -172,7 +211,7 @@ export function MobileNavSheet({
                       onClose();
                       onOpenRoleModal("lab");
                     }}
-                    className="p-2.5 rounded-xl border border-violet-accent/30 bg-violet-accent/10 text-violet-accent text-xs font-bold flex items-center gap-1.5"
+                    className="p-2.5 rounded-xl border border-violet-accent/30 bg-violet-accent/10 text-violet-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                   >
                     <TestTube className="w-3.5 h-3.5" />
                     <span>{t("labRole")}</span>
@@ -183,7 +222,7 @@ export function MobileNavSheet({
                       onClose();
                       onOpenRoleModal("pharmacy");
                     }}
-                    className="p-2.5 rounded-xl border border-coral-accent/30 bg-coral-accent/10 text-coral-accent text-xs font-bold flex items-center gap-1.5"
+                    className="p-2.5 rounded-xl border border-coral-accent/30 bg-coral-accent/10 text-coral-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                   >
                     <Pill className="w-3.5 h-3.5" />
                     <span>{t("pharmacyRole")}</span>
@@ -199,17 +238,39 @@ export function MobileNavSheet({
                 <ThemeToggle />
               </div>
 
-              <Button
-                onClick={() => {
-                  onClose();
-                  onOpenRoleModal("patient");
-                }}
-                variant="primary"
-                size="md"
-                className="w-full justify-center font-bold"
-              >
-                {t("logIn")}
-              </Button>
+              {isAuthenticated && user ? (
+                <div className="space-y-2">
+                  <Link
+                    href={`/dashboard/${userRoleLower}`}
+                    onClick={onClose}
+                    className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-primary-teal text-white font-bold text-xs shadow-md glow-teal hover:brightness-110 transition-all"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Go to Dashboard</span>
+                  </Link>
+                  <Button
+                    onClick={handleSignOut}
+                    variant="ghost"
+                    size="md"
+                    className="w-full justify-center font-bold text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 cursor-pointer"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    <span>Sign Out</span>
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => {
+                    onClose();
+                    onOpenRoleModal("patient");
+                  }}
+                  variant="primary"
+                  size="md"
+                  className="w-full justify-center font-bold cursor-pointer"
+                >
+                  {t("logIn")}
+                </Button>
+              )}
             </div>
           </motion.div>
         </div>

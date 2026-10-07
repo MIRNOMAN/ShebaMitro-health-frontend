@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Volume2, VolumeX, RotateCcw, Radio } from "lucide-react";
-import { playSoftChimeSound } from "../utils/chime";
+import { stopChimeSound } from "../utils/chime";
 import { useLanguage } from "@/components/providers/language-provider";
 
 export interface BengaliVoiceAudioPlayerProps {
@@ -32,6 +32,7 @@ export function BengaliVoiceAudioPlayer({
   const [speechSource, setSpeechSource] = useState<"HD-Cloud-Audio" | "Browser-Synthesizer" | "Initializing">("Initializing");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const activeRequestIdRef = useRef<number>(0);
 
   // Generate localized voice script based on active language
   const spokenText =
@@ -57,26 +58,25 @@ export function BengaliVoiceAudioPlayer({
   }, [medicineName, activeLanguage, autoPlay]);
 
   const stopAllAudio = () => {
+    activeRequestIdRef.current += 1;
+    stopChimeSound();
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      audioRef.current = null;
     }
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
     setIsPlaying(false);
+    setIsLoading(false);
   };
 
   const handlePlayVoiceNote = async () => {
     stopAllAudio();
     setIsLoading(true);
 
-    // Play soft notification chime first
-    try {
-      playSoftChimeSound();
-    } catch (e) {
-      console.warn("Chime playback error:", e);
-    }
+    const currentRequestId = ++activeRequestIdRef.current;
 
     try {
       // 1. Fetch synthesized audio stream from TTS Service via API route
@@ -90,10 +90,17 @@ export function BengaliVoiceAudioPlayer({
         }),
       });
 
+      // If user triggered another request or closed modal, abort
+      if (activeRequestIdRef.current !== currentRequestId) {
+        return;
+      }
+
       const contentType = res.headers.get("content-type");
 
       if (res.ok && contentType && contentType.includes("audio")) {
         const blob = await res.blob();
+        if (activeRequestIdRef.current !== currentRequestId) return;
+
         const audioUrl = URL.createObjectURL(blob);
         const audio = new Audio(audioUrl);
 
@@ -101,34 +108,56 @@ export function BengaliVoiceAudioPlayer({
         audio.muted = isMuted;
 
         audio.onplay = () => {
+          if (activeRequestIdRef.current !== currentRequestId) {
+            audio.pause();
+            return;
+          }
           setIsPlaying(true);
           setIsLoading(false);
           setSpeechSource("HD-Cloud-Audio");
         };
 
         audio.onended = () => {
-          setIsPlaying(false);
-          if (onEnded) onEnded();
+          if (activeRequestIdRef.current === currentRequestId) {
+            setIsPlaying(false);
+            if (onEnded) onEnded();
+          }
         };
 
         audio.onerror = () => {
-          fallbackSpeechSynthesis();
+          if (activeRequestIdRef.current === currentRequestId) {
+            fallbackSpeechSynthesis(currentRequestId);
+          }
         };
 
-        await audio.play();
+        await audio.play().catch((playErr) => {
+          // If play was aborted due to new audio, ignore; otherwise fallback
+          if (activeRequestIdRef.current === currentRequestId) {
+            console.warn("Audio play failed, falling back to Web Speech:", playErr);
+            fallbackSpeechSynthesis(currentRequestId);
+          }
+        });
         return;
       }
 
       // If non-audio response, use Web Speech API fallback
-      fallbackSpeechSynthesis();
+      if (activeRequestIdRef.current === currentRequestId) {
+        fallbackSpeechSynthesis(currentRequestId);
+      }
     } catch (err) {
-      console.warn("Error fetching TTS audio stream, switching to browser synthesizer:", err);
-      fallbackSpeechSynthesis();
+      if (activeRequestIdRef.current === currentRequestId) {
+        console.warn("Error fetching TTS audio stream, switching to browser synthesizer:", err);
+        fallbackSpeechSynthesis(currentRequestId);
+      }
     }
   };
 
   // Web Speech Synthesis Fallback with localized voice matching
-  const fallbackSpeechSynthesis = () => {
+  const fallbackSpeechSynthesis = (requestId?: number) => {
+    if (requestId !== undefined && activeRequestIdRef.current !== requestId) {
+      return;
+    }
+
     setIsLoading(false);
     setSpeechSource("Browser-Synthesizer");
 
@@ -164,12 +193,24 @@ export function BengaliVoiceAudioPlayer({
       }
     }
 
-    utterance.onstart = () => setIsPlaying(true);
-    utterance.onend = () => {
-      setIsPlaying(false);
-      if (onEnded) onEnded();
+    utterance.onstart = () => {
+      if (requestId !== undefined && activeRequestIdRef.current !== requestId) {
+        window.speechSynthesis.cancel();
+        return;
+      }
+      setIsPlaying(true);
     };
-    utterance.onerror = () => setIsPlaying(false);
+
+    utterance.onend = () => {
+      if (requestId === undefined || activeRequestIdRef.current === requestId) {
+        setIsPlaying(false);
+        if (onEnded) onEnded();
+      }
+    };
+
+    utterance.onerror = () => {
+      setIsPlaying(false);
+    };
 
     window.speechSynthesis.speak(utterance);
   };
