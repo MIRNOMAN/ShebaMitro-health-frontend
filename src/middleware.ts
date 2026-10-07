@@ -41,8 +41,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(getRoleDashboardPath(userRole), request.url));
   }
 
-  // 4. Automatic Token Refresh Cycle: Extend session cookie expiration on active responses
+  // 4. Automatic Token Refresh & Locale Cookie Persistence
   const response = NextResponse.next();
+  const localeCookie = request.cookies.get("NEXT_LOCALE")?.value || request.cookies.get("shebamitro_locale")?.value || "bn";
+
+  response.cookies.set("NEXT_LOCALE", localeCookie, {
+    path: "/",
+    maxAge: 31536000,
+    sameSite: "lax",
+  });
+
   if (isAuthenticated && sessionToken) {
     response.cookies.set("sheba_session", sessionToken, {
       path: "/",
