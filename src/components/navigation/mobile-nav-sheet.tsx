@@ -23,7 +23,8 @@ import { megaMenuConfig } from "./mega-menu";
 import type { HealthcareRole } from "./role-login-modal";
 import { useLanguage } from "@/components/providers/language-provider";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { logout } from "@/redux/features/authSlice";
+import { logout, initializeAuth } from "@/redux/features/authSlice";
+import { useLogoutMutation } from "@/redux/api/authApi";
 
 interface MobileNavSheetProps {
   isOpen: boolean;
@@ -45,17 +46,30 @@ export function MobileNavSheet({
 
   const [expandedSection, setExpandedSection] = React.useState<string | null>(null);
 
+  React.useEffect(() => {
+    dispatch(initializeAuth());
+  }, [dispatch]);
+
   const toggleSection = (sectionId: string) => {
     setExpandedSection(expandedSection === sectionId ? null : sectionId);
   };
 
-  const handleSignOut = () => {
+  const [logoutApi] = useLogoutMutation();
+
+  const handleSignOut = async () => {
+    try {
+      await logoutApi().unwrap();
+    } catch {
+      // ignore network errors on logout
+    }
     dispatch(logout());
     onClose();
-    router.push("/login");
+    window.location.href = "/login";
   };
 
-  const userRoleLower = (user?.role?.toLowerCase() || "patient") as HealthcareRole;
+  const userRoleRaw = (user?.role || "patient").toLowerCase();
+  const isAdmin = userRoleRaw === "admin";
+  const userRoleLower = (isAdmin ? "patient" : userRoleRaw) as HealthcareRole;
   const userInitial = (user?.name?.[0] || user?.email?.[0] || "U").toUpperCase();
   const displayName = user?.name || (user?.email ? user.email.split("@")[0] : "User");
 
@@ -177,58 +191,106 @@ export function MobileNavSheet({
                 })}
               </div>
 
-              {/* Quick Role Badges */}
-              <div className="space-y-2 pt-2 border-t border-surface-border/60">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-fg px-1">
-                  Access Portal Roles
-                </p>
+              {/* Role Section: Guest Login Options OR Admin Workspace Links */}
+              {!isAuthenticated ? (
+                <div className="space-y-2 pt-2 border-t border-surface-border/60">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-muted-fg px-1">
+                    Access Portal Roles
+                  </p>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onOpenRoleModal("patient");
-                    }}
-                    className="p-2.5 rounded-xl border border-primary-teal/30 bg-primary-teal/10 text-primary-teal text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <User className="w-3.5 h-3.5" />
-                    <span>{t("patientRole")}</span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenRoleModal("patient");
+                      }}
+                      className="p-2.5 rounded-xl border border-primary-teal/30 bg-primary-teal/10 text-primary-teal text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <User className="w-3.5 h-3.5" />
+                      <span>{t("patientRole")}</span>
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onOpenRoleModal("doctor");
-                    }}
-                    className="p-2.5 rounded-xl border border-emerald-accent/30 bg-emerald-accent/10 text-emerald-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Stethoscope className="w-3.5 h-3.5" />
-                    <span>{t("doctorRole")}</span>
-                  </button>
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenRoleModal("doctor");
+                      }}
+                      className="p-2.5 rounded-xl border border-emerald-accent/30 bg-emerald-accent/10 text-emerald-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Stethoscope className="w-3.5 h-3.5" />
+                      <span>{t("doctorRole")}</span>
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onOpenRoleModal("lab");
-                    }}
-                    className="p-2.5 rounded-xl border border-violet-accent/30 bg-violet-accent/10 text-violet-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <TestTube className="w-3.5 h-3.5" />
-                    <span>{t("labRole")}</span>
-                  </button>
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenRoleModal("lab");
+                      }}
+                      className="p-2.5 rounded-xl border border-violet-accent/30 bg-violet-accent/10 text-violet-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <TestTube className="w-3.5 h-3.5" />
+                      <span>{t("labRole")}</span>
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onOpenRoleModal("pharmacy");
-                    }}
-                    className="p-2.5 rounded-xl border border-coral-accent/30 bg-coral-accent/10 text-coral-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Pill className="w-3.5 h-3.5" />
-                    <span>{t("pharmacyRole")}</span>
-                  </button>
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenRoleModal("pharmacy");
+                      }}
+                      className="p-2.5 rounded-xl border border-coral-accent/30 bg-coral-accent/10 text-coral-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Pill className="w-3.5 h-3.5" />
+                      <span>{t("pharmacyRole")}</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : isAdmin ? (
+                <div className="space-y-2 pt-2 border-t border-surface-border/60">
+                  <div className="flex items-center justify-between px-1">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-muted-fg">
+                      Admin Workspaces
+                    </p>
+                    <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-sm bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                      Admin Mode
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      href="/dashboard/patient"
+                      onClick={onClose}
+                      className="p-2.5 rounded-xl border border-primary-teal/30 bg-primary-teal/10 text-primary-teal text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <User className="w-3.5 h-3.5" />
+                      <span>Patient</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/doctor"
+                      onClick={onClose}
+                      className="p-2.5 rounded-xl border border-emerald-accent/30 bg-emerald-accent/10 text-emerald-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Stethoscope className="w-3.5 h-3.5" />
+                      <span>Doctor</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/lab"
+                      onClick={onClose}
+                      className="p-2.5 rounded-xl border border-violet-accent/30 bg-violet-accent/10 text-violet-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <TestTube className="w-3.5 h-3.5" />
+                      <span>Lab Admin</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/pharmacy"
+                      onClick={onClose}
+                      className="p-2.5 rounded-xl border border-coral-accent/30 bg-coral-accent/10 text-coral-accent text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Pill className="w-3.5 h-3.5" />
+                      <span>Pharmacy</span>
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             {/* Sheet Footer */}

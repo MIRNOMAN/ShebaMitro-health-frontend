@@ -30,8 +30,46 @@ export interface RefreshResponse {
   expiresIn?: number;
 }
 
+export interface RequestOtpRequest {
+  phone: string;
+}
+
+export interface RequestOtpResponse {
+  message: string;
+  phone: string;
+  ttlSeconds: number;
+  demoOtp?: string;
+}
+
+export interface VerifyOtpRequest {
+  phone: string;
+  code: string;
+}
+
+export interface ForgotPasswordRequest {
+  identifier: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  identifier: string;
+  ttlSeconds: number;
+  demoCode?: string;
+}
+
+export interface ResetPasswordRequest {
+  identifier: string;
+  code: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
 // ---------------------------------------------------------------------------
-// Auth API — login, register, logout, refresh, me
+// Auth API — login, register, logout, refresh, OTP, forgot/reset password
 // ---------------------------------------------------------------------------
 
 export const authApi = baseApi.injectEndpoints({
@@ -82,6 +120,55 @@ export const authApi = baseApi.injectEndpoints({
       invalidatesTags: ["Auth"],
     }),
 
+    requestOtp: builder.mutation<RequestOtpResponse, RequestOtpRequest>({
+      query: (body) => ({
+        url: "/auth/request-otp",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    verifyOtp: builder.mutation<AuthResponse, VerifyOtpRequest>({
+      query: (body) => ({
+        url: "/auth/verify-otp",
+        method: "POST",
+        body,
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data.accessToken) {
+            dispatch(
+              setCredentials({
+                user: data.user,
+                accessToken: data.accessToken,
+                refreshToken: data.refreshToken || "otp-refresh-token",
+              }),
+            );
+          }
+        } catch {
+          // Handled by component
+        }
+      },
+      invalidatesTags: ["Auth"],
+    }),
+
+    forgotPassword: builder.mutation<ForgotPasswordResponse, ForgotPasswordRequest>({
+      query: (body) => ({
+        url: "/auth/forgot-password",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    resetPassword: builder.mutation<ResetPasswordResponse, ResetPasswordRequest>({
+      query: (body) => ({
+        url: "/auth/reset-password",
+        method: "POST",
+        body,
+      }),
+    }),
+
     logout: builder.mutation<{ success: boolean }, void>({
       query: () => ({
         url: "/auth/logout",
@@ -120,6 +207,10 @@ export const authApi = baseApi.injectEndpoints({
 export const {
   useLoginMutation,
   useRegisterMutation,
+  useRequestOtpMutation,
+  useVerifyOtpMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
   useLogoutMutation,
   useRefreshTokenMutation,
   useGetMeQuery,

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { phoneSchema, otpSchema } from "../schemas/authSchema";
 import { UserRole } from "../types";
 import { Button } from "@/components/ui/button";
+import { useRequestOtpMutation, useVerifyOtpMutation } from "@/redux/api/authApi";
 
 interface PhoneOtpFormProps {
   role: UserRole;
@@ -39,8 +40,11 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
   const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
   const [otpError, setOtpError] = useState<string | null>(null);
   const [resendTimer, setResendTimer] = useState<number>(60);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+  const [requestOtp, { isLoading: isRequestingOtp }] = useRequestOtpMutation();
+  const [verifyOtp, { isLoading: isVerifyingOtp }] = useVerifyOtpMutation();
+
+  const isSubmitting = isRequestingOtp || isVerifyingOtp;
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Update phone when role changes
@@ -59,17 +63,18 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
     return () => clearInterval(interval);
   }, [step, resendTimer]);
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  const getFormattedPhone = (raw: string) => {
+    const cleaned = raw.replace(/\D/g, "");
+    if (cleaned.startsWith("880")) return `+${cleaned}`;
+    if (cleaned.startsWith("0")) return `+88${cleaned}`;
+    return `+880${cleaned}`;
+  };
+
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setPhoneError(null);
 
-    const formattedPhone = phoneNumber.startsWith("+880")
-      ? phoneNumber
-      : phoneNumber.startsWith("880")
-      ? `+${phoneNumber}`
-      : phoneNumber.startsWith("01")
-      ? `+88${phoneNumber}`
-      : `+880${phoneNumber}`;
+    const formattedPhone = getFormattedPhone(phoneNumber);
 
     const result = phoneSchema.safeParse({ phone: formattedPhone });
     if (!result.success) {
@@ -79,17 +84,21 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
       return;
     }
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const res = await requestOtp({ phone: formattedPhone }).unwrap();
       setStep("otp");
       setResendTimer(60);
-      toast.success(`6-Digit OTP sent to ${phoneNumber}! (Demo code: 123456)`);
+      const demoHint = res.demoOtp ? ` (Code: ${res.demoOtp})` : "";
+      toast.success(`6-Digit OTP sent to ${phoneNumber}!${demoHint}`);
       // Auto-focus first digit on next tick
       setTimeout(() => {
         inputRefs.current[0]?.focus();
       }, 100);
-    }, 600);
+    } catch (err: any) {
+      const msg = err?.data?.message || err?.message || "Failed to send OTP. Please try again.";
+      setPhoneError(msg);
+      toast.error(msg);
+    }
   };
 
   const handleDigitChange = (index: number, value: string) => {
@@ -123,7 +132,7 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
     }
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setOtpError(null);
 
@@ -136,14 +145,21 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
       return;
     }
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      toast.success(`Phone verified! Logged in as ${role.toUpperCase()}`);
+    const formattedPhone = getFormattedPhone(phoneNumber);
+
+    try {
+      const response = await verifyOtp({
+        phone: formattedPhone,
+        code: fullOtp,
+      }).unwrap();
+
+      toast.success(`Phone verified! Logged in as ${response.user?.role || role.toUpperCase()}`);
       if (onSuccessAuth) {
         onSuccessAuth(role);
       }
-      switch (role) {
+
+      const targetRole = (response.user?.role || role).toLowerCase();
+      switch (targetRole) {
         case "doctor":
           router.push("/dashboard/doctor");
           break;
@@ -161,7 +177,11 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
           router.push("/dashboard/patient");
           break;
       }
-    }, 600);
+    } catch (err: any) {
+      const msg = err?.data?.message || err?.message || "Invalid or expired OTP code.";
+      setOtpError(msg);
+      toast.error(msg);
+    }
   };
 
   return (

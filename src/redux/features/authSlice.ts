@@ -37,18 +37,24 @@ export interface AuthState {
 }
 
 // ---------------------------------------------------------------------------
-// Helper: Sync with Cookies & LocalStorage for Next.js Middleware & Persistence
-// ---------------------------------------------------------------------------
-
 function setCookie(name: string, value: string, days = 7) {
   if (typeof document === "undefined") return;
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; expires=${expires}; SameSite=Lax`;
 }
 
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(^|;\\s*)(${name})=([^;]*)`));
+  return match ? decodeURIComponent(match[3]!) : null;
+}
+
 function deleteCookie(name: string) {
   if (typeof document === "undefined") return;
-  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+  // Multiple paths and formats to guarantee removal
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax`;
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0`;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0`;
 }
 
 const getInitialState = (): AuthState => {
@@ -63,15 +69,19 @@ const getInitialState = (): AuthState => {
 
   try {
     const savedUser = localStorage.getItem("shebamitro_user");
-    const savedAccessToken = localStorage.getItem("shebamitro_access_token");
+    const savedAccessToken =
+      localStorage.getItem("shebamitro_access_token") ||
+      getCookie("sheba_session") ||
+      getCookie("sheba_token");
     const savedRefreshToken = localStorage.getItem("shebamitro_refresh_token");
 
-    if (savedAccessToken && savedUser) {
-      const parsedUser = JSON.parse(savedUser) as User;
+    if (savedAccessToken && savedAccessToken !== "undefined" && savedAccessToken !== "null") {
+      const parsedUser = savedUser ? (JSON.parse(savedUser) as User) : null;
+
       return {
         user: parsedUser,
         accessToken: savedAccessToken,
-        refreshToken: savedRefreshToken,
+        refreshToken: savedRefreshToken || null,
         isAuthenticated: true,
       };
     }
@@ -97,6 +107,38 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    /**
+     * Hydrate auth state from localStorage and cookies on client mount.
+     */
+    initializeAuth: (state) => {
+      if (typeof window === "undefined") return;
+      try {
+        const savedUser = localStorage.getItem("shebamitro_user");
+        const savedAccessToken =
+          localStorage.getItem("shebamitro_access_token") ||
+          getCookie("sheba_session") ||
+          getCookie("sheba_token");
+        const savedRefreshToken = localStorage.getItem("shebamitro_refresh_token");
+
+        if (savedAccessToken && savedAccessToken !== "undefined" && savedAccessToken !== "null") {
+          state.accessToken = savedAccessToken;
+          state.refreshToken = savedRefreshToken || null;
+          state.isAuthenticated = true;
+
+          if (savedUser) {
+            state.user = JSON.parse(savedUser) as User;
+          }
+        } else {
+          state.user = null;
+          state.accessToken = null;
+          state.refreshToken = null;
+          state.isAuthenticated = false;
+        }
+      } catch (e) {
+        console.error("Auth hydration error:", e);
+      }
+    },
+
     /**
      * Set user + tokens after login/register.
      */
@@ -180,7 +222,7 @@ const authSlice = createSlice({
 // Actions
 // ---------------------------------------------------------------------------
 
-export const { setCredentials, setUser, updateAccessToken, logout } =
+export const { initializeAuth, setCredentials, setUser, updateAccessToken, logout } =
   authSlice.actions;
 
 // ---------------------------------------------------------------------------

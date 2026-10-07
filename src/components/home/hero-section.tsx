@@ -25,16 +25,14 @@ export function HeroSection() {
 
   const clipRevealVariants = {
     hidden: {
-      y: prefersReducedMotion ? 0 : "110%",
-      opacity: prefersReducedMotion ? 0 : 1,
-      clipPath: prefersReducedMotion ? "inset(0% 0% 0% 0%)" : "inset(100% 0% 0% 0%)",
+      y: prefersReducedMotion ? 0 : 20,
+      opacity: 0,
     },
     visible: {
-      y: "0%",
+      y: 0,
       opacity: 1,
-      clipPath: "inset(0% 0% 0% 0%)",
       transition: {
-        duration: 0.85,
+        duration: 0.75,
         ease: [0.16, 1, 0.3, 1] as const,
       },
     },
@@ -117,26 +115,26 @@ export function HeroSection() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-1.5"
+            className="space-y-2 sm:space-y-3"
           >
-            {/* Line 1 */}
-            <div className="overflow-hidden py-1">
+            {/* Line 1 & Line 2 */}
+            <div className="overflow-hidden py-1 sm:py-1.5">
               <motion.h1
                 variants={clipRevealVariants}
-                className="text-4xl sm:text-6xl lg:text-6xl xl:text-7xl font-black tracking-tight leading-[1.08]"
+                className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-normal leading-[1.22] sm:leading-[1.25] text-fg-app"
               >
-                {t("heroTitleLine1")}{" "}
-                <span className="bg-gradient-to-r from-primary-teal via-emerald-accent to-violet-accent bg-clip-text text-transparent">
+                <span className="block">{t("heroTitleLine1")}</span>
+                <span className="inline-block bg-gradient-to-r from-primary-teal via-emerald-accent to-violet-accent bg-clip-text text-transparent pb-1">
                   {t("heroTitleLine2")}
                 </span>
               </motion.h1>
             </div>
 
-            {/* Line 2 */}
+            {/* Line 3 */}
             <div className="overflow-hidden py-1">
               <motion.p
                 variants={clipRevealVariants}
-                className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-fg-app/90"
+                className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold tracking-normal text-fg-app/90 leading-[1.25]"
               >
                 {t("heroTitleLine3")}
               </motion.p>

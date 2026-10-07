@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Lock, Mail, Eye, EyeOff, ArrowRight, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -145,15 +146,12 @@ export function PasswordLoginForm({ role, onSuccessAuth }: PasswordLoginFormProp
           <label className="text-xs font-black uppercase tracking-wider text-muted-fg">
             Password <span className="text-rose-500">*</span>
           </label>
-          <button
-            type="button"
-            onClick={() => {
-              toast.info("Password reset instructions will be sent to your registered email.");
-            }}
+          <Link
+            href="/forgot-password"
             className="text-xs text-primary-teal hover:underline font-bold"
           >
             Forgot password?
-          </button>
+          </Link>
         </div>
         <div className="relative flex items-center group">
           <Lock className="absolute left-3.5 h-4 w-4 text-muted-fg group-focus-within:text-primary-teal transition-colors pointer-events-none" />

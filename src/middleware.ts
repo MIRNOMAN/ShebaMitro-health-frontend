@@ -12,7 +12,12 @@ export function middleware(request: NextRequest) {
   const rawUserRole =
     request.cookies.get("sheba_role")?.value?.toLowerCase() || "patient";
 
-  const isAuthenticated = Boolean(sessionToken);
+  const isAuthenticated = Boolean(
+    sessionToken &&
+      sessionToken !== "undefined" &&
+      sessionToken !== "null" &&
+      sessionToken.trim().length > 0,
+  );
 
   // 1. If unauthenticated user tries to access /dashboard or any /dashboard/* route
   if (pathname.startsWith("/dashboard")) {

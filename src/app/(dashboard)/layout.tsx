@@ -37,6 +37,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { logout } from "@/redux/features/authSlice";
+import { useLogoutMutation } from "@/redux/api/authApi";
 
 type UserRole = "patient" | "doctor" | "lab" | "pharmacy";
 
@@ -149,7 +150,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [pathname, user]);
 
+  const userRole = (user?.role || currentRole || "patient").toLowerCase();
+  const isAdmin = userRole === "admin";
+
   const handleSwitchWorkspace = (role: UserRole) => {
+    if (!isAdmin && role !== currentRole) {
+      return;
+    }
     setCurrentRole(role);
     document.cookie = `sheba_role=${role}; path=/; max-age=86400`;
     setIsProfileOpen(false);
@@ -171,11 +178,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   };
 
-  const handleSignOut = () => {
+  const [logoutApi] = useLogoutMutation();
+
+  const handleSignOut = async () => {
+    try {
+      await logoutApi().unwrap();
+    } catch {
+      // ignore network errors on logout
+    }
     dispatch(logout());
     setIsProfileOpen(false);
     setIsMobileOpen(false);
-    router.push("/login");
+    window.location.href = "/login";
   };
 
   const navLinks = ROLE_NAV_LINKS[currentRole] || ROLE_NAV_LINKS.patient;
@@ -424,41 +438,70 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       </div>
                     </div>
 
-                    {/* Workspace Switcher Section */}
+                    {/* Workspace Section: Switcher for Admin, Assigned Role Card for Regular Users */}
                     <div className="space-y-1.5 pt-1 border-t border-surface-border">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-muted-fg px-2 block">
-                        Switch Workspace / Role
-                      </span>
-                      <div className="space-y-1">
-                        {WORKSPACE_OPTIONS.map((ws) => {
-                          const Icon = ws.icon;
-                          const isSelected = currentRole === ws.role;
-
-                          return (
-                            <button
-                              key={ws.role}
-                              type="button"
-                              onClick={() => handleSwitchWorkspace(ws.role)}
-                              className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs text-left transition-all cursor-pointer ${
-                                isSelected
-                                  ? "bg-primary-teal/15 text-primary-teal font-black border border-primary-teal/30 shadow-2xs"
-                                  : "text-fg-app hover:bg-muted-bg/70 font-semibold"
-                              }`}
-                            >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <Icon className="h-4 w-4 shrink-0 text-primary-teal" />
-                                <div className="min-w-0">
-                                  <span className="block text-xs truncate">{ws.name}</span>
-                                  <span className="block text-[10px] text-muted-fg truncate font-medium">
-                                    {ws.subtitle}
-                                  </span>
-                                </div>
-                              </div>
-                              {isSelected && <Check className="h-4 w-4 text-primary-teal shrink-0" />}
-                            </button>
-                          );
-                        })}
+                      <div className="flex items-center justify-between px-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-muted-fg">
+                          {isAdmin ? "Switch Workspace / Role" : "Assigned Workspace"}
+                        </span>
+                        {isAdmin && (
+                          <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-sm bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                            Admin Mode
+                          </span>
+                        )}
                       </div>
+
+                      {isAdmin ? (
+                        /* Admin can switch between all workspaces */
+                        <div className="space-y-1">
+                          {WORKSPACE_OPTIONS.map((ws) => {
+                            const Icon = ws.icon;
+                            const isSelected = currentRole === ws.role;
+
+                            return (
+                              <button
+                                key={ws.role}
+                                type="button"
+                                onClick={() => handleSwitchWorkspace(ws.role)}
+                                className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs text-left transition-all cursor-pointer ${
+                                  isSelected
+                                    ? "bg-primary-teal/15 text-primary-teal font-black border border-primary-teal/30 shadow-2xs"
+                                    : "text-fg-app hover:bg-muted-bg/70 font-semibold"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <Icon className="h-4 w-4 shrink-0 text-primary-teal" />
+                                  <div className="min-w-0">
+                                    <span className="block text-xs truncate">{ws.name}</span>
+                                    <span className="block text-[10px] text-muted-fg truncate font-medium">
+                                      {ws.subtitle}
+                                    </span>
+                                  </div>
+                                </div>
+                                {isSelected && <Check className="h-4 w-4 text-primary-teal shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        /* Regular user sees only their own authorized workspace */
+                        <div className="p-2.5 rounded-xl bg-primary-teal/10 border border-primary-teal/25 flex items-center justify-between">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <ShieldCheck className="h-4 w-4 shrink-0 text-primary-teal" />
+                            <div className="min-w-0">
+                              <span className="block text-xs font-bold text-fg-app capitalize">
+                                {currentRole} Portal
+                              </span>
+                              <span className="block text-[10px] text-muted-fg font-medium">
+                                Dedicated Healthcare Workspace
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full shrink-0">
+                            Active
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Sign Out */}

@@ -26,7 +26,8 @@ import { ShebaMitroLogo } from "@/components/ui/logo";
 import { Footer } from "./components/Footer";
 import { useLanguage } from "@/components/providers/language-provider";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { logout } from "@/redux/features/authSlice";
+import { logout, initializeAuth } from "@/redux/features/authSlice";
+import { useLogoutMutation } from "@/redux/api/authApi";
 
 const ROLE_OPTIONS = [
   { role: "patient", name: "Patient Workspace", desc: "Personal Health & Records", icon: User },
@@ -53,6 +54,11 @@ export default function PublicLayout({
 
   const profileRef = React.useRef<HTMLDivElement>(null);
 
+  // Sync auth state on client mount
+  React.useEffect(() => {
+    dispatch(initializeAuth());
+  }, [dispatch]);
+
   // Close profile dropdown when clicking outside
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -69,13 +75,22 @@ export default function PublicLayout({
     setIsRoleModalOpen(true);
   };
 
-  const handleSignOut = () => {
+  const [logoutApi] = useLogoutMutation();
+
+  const handleSignOut = async () => {
+    try {
+      await logoutApi().unwrap();
+    } catch {
+      // ignore network errors on logout
+    }
     dispatch(logout());
     setIsProfileDropdownOpen(false);
-    router.push("/login");
+    window.location.href = "/login";
   };
 
-  const userRoleLower = (user?.role?.toLowerCase() || "patient") as HealthcareRole;
+  const userRoleRaw = (user?.role || "patient").toLowerCase();
+  const isAdmin = userRoleRaw === "admin";
+  const userRoleLower = (isAdmin ? "patient" : userRoleRaw) as HealthcareRole;
   const userInitial = (user?.name?.[0] || user?.email?.[0] || "U").toUpperCase();
   const displayName = user?.name || (user?.email ? user.email.split("@")[0] : "User");
 
@@ -168,42 +183,49 @@ export default function PublicLayout({
                         <span>Go to {userRoleLower.charAt(0).toUpperCase() + userRoleLower.slice(1)} Dashboard</span>
                       </Link>
 
-                      {/* Switch Workspace / Role Section */}
-                      <div className="space-y-1.5 pt-1 border-t border-surface-border">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-muted-fg px-2 block">
-                          Switch Workspace / Role
-                        </span>
-                        <div className="space-y-1">
-                          {ROLE_OPTIONS.map((ws) => {
-                            const Icon = ws.icon;
-                            const isSelected = userRoleLower === ws.role;
+                      {/* Switch Workspace / Role Section - Only for Admins */}
+                      {isAdmin && (
+                        <div className="space-y-1.5 pt-1 border-t border-surface-border">
+                          <div className="flex items-center justify-between px-2">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-muted-fg">
+                              Switch Workspace / Role
+                            </span>
+                            <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-sm bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                              Admin Mode
+                            </span>
+                          </div>
+                          <div className="space-y-1">
+                            {ROLE_OPTIONS.map((ws) => {
+                              const Icon = ws.icon;
+                              const isSelected = userRoleLower === ws.role;
 
-                            return (
-                              <Link
-                                key={ws.role}
-                                href={`/dashboard/${ws.role}`}
-                                onClick={() => setIsProfileDropdownOpen(false)}
-                                className={`w-full flex items-center justify-between p-2 rounded-xl text-xs text-left transition-all ${
-                                  isSelected
-                                    ? "bg-primary-teal/15 text-primary-teal font-black border border-primary-teal/30 shadow-2xs"
-                                    : "text-fg-app hover:bg-muted-bg/70 font-semibold"
-                                }`}
-                              >
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                  <Icon className="h-4 w-4 shrink-0 text-primary-teal" />
-                                  <div className="min-w-0">
-                                    <span className="block text-xs truncate">{ws.name}</span>
-                                    <span className="block text-[10px] text-muted-fg truncate font-medium">
-                                      {ws.desc}
-                                    </span>
+                              return (
+                                <Link
+                                  key={ws.role}
+                                  href={`/dashboard/${ws.role}`}
+                                  onClick={() => setIsProfileDropdownOpen(false)}
+                                  className={`w-full flex items-center justify-between p-2 rounded-xl text-xs text-left transition-all ${
+                                    isSelected
+                                      ? "bg-primary-teal/15 text-primary-teal font-black border border-primary-teal/30 shadow-2xs"
+                                      : "text-fg-app hover:bg-muted-bg/70 font-semibold"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <Icon className="h-4 w-4 shrink-0 text-primary-teal" />
+                                    <div className="min-w-0">
+                                      <span className="block text-xs truncate">{ws.name}</span>
+                                      <span className="block text-[10px] text-muted-fg truncate font-medium">
+                                        {ws.desc}
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
-                                {isSelected && <Check className="h-4 w-4 text-primary-teal shrink-0" />}
-                              </Link>
-                            );
-                          })}
+                                  {isSelected && <Check className="h-4 w-4 text-primary-teal shrink-0" />}
+                                </Link>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       {/* Sign Out */}
                       <div className="pt-2 border-t border-surface-border">
