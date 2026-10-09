@@ -113,7 +113,10 @@ export function ConsultationChat({
 
   // Initialize Socket.io Client Connection to NestJS Chat Gateway
   useEffect(() => {
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
+    const socketUrl =
+      process.env.NEXT_PUBLIC_SOCKET_URL ||
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      "http://localhost:5010";
     const socket = io(socketUrl, {
       transports: ["websocket", "polling"],
       query: { appointmentId, userId: currentUserId },

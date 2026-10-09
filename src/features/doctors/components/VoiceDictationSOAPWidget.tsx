@@ -125,7 +125,10 @@ export function VoiceDictationSOAPWidget({ onApplySOAP }: VoiceDictationSOAPWidg
       const formData = new FormData();
       formData.append("audio", audioBlob, "dictation.webm");
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL ||
+        process.env.NEXT_PUBLIC_BACKEND_URL ||
+        "http://localhost:5010/api/v1";
       const response = await fetch(`${apiUrl}/clinical/dictate`, {
         method: "POST",
         body: formData,
