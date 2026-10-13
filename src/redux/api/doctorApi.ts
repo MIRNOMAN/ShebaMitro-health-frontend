@@ -19,6 +19,44 @@ export interface SpecialtiesResponse {
   data: SpecialtyItemData[];
 }
 
+export interface CreateAppointmentRequest {
+  doctorId: string;
+  slotStartTime: string;
+  slotEndTime: string;
+  type?: "CHAMBER" | "ONLINE";
+  notes?: string;
+}
+
+export interface CreateAppointmentResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    id: string;
+    doctorId: string;
+    patientId: string;
+    slotStartTime: string;
+    slotEndTime: string;
+    type: "CHAMBER" | "ONLINE";
+    status: string;
+    paymentStatus: string;
+    notes?: string;
+    doctor?: {
+      id: string;
+      name: string;
+      specialization: string;
+      consultFee: number;
+    };
+    patient?: {
+      id: string;
+      user?: {
+        name: string;
+        email: string;
+      };
+    };
+  };
+}
+
 export const doctorApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     /**
@@ -29,7 +67,20 @@ export const doctorApi = baseApi.injectEndpoints({
       query: () => "/doctors/specialties",
       providesTags: ["Doctor"],
     }),
+
+    /**
+     * Book appointment slot (Patient role)
+     * POST /api/v1/appointments
+     */
+    createAppointment: builder.mutation<CreateAppointmentResponse, CreateAppointmentRequest>({
+      query: (body) => ({
+        url: "/appointments",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Doctor", "Reminders"],
+    }),
   }),
 });
 
-export const { useGetSpecialtiesQuery } = doctorApi;
+export const { useGetSpecialtiesQuery, useCreateAppointmentMutation } = doctorApi;

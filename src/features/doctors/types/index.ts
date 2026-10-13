@@ -15,6 +15,8 @@ export interface TimeSlot {
   time: string;
   period: "morning" | "afternoon" | "evening";
   isBooked: boolean;
+  startTimeIso?: string;
+  endTimeIso?: string;
 }
 
 export interface DayAvailability {

@@ -23,7 +23,8 @@ import {
   Filter,
 } from "lucide-react";
 import { SPECIALTY_OPTIONS } from "../data/doctors";
-import { DoctorFilterState } from "../types";
+import { DoctorFilterState, SpecialtyOption } from "../types";
+import { useGetSpecialtiesQuery } from "@/redux/api/doctorApi";
 import { Button } from "@/components/ui/button";
 
 interface DoctorFilterSidebarProps {
@@ -65,10 +66,29 @@ export function DoctorFilterSidebar({
   onCloseMobile,
 }: DoctorFilterSidebarProps) {
   const [showAllSpecialties, setShowAllSpecialties] = useState(false);
+  const { data: dynamicSpecialtiesData } = useGetSpecialtiesQuery();
+
+  const specialtyList: SpecialtyOption[] = React.useMemo(() => {
+    if (dynamicSpecialtiesData?.data && dynamicSpecialtiesData.data.length > 0) {
+      return dynamicSpecialtiesData.data.map((item) => {
+        const fallback = SPECIALTY_OPTIONS.find((s) => s.id === item.id);
+        return {
+          id: item.id,
+          name: item.titleEn,
+          iconName: item.icon || fallback?.iconName || "Stethoscope",
+          colorClass: fallback?.colorClass || "text-primary-teal",
+          bgClass: fallback?.bgClass || "bg-primary-teal/10",
+          borderClass: fallback?.borderClass || "border-primary-teal/30",
+          doctorCount: item.count,
+        };
+      });
+    }
+    return SPECIALTY_OPTIONS;
+  }, [dynamicSpecialtiesData]);
 
   const displayedSpecialties = showAllSpecialties
-    ? SPECIALTY_OPTIONS
-    : SPECIALTY_OPTIONS.slice(0, 6);
+    ? specialtyList
+    : specialtyList.slice(0, 6);
 
   const SidebarContent = (
     <div className="space-y-6">
@@ -188,7 +208,7 @@ export function DoctorFilterSidebar({
           })}
         </div>
 
-        {SPECIALTY_OPTIONS.length > 6 && (
+        {specialtyList.length > 6 && (
           <button
             onClick={() => setShowAllSpecialties(!showAllSpecialties)}
             className="flex items-center gap-1 text-xs font-semibold text-primary-teal hover:underline pt-1 pl-1"
@@ -199,7 +219,7 @@ export function DoctorFilterSidebar({
               </>
             ) : (
               <>
-                Show {SPECIALTY_OPTIONS.length - 6} More Specialties{" "}
+                Show {specialtyList.length - 6} More Specialties{" "}
                 <ChevronDown className="h-3.5 w-3.5" />
               </>
             )}

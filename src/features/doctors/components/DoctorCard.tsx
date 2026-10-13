@@ -21,8 +21,10 @@ interface DoctorCardProps {
 }
 
 export function DoctorCard({ doctor, onOpenSlotPreview }: DoctorCardProps) {
-  const primaryChamber = doctor.chambers[0];
-  const minFee = Math.min(...doctor.chambers.map((c) => c.consultationFee));
+  const primaryChamber = doctor.chambers?.[0];
+  const minFee = doctor.chambers && doctor.chambers.length > 0
+    ? Math.min(...doctor.chambers.map((c) => c.consultationFee))
+    : doctor.chamberConsultationFee || 1200;
 
   return (
     <div className="group relative rounded-2xl border border-card-border bg-card p-5 shadow-xs hover:border-luminous transition-all duration-300 hover:shadow-md flex flex-col justify-between overflow-hidden">
