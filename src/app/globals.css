@@ -170,3 +170,116 @@ html {
   scrollbar-width: none !important; /* Firefox */
 }
 
+/* ------------------------------------------------------------------ */
+/* Modern Smooth Scrollbars                                           */
+/* ------------------------------------------------------------------ */
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(6, 182, 212, 0.35) transparent;
+  scroll-behavior: smooth;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 9999px;
+  margin: 6px 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.3);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.65);
+}
+
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: rgba(20, 184, 215, 0.4) transparent;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(20, 184, 215, 0.4);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(20, 184, 215, 0.8);
+}
+
+/* ------------------------------------------------------------------ */
+/* Modal Scrollbar - Guaranteed visible, smooth & non-leaking         */
+/* ------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------ */
+/* Modal Scrollbar - Guaranteed visible, smooth & non-leaking         */
+/* ------------------------------------------------------------------ */
+
+.custom-modal-scrollbar {
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #0d9488 rgba(0, 0, 0, 0.06) !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.custom-modal-scrollbar::-webkit-scrollbar {
+  width: 8px !important;
+  display: block !important;
+}
+
+.custom-modal-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05) !important;
+  border-radius: 9999px !important;
+  margin: 6px 2px !important;
+}
+
+.custom-modal-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #0d9488 !important;
+  border-radius: 9999px !important;
+  border: 1.5px solid transparent !important;
+  background-clip: padding-box !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #0f766e !important;
+}
+
+.custom-modal-scrollbar::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.dark .custom-modal-scrollbar {
+  scrollbar-color: #14b8a6 rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .custom-modal-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .custom-modal-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #14b8a6 !important;
+  border: 1.5px solid transparent !important;
+  background-clip: padding-box !important;
+}
+
+.dark .custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #2dd4bf !important;
+}
+
+

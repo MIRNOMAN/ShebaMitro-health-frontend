@@ -37,6 +37,15 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
       touchMultiplier: 1.5,
+      prevent: (node) => {
+        return (
+          node.hasAttribute("data-lenis-prevent") ||
+          Boolean(node.closest("[data-lenis-prevent]")) ||
+          Boolean(node.closest('[role="dialog"]')) ||
+          Boolean(node.closest(".custom-modal-scrollbar")) ||
+          Boolean(node.closest(".overflow-y-auto"))
+        );
+      },
     });
 
     setLenis(lenisInstance);
