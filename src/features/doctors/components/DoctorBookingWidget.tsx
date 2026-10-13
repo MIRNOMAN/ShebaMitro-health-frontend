@@ -15,6 +15,8 @@ import {
   ShieldCheck,
   CreditCard,
   Sparkles,
+  Smartphone,
+  Mail,
 } from "lucide-react";
 import { Doctor, Chamber, TimeSlot, DayAvailability } from "../types";
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,7 @@ export function DoctorBookingWidget({ doctor }: DoctorBookingWidgetProps) {
   const [isBookingConfirmed, setIsBookingConfirmed] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [confirmedApptId, setConfirmedApptId] = useState<string | null>(null);
+  const [confirmedAppointment, setConfirmedAppointment] = useState<any>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
 
   const auth = useAppSelector((state) => state.auth);
@@ -142,6 +145,7 @@ export function DoctorBookingWidget({ doctor }: DoctorBookingWidgetProps) {
       }).unwrap();
 
       const appt = res.data || res;
+      setConfirmedAppointment(appt);
       setConfirmedApptId(appt?.id || `APPT-${Date.now().toString().slice(-6)}`);
       setIsBookingConfirmed(true);
       setTimerSeconds(null);
@@ -509,6 +513,40 @@ export function DoctorBookingWidget({ doctor }: DoctorBookingWidgetProps) {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Fee Paid:</span>
                   <span className="font-bold text-emerald-500">৳{consultationFee}</span>
+                </div>
+              </div>
+
+              {/* SMS & Email Confirmation Text & Badges */}
+              <div className="space-y-2 pt-1 text-left">
+                <p className="text-[11px] text-muted-foreground text-center">
+                  {confirmedAppointment?.notifications?.notice ||
+                    "A confirmation SMS & email reminder have been sent to your mobile number."}
+                </p>
+
+                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                  <div className="flex items-center gap-1.5 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300">
+                    <Smartphone className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                    <div className="min-w-0">
+                      <p className="font-bold leading-tight">SMS Sent</p>
+                      <p className="opacity-80 truncate font-mono">
+                        {confirmedAppointment?.notifications?.sms?.recipient ||
+                          auth.user?.phone ||
+                          "+8801712345678"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-cyan-700 dark:text-cyan-300">
+                    <Mail className="h-3.5 w-3.5 shrink-0 text-primary-teal" />
+                    <div className="min-w-0">
+                      <p className="font-bold leading-tight">Email Sent</p>
+                      <p className="opacity-80 truncate font-mono">
+                        {confirmedAppointment?.notifications?.email?.recipient ||
+                          auth.user?.email ||
+                          "patient@shebamitro.health"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 

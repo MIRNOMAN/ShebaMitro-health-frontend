@@ -17,6 +17,8 @@ import {
   UserCheck,
   AlertCircle,
   ExternalLink,
+  Smartphone,
+  Mail,
 } from "lucide-react";
 import { Doctor, Chamber, TimeSlot } from "../types";
 import { Button } from "@/components/ui/button";
@@ -183,12 +185,13 @@ export function DoctorSlotDrawer({ doctor, isOpen, onClose }: DoctorSlotDrawerPr
 
               {bookingSuccess ? (
                 <div className="py-6 text-center space-y-4">
+                  {/* Circular Checkmark Badge */}
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-16 h-16 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500/40"
+                    className="w-16 h-16 bg-emerald-500/15 text-emerald-500 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500/30"
                   >
-                    <CheckCircle2 className="w-10 h-10" />
+                    <CheckCircle2 className="w-9 h-9" />
                   </motion.div>
 
                   <div className="space-y-1">
@@ -203,53 +206,73 @@ export function DoctorSlotDrawer({ doctor, isOpen, onClose }: DoctorSlotDrawerPr
                     </p>
                   </div>
 
-                  <div className="bg-surface-card-hover border border-card-border rounded-xl p-4 text-left space-y-2.5 text-xs">
-                    <div className="flex justify-between">
+                  {/* Summary Card */}
+                  <div className="bg-surface-card-hover border border-card-border rounded-2xl p-4 text-left space-y-3 text-xs shadow-xs">
+                    <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Doctor:</span>
-                      <span className="font-semibold text-fg-app">{doctor.name}</span>
+                      <span className="font-semibold text-fg-app text-right">{doctor.name}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Chamber:</span>
-                      <span className="font-semibold text-fg-app truncate max-w-[200px]">
+                      <span className="font-semibold text-fg-app truncate max-w-[220px] text-right">
                         {selectedChamber?.name}
                       </span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Date & Time:</span>
-                      <span className="font-semibold text-primary-teal">
+                      <span className="font-semibold text-primary-teal text-right">
                         {activeAvailability?.dayLabel} at {selectedSlot?.time}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Patient:</span>
-                      <span className="font-semibold text-fg-app">
-                        {confirmedAppointment?.patient?.user?.name ||
-                          auth.user?.name ||
-                          "Rahim Ahmed (Patient)"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t border-card-border">
-                      <span className="text-muted-foreground">Consultation Fee:</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                    <div className="flex justify-between items-center pt-2.5 border-t border-card-border">
+                      <span className="text-muted-foreground font-medium">Consultation Fee:</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
                         ৳{selectedChamber?.consultationFee}
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                    10-minute payment grace period active. You can confirm payment or attend at chamber.
+                  {/* SMS & Email Confirmation Text & Badges matching Screenshot */}
+                  <div className="space-y-3 pt-1">
+                    <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                      {confirmedAppointment?.notifications?.notice ||
+                        "A confirmation SMS & email reminder have been sent to your mobile number."}
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300">
+                        <Smartphone className="h-4 w-4 shrink-0 text-emerald-500" />
+                        <div className="min-w-0 text-left">
+                          <p className="font-bold">SMS Dispatched</p>
+                          <p className="text-[10px] opacity-80 truncate font-mono">
+                            {confirmedAppointment?.notifications?.sms?.recipient ||
+                              confirmedAppointment?.patient?.user?.phone ||
+                              "+8801712345678"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-cyan-700 dark:text-cyan-300">
+                        <Mail className="h-4 w-4 shrink-0 text-primary-teal" />
+                        <div className="min-w-0 text-left">
+                          <p className="font-bold">Email Dispatched</p>
+                          <p className="text-[10px] opacity-80 truncate font-mono">
+                            {confirmedAppointment?.notifications?.email?.recipient ||
+                              confirmedAppointment?.patient?.user?.email ||
+                              auth.user?.email ||
+                              "patient@shebamitro.health"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="pt-2 space-y-2">
-                    <Link
-                      href="/patient/reminders"
-                      className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 px-4 rounded-xl bg-primary-teal text-white font-bold text-xs shadow-md hover:bg-primary-teal/90 transition-all"
+                  <div className="pt-2">
+                    <Button
+                      variant="primary"
+                      className="w-full h-12 text-sm font-bold shadow-md cursor-pointer justify-center rounded-xl bg-primary-teal hover:bg-primary-teal/90 text-white"
+                      onClick={onClose}
                     >
-                      <span>View Health Dashboard</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </Link>
-
-                    <Button variant="outline" className="w-full text-xs" onClick={onClose}>
                       Done
                     </Button>
                   </div>

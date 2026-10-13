@@ -52,7 +52,25 @@ export interface CreateAppointmentResponse {
       user?: {
         name: string;
         email: string;
+        phone?: string;
       };
+    };
+    notifications?: {
+      sms?: {
+        success: boolean;
+        recipient: string;
+        messageId: string;
+        message: string;
+        dispatchedAt: string;
+      };
+      email?: {
+        success: boolean;
+        recipient: string;
+        messageId: string;
+        subject: string;
+        dispatchedAt: string;
+      };
+      notice?: string;
     };
   };
 }
