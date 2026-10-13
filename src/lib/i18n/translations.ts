@@ -47,7 +47,7 @@ export const translations = {
     // Hero Slider
     slide1Badge: "BMDC Certified Doctors",
     slide1Title: "Specialist Doctor Consultations",
-    slide1Sub: "1,200+ Experienced BMDC Registered Specialists",
+    slide1Sub: "Experienced BMDC Registered Specialists across Bangladesh",
 
     slide2Badge: "Family Health Shield",
     slide2Title: "Complete Family Healthcare",
@@ -101,7 +101,7 @@ export const translations = {
     statDelivery: "On-Time Express Delivery",
     statDeliverySub: "Average delivery time 42 mins",
     statRating: "Patient Satisfaction Rating",
-    statRatingSub: "Based on 14,000+ verified reviews",
+    statRatingSub: "Based on verified patient reviews",
 
     // Mega Menu Descriptions & Services
     findDoctorsDesc: "Connect with verified specialists & online consultations",
@@ -240,7 +240,7 @@ export const translations = {
     // Hero Slider
     slide1Badge: "বিএমডিসি রেজিস্টার্ড ডাক্তার",
     slide1Title: "বিশেষজ্ঞ চিকিৎসকের পরামর্শ",
-    slide1Sub: "১,২০০+ অভিজ্ঞ বিএমডিসি নিবন্ধিত ডাক্তার",
+    slide1Sub: "অভিজ্ঞ বিএমডিসি নিবন্ধিত বিশেষজ্ঞ ডাক্তার প্যানেল",
 
     slide2Badge: "পারিবারিক স্বাস্থ্য সুরক্ষা",
     slide2Title: "সম্পূর্ণ পরিবারের স্বাস্থ্যসেবা",
@@ -294,7 +294,7 @@ export const translations = {
     statDelivery: "দ্রুত ওষুধ সরবরাহ",
     statDeliverySub: "গড় ডেলিভারি সময় মাত্র ৪২ মিনিট",
     statRating: "রোগীদের সন্তুষ্টি রেটিং",
-    statRatingSub: "১৪,০০০+ পেশেন্ট রিভিউ এর ভিত্তিতে",
+    statRatingSub: "যাচাইকৃত পেশেন্ট রিভিউ এর ভিত্তিতে",
 
     // Mega Menu Descriptions & Services
     findDoctorsDesc: "যাচাইকৃত বিশেষজ্ঞ ডাক্তার ও অনলাইন পরামর্শ নিন",
@@ -433,7 +433,7 @@ export const translations = {
     // Hero Slider
     slide1Badge: "बीएमडीसी प्रमाणित डॉक्टर",
     slide1Title: "विशेषज्ञ डॉक्टर परामर्श",
-    slide1Sub: "1,200+ अनुभवी बीएमडीसी पंजीकृत डॉक्टर",
+    slide1Sub: "अनुभवी बीएमडीसी पंजीकृत विशेषज्ञ डॉक्टर",
 
     slide2Badge: "पारिवारिक स्वास्थ्य सुरक्षा",
     slide2Title: "संपूर्ण परिवार की स्वास्थ्य सेवा",
@@ -487,7 +487,7 @@ export const translations = {
     statDelivery: "समय पर एक्सप्रेस डिलीवरी",
     statDeliverySub: "औसत डिलीवरी समय केवल 42 मिनट",
     statRating: "मरीजों की संतुष्टि रेटिंग",
-    statRatingSub: "14,000+ सत्यापित समीक्षाओं पर आधारित",
+    statRatingSub: "सत्यापित समीक्षाओं पर आधारित",
 
     // Mega Menu Descriptions & Services
     findDoctorsDesc: "सत्यापित विशेषज्ञों से जुड़ें और ऑनलाइन परामर्श लें",

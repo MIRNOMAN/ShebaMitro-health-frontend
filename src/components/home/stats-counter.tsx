@@ -23,7 +23,7 @@ interface StatItemDisplay {
   gradient: string;
 }
 
-// Fallback initial data so SSR and initial render never flash or shift
+// Fallback initial data matching active database state
 const defaultStatsData: StatItemDisplay[] = [
   {
     id: "consultations",
@@ -33,7 +33,7 @@ const defaultStatsData: StatItemDisplay[] = [
     labelBn: "সফল চিকিৎসা সেবা",
     subtext: "Across 64 districts in Bangladesh",
     subtextBn: "বাংলাদেশের ৬৪টি জেলায় বিস্তৃত",
-    value: 50000,
+    value: 12,
     suffix: "+",
     decimals: 0,
     icon: <Users className="w-6 h-6" />,
@@ -47,7 +47,7 @@ const defaultStatsData: StatItemDisplay[] = [
     labelBn: "বিএমডিসি নিবন্ধিত ডাক্তার",
     subtext: "Verified credentials & BMDC IDs",
     subtextBn: "যাচাইকৃত রেজিস্টার্ড বিশেষজ্ঞ প্যানেল",
-    value: 1200,
+    value: 19,
     suffix: "+",
     decimals: 0,
     icon: <Stethoscope className="w-6 h-6" />,
@@ -59,9 +59,9 @@ const defaultStatsData: StatItemDisplay[] = [
     subtextKey: "statDeliverySub",
     label: "On-Time Express Delivery",
     labelBn: "দ্রুত ওষুধ সরবরাহ",
-    subtext: "Average delivery time 42 mins",
-    subtextBn: "গড় ডেলিভারি সময় মাত্র ৪২ মিনিট",
-    value: 99.4,
+    subtext: "15 of 15 orders delivered express",
+    subtextBn: "১৫/১৫ টি অর্ডার সফল এক্সপ্রেস ডেলিভারি",
+    value: 100,
     suffix: "%",
     decimals: 1,
     icon: <Truck className="w-6 h-6" />,
@@ -73,8 +73,8 @@ const defaultStatsData: StatItemDisplay[] = [
     subtextKey: "statRatingSub",
     label: "Patient Satisfaction Rating",
     labelBn: "রোগীদের সন্তুষ্টি রেটিং",
-    subtext: "Based on 14,000+ verified reviews",
-    subtextBn: "১৪,০০০+ পেশেন্ট রিভিউ এর ভিত্তিতে",
+    subtext: "Based on 2,469+ verified reviews",
+    subtextBn: "২,৪৬৯+ পেশেন্ট রিভিউ এর ভিত্তিতে",
     value: 4.9,
     suffix: " / 5.0",
     decimals: 1,
@@ -85,12 +85,12 @@ const defaultStatsData: StatItemDisplay[] = [
 
 const fallbackActivity: LiveActivityItem = {
   id: "default-act",
-  message: "Dr. Farah Ahmed completed a live video consultation in Dhaka • 14s ago",
-  messageBn: "ডাঃ ফারাহ আহমেদ ঢাকা থেকে লাইভ ভিডিও কনসালটেশন সম্পন্ন করেছেন • ১৪ সে পূর্বে",
-  doctorName: "Dr. Farah Ahmed",
+  message: "Dr. Kazi Arif completed a live video consultation in Dhaka • 14m ago",
+  messageBn: "ডাঃ Kazi Arif ঢাকা থেকে লাইভ ভিডিও কনসালটেশন সম্পন্ন করেছেন • ১৪ মি পূর্বে",
+  doctorName: "Dr. Kazi Arif",
   location: "Dhaka",
-  timeAgo: "14s ago",
-  timeAgoBn: "১৪ সে পূর্বে",
+  timeAgo: "14m ago",
+  timeAgoBn: "১৪ মি পূর্বে",
   timestamp: new Date().toISOString(),
 };
 
@@ -268,8 +268,8 @@ export function StatsCounter() {
             : (stat.labelKey ? t(stat.labelKey as TranslationKey) : "") || stat.label;
 
           const cardSubtext = isBn
-            ? stat.subtextBn || (stat.subtextKey ? t(stat.subtextKey as TranslationKey) : "") || stat.subtext
-            : (stat.subtextKey ? t(stat.subtextKey as TranslationKey) : "") || stat.subtext;
+            ? stat.subtextBn || stat.subtext || (stat.subtextKey ? t(stat.subtextKey as TranslationKey) : "")
+            : stat.subtext || (stat.subtextKey ? t(stat.subtextKey as TranslationKey) : "");
 
           return (
             <StaggerItem key={stat.id} variants={itemVariants}>
