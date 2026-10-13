@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { baseApi } from "./baseApi";
-import { setCredentials, logout, type User } from "../features/authSlice";
+import { setCredentials, logout, setUser, type User } from "../features/authSlice";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -210,6 +210,36 @@ export const authApi = baseApi.injectEndpoints({
       transformResponse: (response: any) => response?.data?.profile ?? response?.data ?? response,
       providesTags: ["User"],
     }),
+
+    updateProfile: builder.mutation<User, { name?: string; phone?: string; avatar?: string }>({
+      query: (body) => ({
+        url: "/users/profile",
+        method: "PATCH",
+        body,
+      }),
+      transformResponse: (response: any) => response?.data?.profile ?? response?.data ?? response,
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          const user = (data as any)?.profile ?? data;
+          if (user) {
+            dispatch(setUser({ ...user, avatar: arg.avatar || user.avatar }));
+          }
+        } catch {
+          // Handled in component
+        }
+      },
+      invalidatesTags: ["User"],
+    }),
+
+    uploadAvatar: builder.mutation<{ url: string; fileName?: string }, FormData>({
+      query: (formData) => ({
+        url: "/users/upload-avatar",
+        method: "POST",
+        body: formData,
+      }),
+      transformResponse: (response: any) => response?.data ?? response,
+    }),
   }),
 });
 
@@ -228,4 +258,6 @@ export const {
   useRefreshTokenMutation,
   useGetMeQuery,
   useLazyGetMeQuery,
+  useUpdateProfileMutation,
+  useUploadAvatarMutation,
 } = authApi;

@@ -213,10 +213,17 @@ const authSlice = createSlice({
      * Update only the user profile.
      */
     setUser: (state, action: PayloadAction<User>) => {
-      state.user = action.payload;
+      const merged = {
+        ...state.user,
+        ...action.payload,
+        avatar: action.payload.avatar || state.user?.avatar,
+      };
+      state.user = merged as User;
       if (typeof window !== "undefined") {
-        localStorage.setItem("shebamitro_user", JSON.stringify(action.payload));
-        setCookie("sheba_role", action.payload.role.toLowerCase());
+        localStorage.setItem("shebamitro_user", JSON.stringify(merged));
+        if (merged.role) {
+          setCookie("sheba_role", merged.role.toLowerCase());
+        }
       }
     },
 
