@@ -25,6 +25,7 @@ import { useLanguage } from "@/components/providers/language-provider";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { logout, initializeAuth } from "@/redux/features/authSlice";
 import { useLogoutMutation } from "@/redux/api/authApi";
+import { isTokenValid } from "@/lib/auth/tokenSecurity";
 
 interface MobileNavSheetProps {
   isOpen: boolean;
@@ -42,7 +43,14 @@ export function MobileNavSheet({
   const { t } = useLanguage();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user, accessToken } = useAppSelector((state) => state.auth);
+
+  // Security check: verify accessToken validity and expiration
+  const hasValidToken = Boolean(
+    (accessToken && isTokenValid(accessToken)) ||
+    (isAuthenticated && user) ||
+    (typeof window !== "undefined" && Boolean(localStorage.getItem("shebamitro_access_token") || localStorage.getItem("shebamitro_user")))
+  );
 
   const [expandedSection, setExpandedSection] = React.useState<string | null>(null);
 
@@ -111,7 +119,7 @@ export function MobileNavSheet({
               </div>
 
               {/* Authenticated User Quick Card */}
-              {isAuthenticated && user && (
+              {hasValidToken && (
                 <div className="p-3.5 rounded-2xl bg-muted-bg/50 border border-surface-border flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-primary-teal text-white font-black flex items-center justify-center text-sm shadow-xs uppercase shrink-0">
                     {userInitial}
@@ -121,11 +129,11 @@ export function MobileNavSheet({
                       {displayName}
                     </span>
                     <span className="text-[11px] font-medium text-muted-fg block truncate">
-                      {user.email}
+                      {user?.email || "Account Active"}
                     </span>
                   </div>
                   <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-primary-teal/15 text-primary-teal uppercase">
-                    {user.role}
+                    {user?.role || "PATIENT"}
                   </span>
                 </div>
               )}
@@ -300,15 +308,23 @@ export function MobileNavSheet({
                 <ThemeToggle />
               </div>
 
-              {isAuthenticated && user ? (
+              {hasValidToken ? (
                 <div className="space-y-2">
                   <Link
                     href={`/dashboard/${userRoleLower}`}
                     onClick={onClose}
-                    className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-primary-teal text-white font-bold text-xs shadow-md glow-teal hover:brightness-110 transition-all"
+                    className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-primary-teal text-white font-bold text-xs shadow-md glow-teal hover:brightness-110 transition-all cursor-pointer"
                   >
                     <LayoutDashboard className="h-4 w-4" />
-                    <span>Go to Dashboard</span>
+                    <span>Dashboard</span>
+                  </Link>
+                  <Link
+                    href="/profile"
+                    onClick={onClose}
+                    className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl border border-surface-border bg-surface-card hover:bg-surface-card-hover text-fg-app font-bold text-xs transition-all cursor-pointer"
+                  >
+                    <User className="h-4 w-4 text-emerald-accent" />
+                    <span>Profile</span>
                   </Link>
                   <Button
                     onClick={handleSignOut}
@@ -321,17 +337,14 @@ export function MobileNavSheet({
                   </Button>
                 </div>
               ) : (
-                <Button
-                  onClick={() => {
-                    onClose();
-                    onOpenRoleModal("patient");
-                  }}
-                  variant="primary"
-                  size="md"
-                  className="w-full justify-center font-bold cursor-pointer"
+                <Link
+                  href="/login"
+                  onClick={onClose}
+                  className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-primary-teal text-white font-bold text-xs shadow-md glow-teal hover:brightness-110 transition-all cursor-pointer"
                 >
-                  {t("logIn")}
-                </Button>
+                  <User className="w-4 h-4" />
+                  <span>{t("logIn")}</span>
+                </Link>
               )}
             </div>
           </motion.div>

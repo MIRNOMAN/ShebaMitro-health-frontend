@@ -81,6 +81,7 @@ export function ContactFormSection() {
                 <input
                   type="email"
                   required
+                  suppressHydrationWarning
                   placeholder="e.g. tanvir@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -98,6 +99,7 @@ export function ContactFormSection() {
                 <input
                   type="tel"
                   required
+                  suppressHydrationWarning
                   placeholder="+880 1711-000000"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}

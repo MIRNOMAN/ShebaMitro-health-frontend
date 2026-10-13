@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { baseApi } from "./baseApi";
 import { setCredentials, logout, type User } from "../features/authSlice";
 
@@ -80,16 +81,20 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(
-            setCredentials({
-              user: data.user,
-              accessToken: data.accessToken,
-              refreshToken: data.refreshToken,
-            }),
-          );
+          const payload = (data as any)?.data ?? data;
+          if (payload?.accessToken) {
+            dispatch(
+              setCredentials({
+                user: payload.user,
+                accessToken: payload.accessToken,
+                refreshToken: payload.refreshToken,
+              }),
+            );
+          }
         } catch {
           // Handled by component
         }
@@ -103,16 +108,20 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(
-            setCredentials({
-              user: data.user,
-              accessToken: data.accessToken,
-              refreshToken: data.refreshToken,
-            }),
-          );
+          const payload = (data as any)?.data ?? data;
+          if (payload?.accessToken) {
+            dispatch(
+              setCredentials({
+                user: payload.user,
+                accessToken: payload.accessToken,
+                refreshToken: payload.refreshToken,
+              }),
+            );
+          }
         } catch {
           // Handled by component
         }
@@ -126,6 +135,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
     }),
 
     verifyOtp: builder.mutation<AuthResponse, VerifyOtpRequest>({
@@ -134,15 +144,17 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          if (data.accessToken) {
+          const payload = (data as any)?.data ?? data;
+          if (payload?.accessToken) {
             dispatch(
               setCredentials({
-                user: data.user,
-                accessToken: data.accessToken,
-                refreshToken: data.refreshToken || "otp-refresh-token",
+                user: payload.user,
+                accessToken: payload.accessToken,
+                refreshToken: payload.refreshToken || "otp-refresh-token",
               }),
             );
           }
@@ -195,6 +207,7 @@ export const authApi = baseApi.injectEndpoints({
 
     getMe: builder.query<User, void>({
       query: () => "/users/me",
+      transformResponse: (response: any) => response?.data?.profile ?? response?.data ?? response,
       providesTags: ["User"],
     }),
   }),

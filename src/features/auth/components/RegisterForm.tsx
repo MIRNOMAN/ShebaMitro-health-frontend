@@ -129,26 +129,10 @@ export function RegisterForm({ currentRole, onChangeRole }: RegisterFormProps) {
         `Account created successfully! Welcome to ShebaMitro as ${result.user?.role || backendRole}.`
       );
 
-      if (redirectUrl) {
+      if (redirectUrl && !redirectUrl.startsWith("/dashboard")) {
         router.push(redirectUrl);
-        return;
-      }
-
-      // Route to respective role dashboard
-      switch (currentRole) {
-        case "doctor":
-          router.push("/dashboard/doctor");
-          break;
-        case "lab":
-          router.push("/dashboard/lab");
-          break;
-        case "pharmacy":
-          router.push("/dashboard/pharmacy");
-          break;
-        case "patient":
-        default:
-          router.push("/dashboard/patient");
-          break;
+      } else {
+        router.push("/");
       }
     } catch (err: unknown) {
       const apiError = err as {
@@ -241,6 +225,7 @@ export function RegisterForm({ currentRole, onChangeRole }: RegisterFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder={`Enter your ${currentRole} email`}
               required
+              suppressHydrationWarning
               className="w-full h-11 pl-10 pr-4 rounded-2xl bg-surface-card border border-surface-border text-sm text-fg-app placeholder:text-muted-fg focus:outline-none focus:ring-2 focus:ring-primary-teal focus:border-transparent transition-all shadow-xs"
             />
           </div>
@@ -258,6 +243,7 @@ export function RegisterForm({ currentRole, onChangeRole }: RegisterFormProps) {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="01712345678"
+              suppressHydrationWarning
               className="w-full h-11 pl-10 pr-4 rounded-2xl bg-surface-card border border-surface-border text-sm text-fg-app placeholder:text-muted-fg focus:outline-none focus:ring-2 focus:ring-primary-teal focus:border-transparent transition-all shadow-xs"
             />
           </div>
@@ -276,6 +262,7 @@ export function RegisterForm({ currentRole, onChangeRole }: RegisterFormProps) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Min 8 chars, 1 uppercase & number"
               required
+              suppressHydrationWarning
               className="w-full h-11 pl-10 pr-11 rounded-2xl bg-surface-card border border-surface-border text-sm text-fg-app placeholder:text-muted-fg focus:outline-none focus:ring-2 focus:ring-primary-teal focus:border-transparent transition-all shadow-xs"
             />
             <button
@@ -333,6 +320,7 @@ export function RegisterForm({ currentRole, onChangeRole }: RegisterFormProps) {
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Re-enter your password"
               required
+              suppressHydrationWarning
               className="w-full h-11 pl-10 pr-4 rounded-2xl bg-surface-card border border-surface-border text-sm text-fg-app placeholder:text-muted-fg focus:outline-none focus:ring-2 focus:ring-primary-teal focus:border-transparent transition-all shadow-xs"
             />
           </div>

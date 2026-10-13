@@ -154,30 +154,13 @@ export function PhoneOtpForm({ role, onSuccessAuth }: PhoneOtpFormProps) {
         code: fullOtp,
       }).unwrap();
 
-      toast.success(`Phone verified! Logged in as ${response.user?.role || role.toUpperCase()}`);
+      const userObj = response?.user || (response as any)?.data?.user;
+      toast.success(`Phone verified! Logged in as ${userObj?.role || role.toUpperCase()}`);
       if (onSuccessAuth) {
         onSuccessAuth(role);
       }
 
-      const targetRole = (response.user?.role || role).toLowerCase();
-      switch (targetRole) {
-        case "doctor":
-          router.push("/dashboard/doctor");
-          break;
-        case "lab":
-          router.push("/dashboard/lab");
-          break;
-        case "pharmacy":
-          router.push("/dashboard/pharmacy");
-          break;
-        case "admin":
-          router.push("/dashboard/admin");
-          break;
-        case "patient":
-        default:
-          router.push("/dashboard/patient");
-          break;
-      }
+      router.push("/");
     } catch (err: any) {
       const msg = err?.data?.message || err?.message || "Invalid or expired OTP code.";
       setOtpError(msg);

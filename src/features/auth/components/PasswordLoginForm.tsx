@@ -16,11 +16,26 @@ interface PasswordLoginFormProps {
 }
 
 const DEMO_ACCOUNTS: Record<UserRole, { email: string; pass: string }> = {
-  patient: { email: "patient@shebamitro.health", pass: "Password123!" },
-  doctor: { email: "doctor@shebamitro.health", pass: "Password123!" },
-  pharmacy: { email: "pharmacy@shebamitro.health", pass: "Password123!" },
-  lab: { email: "lab@shebamitro.health", pass: "Password123!" },
-  admin: { email: "admin@shebamitro.health", pass: "Password123!" },
+  patient: {
+    email: process.env.NEXT_PUBLIC_DEMO_PATIENT_EMAIL || "patient@shebamitro.health",
+    pass: process.env.NEXT_PUBLIC_DEMO_PATIENT_PASSWORD || "Password123!",
+  },
+  doctor: {
+    email: process.env.NEXT_PUBLIC_DEMO_DOCTOR_EMAIL || "doctor@shebamitro.health",
+    pass: process.env.NEXT_PUBLIC_DEMO_DOCTOR_PASSWORD || "Password123!",
+  },
+  pharmacy: {
+    email: process.env.NEXT_PUBLIC_DEMO_PHARMACY_EMAIL || "pharmacy@shebamitro.health",
+    pass: process.env.NEXT_PUBLIC_DEMO_PHARMACY_PASSWORD || "Password123!",
+  },
+  lab: {
+    email: process.env.NEXT_PUBLIC_DEMO_LAB_EMAIL || "lab@shebamitro.health",
+    pass: process.env.NEXT_PUBLIC_DEMO_LAB_PASSWORD || "Password123!",
+  },
+  admin: {
+    email: process.env.NEXT_PUBLIC_DEMO_ADMIN_EMAIL || "admin@shebamitro.health",
+    pass: process.env.NEXT_PUBLIC_DEMO_ADMIN_PASSWORD || "Password123!",
+  },
 };
 
 export function PasswordLoginForm({ role, onSuccessAuth }: PasswordLoginFormProps) {
@@ -77,36 +92,18 @@ export function PasswordLoginForm({ role, onSuccessAuth }: PasswordLoginFormProp
         password,
       }).unwrap();
 
-      toast.success(`Welcome back! Logged in as ${response.user?.role || role.toUpperCase()}`);
+      const userObj = response?.user || (response as any)?.data?.user;
+      toast.success(`Welcome back! Logged in as ${userObj?.role || role.toUpperCase()}`);
 
       if (onSuccessAuth) {
         onSuccessAuth(role);
       }
 
-      // Determine target destination
-      if (redirectUrl) {
+      // Determine target destination: redirect to home page as requested
+      if (redirectUrl && !redirectUrl.startsWith("/dashboard")) {
         router.push(redirectUrl);
-        return;
-      }
-
-      const userRole = (response.user?.role || role).toLowerCase();
-      switch (userRole) {
-        case "doctor":
-          router.push("/dashboard/doctor");
-          break;
-        case "lab":
-          router.push("/dashboard/lab");
-          break;
-        case "pharmacy":
-          router.push("/dashboard/pharmacy");
-          break;
-        case "admin":
-          router.push("/dashboard/admin");
-          break;
-        case "patient":
-        default:
-          router.push("/dashboard/patient");
-          break;
+      } else {
+        router.push("/");
       }
     } catch (err: unknown) {
       const apiError = err as { data?: { message?: string | string[] }; status?: number };
@@ -135,6 +132,7 @@ export function PasswordLoginForm({ role, onSuccessAuth }: PasswordLoginFormProp
             onChange={(e) => setIdentifier(e.target.value)}
             placeholder={`Enter your ${role} email`}
             required
+            suppressHydrationWarning
             className="w-full h-12 pl-10 pr-4 rounded-2xl bg-surface-card border border-surface-border text-sm text-fg-app placeholder:text-muted-fg focus:outline-none focus:ring-2 focus:ring-primary-teal focus:border-transparent transition-all shadow-xs"
           />
         </div>
@@ -161,6 +159,7 @@ export function PasswordLoginForm({ role, onSuccessAuth }: PasswordLoginFormProp
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
+            suppressHydrationWarning
             className="w-full h-12 pl-10 pr-11 rounded-2xl bg-surface-card border border-surface-border text-sm text-fg-app placeholder:text-muted-fg focus:outline-none focus:ring-2 focus:ring-primary-teal focus:border-transparent transition-all shadow-xs"
           />
           <button

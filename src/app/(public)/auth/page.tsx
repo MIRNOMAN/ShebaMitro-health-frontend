@@ -18,22 +18,8 @@ export default function AuthPage() {
     document.cookie = `sheba_session=active_jwt_token_${Date.now()}; path=/; max-age=86400`;
     document.cookie = `sheba_role=${role}; path=/; max-age=86400`;
 
-    // Role-specific redirect matching RBAC rules
-    switch (role) {
-      case "doctor":
-        router.push("/dashboard/doctor");
-        break;
-      case "lab":
-        router.push("/dashboard/lab");
-        break;
-      case "pharmacy":
-        router.push("/dashboard/pharmacy");
-        break;
-      case "patient":
-      default:
-        router.push("/dashboard/patient");
-        break;
-    }
+    // Redirect to home page as requested
+    router.push("/");
   };
 
   return (

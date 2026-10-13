@@ -252,6 +252,7 @@ export function Footer() {
                   <input
                     type="email"
                     required
+                    suppressHydrationWarning
                     placeholder={t("enterEmailPlaceholder")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

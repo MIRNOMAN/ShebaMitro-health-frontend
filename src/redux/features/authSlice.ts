@@ -37,6 +37,12 @@ export interface AuthState {
 }
 
 // ---------------------------------------------------------------------------
+import {
+  decodeJwt,
+  isTokenValid,
+  clearAllAuthStorage,
+} from "@/lib/auth/tokenSecurity";
+
 function setCookie(name: string, value: string, days = 7) {
   if (typeof document === "undefined") return;
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -47,14 +53,6 @@ function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(new RegExp(`(^|;\\s*)(${name})=([^;]*)`));
   return match ? decodeURIComponent(match[3]!) : null;
-}
-
-function deleteCookie(name: string) {
-  if (typeof document === "undefined") return;
-  // Multiple paths and formats to guarantee removal
-  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax`;
-  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0`;
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0`;
 }
 
 const getInitialState = (): AuthState => {
@@ -68,15 +66,30 @@ const getInitialState = (): AuthState => {
   }
 
   try {
-    const savedUser = localStorage.getItem("shebamitro_user");
     const savedAccessToken =
       localStorage.getItem("shebamitro_access_token") ||
       getCookie("sheba_session") ||
       getCookie("sheba_token");
-    const savedRefreshToken = localStorage.getItem("shebamitro_refresh_token");
 
-    if (savedAccessToken && savedAccessToken !== "undefined" && savedAccessToken !== "null") {
-      const parsedUser = savedUser ? (JSON.parse(savedUser) as User) : null;
+    // Strictly validate token presence and expiration
+    if (savedAccessToken && isTokenValid(savedAccessToken)) {
+      const savedUser = localStorage.getItem("shebamitro_user");
+      const savedRefreshToken = localStorage.getItem("shebamitro_refresh_token");
+      let parsedUser = savedUser ? (JSON.parse(savedUser) as User) : null;
+
+      // If user object was missing in localStorage, rebuild from JWT payload
+      if (!parsedUser) {
+        const decoded = decodeJwt(savedAccessToken);
+        if (decoded) {
+          parsedUser = {
+            id: (decoded.sub || decoded.id || "") as string,
+            email: (decoded.email || "") as string,
+            role: (decoded.role || "patient") as UserRole,
+            isVerified: Boolean(decoded.isVerified),
+            name: decoded.name as string | undefined,
+          };
+        }
+      }
 
       return {
         user: parsedUser,
@@ -84,6 +97,9 @@ const getInitialState = (): AuthState => {
         refreshToken: savedRefreshToken || null,
         isAuthenticated: true,
       };
+    } else if (savedAccessToken) {
+      // Purge invalid or expired token
+      clearAllAuthStorage();
     }
   } catch {
     // Ignore storage parse errors
@@ -113,22 +129,39 @@ const authSlice = createSlice({
     initializeAuth: (state) => {
       if (typeof window === "undefined") return;
       try {
-        const savedUser = localStorage.getItem("shebamitro_user");
         const savedAccessToken =
           localStorage.getItem("shebamitro_access_token") ||
           getCookie("sheba_session") ||
           getCookie("sheba_token");
         const savedRefreshToken = localStorage.getItem("shebamitro_refresh_token");
+        const savedUser = localStorage.getItem("shebamitro_user");
 
-        if (savedAccessToken && savedAccessToken !== "undefined" && savedAccessToken !== "null") {
+        // Validate token integrity and expiration
+        if (savedAccessToken && isTokenValid(savedAccessToken)) {
           state.accessToken = savedAccessToken;
           state.refreshToken = savedRefreshToken || null;
           state.isAuthenticated = true;
 
           if (savedUser) {
             state.user = JSON.parse(savedUser) as User;
+          } else {
+            // Reconstruct user from JWT payload if missing
+            const decoded = decodeJwt(savedAccessToken);
+            if (decoded) {
+              state.user = {
+                id: (decoded.sub || decoded.id || "") as string,
+                email: (decoded.email || "") as string,
+                role: (decoded.role || "patient") as UserRole,
+                isVerified: Boolean(decoded.isVerified),
+                name: decoded.name as string | undefined,
+              };
+            }
           }
         } else {
+          // Token is expired, invalid, or absent — purge all credentials
+          if (savedAccessToken) {
+            clearAllAuthStorage();
+          }
           state.user = null;
           state.accessToken = null;
           state.refreshToken = null;
@@ -136,6 +169,10 @@ const authSlice = createSlice({
         }
       } catch (e) {
         console.error("Auth hydration error:", e);
+        state.user = null;
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.isAuthenticated = false;
       }
     },
 
@@ -204,16 +241,7 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.isAuthenticated = false;
 
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("shebamitro_user");
-        localStorage.removeItem("shebamitro_access_token");
-        localStorage.removeItem("shebamitro_refresh_token");
-        deleteCookie("sheba_session");
-        deleteCookie("sheba_role");
-        deleteCookie("sheba_token");
-        deleteCookie("access_token");
-        deleteCookie("refresh_token");
-      }
+      clearAllAuthStorage();
     },
   },
 });
@@ -233,6 +261,8 @@ export const selectCurrentUser = (state: RootState) => state.auth.user;
 export const selectAccessToken = (state: RootState) => state.auth.accessToken;
 export const selectRefreshToken = (state: RootState) => state.auth.refreshToken;
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+export const selectHasValidAccessToken = (state: RootState) =>
+  Boolean(state.auth.accessToken && isTokenValid(state.auth.accessToken));
 export const selectUserRole = (state: RootState) => state.auth.user?.role ?? null;
 
 export const selectHasRole = (
