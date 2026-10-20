@@ -98,7 +98,79 @@ export const doctorApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Doctor", "Reminders"],
     }),
+
+    /**
+     * Get top featured doctors for homepage
+     * GET /api/v1/doctors?limit=3
+     */
+    getFeaturedDoctors: builder.query<{ success: boolean; data: { items: any[] } }, { limit?: number } | void>({
+      query: (params) => ({
+        url: `/doctors?limit=${params?.limit || 3}`,
+        method: "GET",
+      }),
+      providesTags: ["Doctor"],
+    }),
+
+    /**
+     * Get doctor OPD live queue appointments
+     * GET /api/v1/appointments/doctor
+     */
+    getDoctorAppointments: builder.query<{ success: boolean; data: any[] }, { doctorId?: string } | void>({
+      query: (params) => ({
+        url: params?.doctorId ? `/appointments/doctor?doctorId=${params.doctorId}` : "/appointments/doctor",
+        method: "GET",
+      }),
+      providesTags: ["Doctor"],
+    }),
+
+    /**
+     * Get doctor OPD queue statistics
+     * GET /api/v1/appointments/doctor/stats
+     */
+    getDoctorStats: builder.query<{ success: boolean; data: any }, { doctorId?: string } | void>({
+      query: (params) => ({
+        url: params?.doctorId ? `/appointments/doctor/stats?doctorId=${params.doctorId}` : "/appointments/doctor/stats",
+        method: "GET",
+      }),
+      providesTags: ["Doctor"],
+    }),
+
+    /**
+     * Update appointment status (Doctor/Admin: e.g. IN_PROGRESS, COMPLETED)
+     * PATCH /api/v1/appointments/:id/status
+     */
+    updateAppointmentStatus: builder.mutation<
+      { success: boolean; message: string; data: any },
+      { id: string; status: "IN_PROGRESS" | "COMPLETED" | "CANCELLED" | "CONFIRMED" }
+    >({
+      query: ({ id, status }) => ({
+        url: `/appointments/${id}/status`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["Doctor"],
+    }),
+
+    /**
+     * Get patient's booked appointments
+     * GET /api/v1/appointments
+     */
+    getPatientAppointments: builder.query<{ success: boolean; data: any[] }, void>({
+      query: () => ({
+        url: "/appointments",
+        method: "GET",
+      }),
+      providesTags: ["Doctor"],
+    }),
   }),
 });
 
-export const { useGetSpecialtiesQuery, useCreateAppointmentMutation } = doctorApi;
+export const {
+  useGetSpecialtiesQuery,
+  useCreateAppointmentMutation,
+  useGetFeaturedDoctorsQuery,
+  useGetDoctorAppointmentsQuery,
+  useGetDoctorStatsQuery,
+  useUpdateAppointmentStatusMutation,
+  useGetPatientAppointmentsQuery,
+} = doctorApi;

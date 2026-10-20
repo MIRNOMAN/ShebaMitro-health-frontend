@@ -1,34 +1,49 @@
 "use client";
 
 import React, { useState } from "react";
-import { Pill, Search, Edit3, CheckCircle2, AlertCircle, Plus, Building, Hash } from "lucide-react";
+import {
+  Pill,
+  Search,
+  Edit3,
+  Trash2,
+  Eye,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  Building,
+} from "lucide-react";
 import { DrugMasterItem } from "../../types/masterData";
 
 interface DrugDirectoryTableProps {
   drugs: DrugMasterItem[];
+  isLoading?: boolean;
   onEditDrug: (drug: DrugMasterItem) => void;
-  onToggleStatus: (id: string) => void;
+  onViewDrug: (drug: DrugMasterItem) => void;
+  onDeleteDrug: (drug: DrugMasterItem) => void;
+  onToggleStatus: (drug: DrugMasterItem) => void;
   onAddNew: () => void;
 }
 
 export function DrugDirectoryTable({
   drugs,
+  isLoading,
   onEditDrug,
+  onViewDrug,
+  onDeleteDrug,
   onToggleStatus,
   onAddNew,
 }: DrugDirectoryTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
 
   const filtered = drugs.filter((d) => {
     const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
     return (
-      !q ||
-      d.brandName.toLowerCase().includes(q) ||
-      d.genericName.toLowerCase().includes(q) ||
-      d.manufacturer.toLowerCase().includes(q) ||
-      d.strength.toLowerCase().includes(q) ||
-      d.dgdaApprovalNo.toLowerCase().includes(q)
+      (d.brandName || "").toLowerCase().includes(q) ||
+      (d.genericName || "").toLowerCase().includes(q) ||
+      (d.manufacturer || "").toLowerCase().includes(q) ||
+      (d.strength || "").toLowerCase().includes(q) ||
+      (d.dgdaApprovalNo || "").toLowerCase().includes(q)
     );
   });
 
@@ -53,7 +68,7 @@ export function DrugDirectoryTable({
               placeholder="Search brand, generic, or DGDA #..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-8 pl-8 pr-3 rounded-lg bg-card border border-card-border text-xs text-fg-app"
+              className="w-full h-8 pl-8 pr-3 rounded-lg bg-card border border-card-border text-xs text-fg-app focus:outline-none focus:ring-1 focus:ring-primary-teal"
             />
           </div>
 
@@ -81,9 +96,18 @@ export function DrugDirectoryTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-card-border/60">
-            {filtered.length === 0 ? (
+            {isLoading ? (
               <tr>
-                <td colSpan={7} className="py-6 text-center text-muted-foreground">
+                <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="h-4 w-4 rounded-full border-2 border-primary-teal border-t-transparent animate-spin" />
+                    <span>Loading medicines from database...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-8 text-center text-muted-foreground">
                   No matching pharmaceutical drugs found in master directory.
                 </td>
               </tr>
@@ -114,7 +138,7 @@ export function DrugDirectoryTable({
                   </td>
                   <td className="py-3 px-3">
                     <button
-                      onClick={() => onToggleStatus(d.id)}
+                      onClick={() => onToggleStatus(d)}
                       className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full cursor-pointer transition-colors ${
                         d.status === "Active"
                           ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 hover:bg-emerald-500/20"
@@ -130,13 +154,29 @@ export function DrugDirectoryTable({
                     </button>
                   </td>
                   <td className="py-3 px-3 text-right">
-                    <button
-                      onClick={() => onEditDrug(d)}
-                      className="p-1.5 rounded-lg border border-card-border bg-card hover:bg-muted text-fg-app transition-colors"
-                      title="Edit Master Record"
-                    >
-                      <Edit3 className="h-3.5 w-3.5 text-primary-teal" />
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => onViewDrug(d)}
+                        className="p-1.5 rounded-lg border border-card-border bg-card hover:bg-muted text-fg-app transition-colors"
+                        title="View Details"
+                      >
+                        <Eye className="h-3.5 w-3.5 text-fg-app" />
+                      </button>
+                      <button
+                        onClick={() => onEditDrug(d)}
+                        className="p-1.5 rounded-lg border border-card-border bg-card hover:bg-muted text-fg-app transition-colors"
+                        title="Edit Master Record"
+                      >
+                        <Edit3 className="h-3.5 w-3.5 text-primary-teal" />
+                      </button>
+                      <button
+                        onClick={() => onDeleteDrug(d)}
+                        className="p-1.5 rounded-lg border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/15 text-rose-600 transition-colors"
+                        title="Delete Drug"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

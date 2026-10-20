@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Pill, FileSpreadsheet, Upload, Download, CheckCircle2 } from "lucide-react";
+import { Pill, FileSpreadsheet, Stethoscope, Upload, Download } from "lucide-react";
 import { MasterDataTab } from "../../types/masterData";
 
 interface MasterDataHeaderControlsProps {
@@ -30,7 +30,19 @@ export function MasterDataHeaderControls({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-card-border pb-4">
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 bg-muted/60 p-1 rounded-2xl text-xs font-bold">
+      <div className="flex flex-wrap items-center gap-1.5 bg-muted/60 p-1 rounded-2xl text-xs font-bold">
+        <button
+          onClick={() => onSelectTab("SPECIALTIES")}
+          className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${
+            activeTab === "SPECIALTIES"
+              ? "bg-card text-primary-teal shadow-xs border border-card-border"
+              : "text-muted-foreground hover:text-fg-app"
+          }`}
+        >
+          <Stethoscope className="h-4 w-4" />
+          Medical Specialties
+        </button>
+
         <button
           onClick={() => onSelectTab("DRUGS")}
           className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${
@@ -52,12 +64,12 @@ export function MasterDataHeaderControls({
           }`}
         >
           <FileSpreadsheet className="h-4 w-4" />
-          ICD-10 Clinical Diagnosis Table
+          ICD-10 Clinical Diagnoses
         </button>
       </div>
 
       {/* Bulk CSV Controls */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         <input
           type="file"
           ref={fileInputRef}

@@ -7,50 +7,38 @@ import { BentoGrid } from "@/components/home/bento-grid";
 import { StatsCounter } from "@/components/home/stats-counter";
 import { GlowCard } from "@/components/ui/glow-card";
 import { MagneticButton } from "@/components/motion/magnetic-button";
+import Link from "next/link";
 import { FadeInUp, StaggerChildren, StaggerItem, itemVariants } from "@/components/motion/motion-primitives";
 import { Button } from "@/components/ui/button";
-import { Star, Clock, MapPin, Calendar, ChevronRight, ShieldCheck, HeartPulse } from "lucide-react";
-
-const featuredDoctors = [
-  {
-    id: "doc-1",
-    name: "Dr. Sarah Jenkins",
-    specialty: "Cardiologist",
-    rating: "4.9",
-    reviews: 128,
-    experience: "12+ Yrs Experience",
-    location: "Central Health Hub, Dhaka",
-    avatarBg: "from-primary-teal to-emerald-accent",
-    status: "Available Today",
-    cursorTag: "Book",
-  },
-  {
-    id: "doc-2",
-    name: "Dr. Aris Thorne",
-    specialty: "Neurologist",
-    rating: "5.0",
-    reviews: 210,
-    experience: "15+ Yrs Experience",
-    location: "Neuro Care Pavilion, Dhaka",
-    avatarBg: "from-violet-accent to-primary-teal",
-    status: "Next Slot 2:30 PM",
-    cursorTag: "View",
-  },
-  {
-    id: "doc-3",
-    name: "Dr. Elena Rostova",
-    specialty: "Pediatric Specialist",
-    rating: "4.8",
-    reviews: 95,
-    experience: "9+ Yrs Experience",
-    location: "Children's Wellness Center",
-    avatarBg: "from-coral-accent to-violet-accent",
-    status: "Available Tomorrow",
-    cursorTag: "Book",
-  },
-];
+import { Star, Clock, MapPin, Calendar, ChevronRight, ShieldCheck, HeartPulse, Sparkles, ArrowRight } from "lucide-react";
+import { useGetFeaturedDoctorsQuery } from "@/redux/api/doctorApi";
+import { DoctorSlotDrawer } from "@/features/doctors/components/DoctorSlotDrawer";
+import { Doctor } from "@/features/doctors/types";
 
 export default function HomePage() {
+  const { data: featuredData, isLoading: isDoctorsLoading } = useGetFeaturedDoctorsQuery({ limit: 3 });
+  const doctors: Doctor[] = featuredData?.data?.items || [];
+
+  const [selectedDoctorForDrawer, setSelectedDoctorForDrawer] = React.useState<Doctor | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState<boolean>(false);
+
+  const handleOpenSlotDrawer = (e: React.MouseEvent, doc: Doctor) => {
+    e.stopPropagation();
+    setSelectedDoctorForDrawer(doc);
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedDoctorForDrawer(null);
+  };
+
+  const avatarGradients = [
+    "from-primary-teal to-emerald-accent",
+    "from-violet-accent to-primary-teal",
+    "from-coral-accent to-violet-accent",
+  ];
+
   return (
     <div className="relative isolate min-h-screen space-y-20 pb-20">
       {/* 1) Hero section with kinetic headline text reveal & ambient floating gradient orbs */}
@@ -83,66 +71,132 @@ export default function HomePage() {
           </p>
         </FadeInUp>
 
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredDoctors.map((doc) => (
-            <StaggerItem key={doc.id} variants={itemVariants}>
-              <GlowCard data-cursor-text={doc.cursorTag} className="p-6 space-y-5 cursor-pointer h-full flex flex-col justify-between">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${doc.avatarBg} flex items-center justify-center text-white font-extrabold text-xl shadow-md group-hover:scale-105 transition-transform duration-300`}
+        {isDoctorsLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="p-6 rounded-2xl bg-card border border-surface-border animate-pulse space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-surface-border/40" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 bg-surface-border/50 rounded-sm w-3/4" />
+                    <div className="h-3 bg-surface-border/30 rounded-sm w-1/2" />
+                  </div>
+                </div>
+                <div className="space-y-2 pt-4 border-t border-surface-border/30">
+                  <div className="h-3 bg-surface-border/30 rounded-sm w-2/3" />
+                  <div className="h-3 bg-surface-border/30 rounded-sm w-4/5" />
+                </div>
+                <div className="h-10 bg-surface-border/40 rounded-xl" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {doctors.map((doc, idx) => {
+              const gradient = avatarGradients[idx % avatarGradients.length];
+              const docName = doc.name || "Dr. Specialist";
+              const initial = docName.replace(/^Dr\.\s*|Prof\.\s*Dr\.\s*/i, "")[0] || "D";
+              const location = doc.hospital || doc.chambers?.[0]?.name || "Dhaka, Bangladesh";
+              const statusText = doc.availableToday
+                ? "Available Today"
+                : doc.nextSlot || "Next Slot Tomorrow";
+
+              return (
+                <StaggerItem key={doc.id} variants={itemVariants}>
+                  <Link href={`/doctors/${doc.id}`} className="block h-full">
+                    <GlowCard
+                      data-cursor-text="Profile"
+                      className="p-6 space-y-5 cursor-pointer h-full flex flex-col justify-between hover:border-primary-teal/40 transition-colors"
                     >
-                      {doc.name.split(" ")[1]?.[0] || "D"}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-extrabold group-hover:text-primary-teal transition-colors">
-                        {doc.name}
-                      </h3>
-                      <p className="text-xs font-semibold text-emerald-accent">
-                        {doc.specialty}
-                      </p>
-                      <div className="flex items-center gap-1 mt-1 text-xs text-muted-fg">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                        <span className="font-bold text-fg-app">{doc.rating}</span>
-                        <span>({doc.reviews} reviews)</span>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                          {doc.avatarUrl ? (
+                            <img
+                              src={doc.avatarUrl}
+                              alt={docName}
+                              className="w-14 h-14 rounded-2xl object-cover ring-2 ring-primary-teal/20 shadow-md group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div
+                              className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${gradient} flex items-center justify-center text-white font-extrabold text-xl shadow-md group-hover:scale-105 transition-transform duration-300`}
+                            >
+                              {initial}
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <h3 className="text-lg font-extrabold group-hover:text-primary-teal transition-colors truncate">
+                              {docName}
+                            </h3>
+                            <p className="text-xs font-semibold text-emerald-accent truncate">
+                              {doc.specialtyName || doc.designation}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-fg">
+                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                              <span className="font-bold text-fg-app">{doc.rating?.toFixed(1) || "4.9"}</span>
+                              <span>({doc.reviewCount || 100}+ reviews)</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 pt-3 border-t border-surface-border text-xs text-muted-fg">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-3.5 h-3.5 text-primary-teal shrink-0" />
+                            <span>{doc.experienceYears ? `${doc.experienceYears}+ Yrs Experience` : "10+ Yrs Experience"}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-3.5 h-3.5 text-violet-accent shrink-0" />
+                            <span className="truncate">{location}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-emerald-accent shrink-0" />
+                            <span className="font-semibold text-emerald-accent">{statusText}</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="space-y-2 pt-3 border-t border-surface-border text-xs text-muted-fg">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-3.5 h-3.5 text-primary-teal" />
-                      <span>{doc.experience}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-violet-accent" />
-                      <span>{doc.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-3.5 h-3.5 text-emerald-accent" />
-                      <span className="font-semibold text-emerald-accent">{doc.status}</span>
-                    </div>
-                  </div>
-                </div>
+                      <div className="pt-2 flex items-center gap-2">
+                        <Button
+                          variant="primary"
+                          size="md"
+                          className="flex-1 justify-between text-xs font-bold"
+                          onClick={(e) => handleOpenSlotDrawer(e, doc)}
+                        >
+                          <span>Book Appointment</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="md"
+                          className="px-3 text-xs"
+                          title="View Profile"
+                        >
+                          <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </GlowCard>
+                  </Link>
+                </StaggerItem>
+              );
+            })}
+          </StaggerChildren>
+        )}
 
-                <div className="pt-2">
-                  <MagneticButton distance={30} strength={0.35} className="w-full">
-                    <Button
-                      variant={doc.cursorTag === "Book" ? "primary" : "outline"}
-                      size="md"
-                      className="w-full justify-between"
-                      data-cursor-text={doc.cursorTag}
-                    >
-                      <span>{doc.cursorTag === "Book" ? "Book Appointment" : "View Profile"}</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </MagneticButton>
-                </div>
-              </GlowCard>
-            </StaggerItem>
-          ))}
-        </StaggerChildren>
+        <div className="text-center pt-2">
+          <Link href="/doctors">
+            <Button variant="outline" size="lg" className="rounded-2xl border-primary-teal/30 hover:border-primary-teal px-6">
+              <span>View All 20+ Verified Specialists</span>
+              <ArrowRight className="w-4 h-4 ml-2 text-primary-teal" />
+            </Button>
+          </Link>
+        </div>
       </section>
+
+      {/* Appointment Booking Drawer Modal */}
+      <DoctorSlotDrawer
+        doctor={selectedDoctorForDrawer}
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+      />
     </div>
   );
 }

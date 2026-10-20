@@ -25,9 +25,15 @@ import {
   History,
   ShieldCheck,
   ExternalLink,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConsultationChat } from "@/components/chat/ConsultationChat";
+import {
+  useGetDoctorAppointmentsQuery,
+  useGetDoctorStatsQuery,
+  useUpdateAppointmentStatusMutation,
+} from "@/redux/api/doctorApi";
 
 export interface PatientQueueItem {
   id: string;
@@ -175,6 +181,17 @@ const INITIAL_QUEUE: PatientQueueItem[] = [
 ];
 
 export default function DoctorDashboardPage() {
+  const {
+    data: queueResponse,
+    isLoading: isQueueLoading,
+    refetch: refetchQueue,
+  } = useGetDoctorAppointmentsQuery(undefined, { pollingInterval: 15000 });
+  const {
+    data: statsResponse,
+    refetch: refetchStats,
+  } = useGetDoctorStatsQuery(undefined, { pollingInterval: 15000 });
+  const [updateStatusMutation] = useUpdateAppointmentStatusMutation();
+
   const [queue, setQueue] = useState<PatientQueueItem[]>(INITIAL_QUEUE);
   const [activeTab, setActiveTab] = useState<"all" | "waiting" | "consulting" | "completed">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -182,6 +199,13 @@ export default function DoctorDashboardPage() {
   const [activeVideoPatient, setActiveVideoPatient] = useState<PatientQueueItem | null>(null);
   const [isCallingNext, setIsCallingNext] = useState(false);
   const [callNotification, setCallNotification] = useState<string | null>(null);
+
+  // Sync live database appointments whenever fetched
+  React.useEffect(() => {
+    if (queueResponse?.data && Array.isArray(queueResponse.data) && queueResponse.data.length > 0) {
+      setQueue(queueResponse.data);
+    }
+  }, [queueResponse]);
 
   // Play synthesized Web Audio chime when calling next patient
   const playCallChime = () => {
@@ -215,7 +239,7 @@ export default function DoctorDashboardPage() {
   };
 
   // Quick Action: "Call Next Patient"
-  const handleCallNextPatient = () => {
+  const handleCallNextPatient = async () => {
     const nextWaiting = queue.find((p) => p.status === "waiting");
     if (!nextWaiting) {
       setCallNotification("No patients currently waiting in lobby!");
@@ -227,6 +251,23 @@ export default function DoctorDashboardPage() {
     playCallChime();
 
     setCallNotification(`Calling Token #${nextWaiting.queueNumber} - ${nextWaiting.name} to Consultation`);
+
+    // Transition current consulting patient to completed
+    const currentConsulting = queue.find((p) => p.status === "consulting");
+    if (currentConsulting) {
+      try {
+        await updateStatusMutation({ id: currentConsulting.id, status: "COMPLETED" }).unwrap();
+      } catch (e) {
+        console.warn("Status update fallback:", e);
+      }
+    }
+
+    // Transition next waiting patient to in-progress
+    try {
+      await updateStatusMutation({ id: nextWaiting.id, status: "IN_PROGRESS" }).unwrap();
+    } catch (e) {
+      console.warn("Status update fallback:", e);
+    }
 
     setQueue((prev) =>
       prev.map((p) => {
@@ -247,12 +288,22 @@ export default function DoctorDashboardPage() {
     setTimeout(() => {
       setCallNotification(null);
     }, 4500);
+
+    refetchQueue();
+    refetchStats();
   };
 
-  const handleCompleteConsultation = (patientId: string) => {
+  const handleCompleteConsultation = async (patientId: string) => {
+    try {
+      await updateStatusMutation({ id: patientId, status: "COMPLETED" }).unwrap();
+    } catch (e) {
+      console.warn("Complete consultation status update fallback:", e);
+    }
     setQueue((prev) =>
       prev.map((p) => (p.id === patientId ? { ...p, status: "completed" } : p))
     );
+    refetchQueue();
+    refetchStats();
   };
 
   // Filtered queue items
@@ -269,6 +320,12 @@ export default function DoctorDashboardPage() {
   const consultingList = queue.filter((p) => p.status === "consulting");
   const completedList = queue.filter((p) => p.status === "completed");
 
+  const doctorInfo = statsResponse?.data?.doctor || {
+    name: "Dr. Tanzil Rahman",
+    specialization: "Internal Medicine & General Care",
+    hospital: "Dhaka Medical College Hospital • Chamber Room #402 & Teleconsultation Hub",
+  };
+
   return (
     <div className="space-y-6 pb-12">
       {/* Top Banner Stats & Quick Action Masthead */}
@@ -278,14 +335,27 @@ export default function DoctorDashboardPage() {
             <Stethoscope className="h-3.5 w-3.5" /> Doctor Live OPD Queue System
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            Prof. Dr. Syed Mahmudul Hasan
+            {doctorInfo.name}
           </h1>
           <p className="text-xs sm:text-sm text-slate-300">
-            Cardiology & Internal Medicine • Chamber Room #402 & Teleconsultation Hub
+            {doctorInfo.specialization} • {doctorInfo.hospital || "Dhaka Medical College Hospital"}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 z-10 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={() => {
+              refetchQueue();
+              refetchStats();
+            }}
+            className="h-12 px-4 rounded-2xl font-bold text-xs border-white/20 bg-white/10 hover:bg-white/20 text-white flex items-center gap-2"
+            title="Refresh Live Queue"
+          >
+            <RefreshCw className={`h-4 w-4 ${isQueueLoading ? "animate-spin" : ""}`} />
+            <span>Sync</span>
+          </Button>
+
           <Button
             variant="primary"
             onClick={handleCallNextPatient}
