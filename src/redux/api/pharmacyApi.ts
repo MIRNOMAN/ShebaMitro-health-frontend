@@ -4,7 +4,11 @@ import type { Medicine, RecognizedMedicine, SuggestedMedicine } from "@/features
 
 export interface PharmacyMedicinesResponse {
   medicines: Medicine[];
-  meta: {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  meta?: {
     total: number;
     page: number;
     limit: number;
@@ -66,18 +70,33 @@ export const pharmacyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getPharmacyMedicines: builder.query<
       PharmacyMedicinesResponse,
-      { category?: string; search?: string; page?: number; limit?: number } | void
+      { category?: string; search?: string; names?: string; page?: number; limit?: number } | void
     >({
       query: (params) => ({
         url: "/pharmacy/medicines",
         params: {
           ...(params?.category && params.category !== "all" ? { category: params.category } : {}),
           ...(params?.search ? { search: params.search } : {}),
+          ...(params?.names ? { names: params.names } : {}),
           page: params?.page ?? 1,
-          limit: params?.limit ?? 50,
+          limit: params?.limit ?? 20,
         },
       }),
-      transformResponse: (response: any) => response.data ?? response,
+      transformResponse: (response: any) => {
+        const d = response.data ?? response;
+        const total = d.total ?? d.meta?.total ?? (d.medicines ? d.medicines.length : 0);
+        const page = d.page ?? d.meta?.page ?? 1;
+        const limit = d.limit ?? d.meta?.limit ?? 20;
+        const totalPages = d.totalPages ?? d.meta?.totalPages ?? Math.max(1, Math.ceil(total / limit));
+        return {
+          medicines: d.medicines || [],
+          total,
+          page,
+          limit,
+          totalPages,
+          meta: { total, page, limit, totalPages },
+        };
+      },
       providesTags: (result) =>
         result
           ? [

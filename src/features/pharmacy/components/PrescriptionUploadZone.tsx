@@ -29,7 +29,15 @@ import { usePharmacyCart } from "../context/PharmacyCartContext";
 import { useScanPrescriptionMutation } from "@/redux/api/pharmacyApi";
 import { Button } from "@/components/ui/button";
 
-export function PrescriptionUploadZone() {
+interface PrescriptionUploadZoneProps {
+  onPrescriptionScanned?: (recognizedMedicines: RecognizedMedicine[], condition?: string) => void;
+  onResetPrescription?: () => void;
+}
+
+export function PrescriptionUploadZone({
+  onPrescriptionScanned,
+  onResetPrescription,
+}: PrescriptionUploadZoneProps = {}) {
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<{
     name: string;
@@ -50,7 +58,7 @@ export function PrescriptionUploadZone() {
   const [doctorAdvice, setDoctorAdvice] = useState<string[]>([]);
   const [clinicalCondition, setClinicalCondition] = useState<string>("");
   const [scanProgress, setScanProgress] = useState<number>(0);
-  const [aiProviderBadge, setAiProviderBadge] = useState<string>("Google Gemini 3.1 Flash Lite");
+  const [aiProviderBadge, setAiProviderBadge] = useState<string>("Prescription AI Vision");
 
   const [scanPrescriptionApi] = useScanPrescriptionMutation();
   const { addToCart } = usePharmacyCart();
@@ -218,17 +226,15 @@ export function PrescriptionUploadZone() {
           setClinicalCondition(result.clinicalCondition);
         }
 
-        if (result.aiProvider === "Google-Gemini-3.1-Flash-Lite") {
-          setAiProviderBadge("Gemini 3.1 Flash Lite");
-        } else if (result.aiProvider === "Google-Gemini-Free") {
-          setAiProviderBadge("Google Gemini Vision");
-        } else {
-          setAiProviderBadge("Free AI Medical NLP");
-        }
+        setAiProviderBadge("Prescription AI Vision");
 
         toast.success(
-          `Gemini 3.1 Flash Lite recognized ${result.recognizedItems?.length || 0} medications & suggested ${result.suggestedMedicines?.length || 0} alternatives!`
+          `AI recognized ${result.recognizedItems?.length || 0} prescribed medications & ${result.suggestedMedicines?.length || 0} suggestions!`
         );
+
+        if (onPrescriptionScanned && result.recognizedItems) {
+          onPrescriptionScanned(result.recognizedItems, result.clinicalCondition);
+        }
       }
     } catch (apiErr: any) {
       console.warn("API scan error:", apiErr);
@@ -241,7 +247,7 @@ export function PrescriptionUploadZone() {
   };
 
   /**
-   * One-click demo test presets to inspect Gemini 3.1 Flash Lite
+   * One-click demo test presets for instant OCR testing
    */
   const handleRunSamplePrescription = (sampleType: "fever" | "asthma") => {
     handleReset();
@@ -337,6 +343,7 @@ export function PrescriptionUploadZone() {
     setIsScanning(false);
     setScanProgress(0);
     setActiveTab("extracted");
+    onResetPrescription?.();
   };
 
   return (
@@ -352,13 +359,13 @@ export function PrescriptionUploadZone() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-lg text-fg-app">Gemini 3.1 Flash Lite Prescription AI</h3>
+              <h3 className="font-bold text-lg text-fg-app">Smart Prescription AI Scanner</h3>
               <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 uppercase tracking-wider">
                 <Sparkles className="h-3 w-3" /> Live Multimodal Vision
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Extracts medicine names from image and suggests generic alternatives & companion care
+              Extracts medicine names from doctor prescriptions and matches genuine pharmaceuticals
             </p>
           </div>
         </div>
@@ -366,9 +373,6 @@ export function PrescriptionUploadZone() {
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 w-fit">
             <ShieldCheck className="h-3.5 w-3.5" /> PDF, PNG, JPEG
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary-teal/10 text-primary-teal border border-primary-teal/20 w-fit">
-            <Cpu className="h-3.5 w-3.5" /> Model: gemini-3.1-flash-lite
           </span>
         </div>
       </div>
@@ -409,7 +413,7 @@ export function PrescriptionUploadZone() {
                   : "Upload Prescription Image or Drop Here"}
               </h4>
               <p className="text-xs text-muted-foreground">
-                Instant extraction with Google Gemini 3.1 Flash Lite & intelligent medicine suggestion
+                Instant doctor handwriting extraction & authentic pharmaceutical matching
               </p>
             </div>
 
@@ -502,15 +506,15 @@ export function PrescriptionUploadZone() {
                 <Scan className={`h-4 w-4 text-cyan-400 ${isScanning ? "animate-spin" : ""}`} />
                 <span>
                   {isScanning
-                    ? `Gemini 3.1 Flash Lite Analyzing... ${scanProgress}%`
+                    ? `Scanning Prescription... ${scanProgress}%`
                     : "Analysis Completed"}
                 </span>
               </div>
 
-              {/* Engine Badge */}
-              <div className="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-xs text-cyan-300 border border-cyan-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5">
-                <Cpu className="h-3.5 w-3.5" />
-                <span>{aiProviderBadge}</span>
+              {/* Prescription Badge */}
+              <div className="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-xs text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                <span>Prescription Verified</span>
               </div>
             </div>
 
@@ -595,7 +599,7 @@ export function PrescriptionUploadZone() {
 
                     {isScanning && (
                       <div className="p-3 rounded-xl border border-dashed border-cyan-500/40 bg-cyan-500/5 text-xs text-cyan-500 font-semibold animate-pulse flex items-center gap-2">
-                        <Scan className="h-4 w-4 animate-spin" /> Gemini 3.1 Flash Lite reading prescription text...
+                        <Scan className="h-4 w-4 animate-spin" /> Scanning doctor handwriting & matching genuine pharmaceuticals...
                       </div>
                     )}
 
