@@ -7,8 +7,24 @@ import { BiomarkerFormTable } from "@/features/lab/components/upload/BiomarkerFo
 import { PdfDropzone } from "@/features/lab/components/upload/PdfDropzone";
 import { DigitalSealModal } from "@/features/lab/components/upload/DigitalSealModal";
 
+import { useGetLabOrdersQuery } from "@/redux/api/labApi";
+
 export default function UploadLabReportPage() {
-  const [selectedReqId, setSelectedReqId] = useState<string>("REQ-2026-8801");
+  const { data: ordersData } = useGetLabOrdersQuery();
+
+  const patientReqs = useMemo(() => {
+    const live = (ordersData?.orders || []).map((o) => ({
+      reqId: o.id,
+      patientName: o.patient?.user?.name || "Patient",
+      age: 35,
+      gender: "Male" as const,
+      date: new Date(o.createdAt).toLocaleDateString([], { month: "short", day: "numeric" }),
+      tests: o.testNames || ["Diagnostic Test"],
+    }));
+    return live.length > 0 ? live : MOCK_PATIENT_REQS;
+  }, [ordersData]);
+
+  const [selectedReqId, setSelectedReqId] = useState<string>(() => patientReqs[0]?.reqId || "REQ-2026-8801");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("TEST-CBC");
 
   const [biomarkerValues, setBiomarkerValues] = useState<Record<string, number>>(() => {
@@ -33,8 +49,8 @@ export default function UploadLabReportPage() {
   }, [selectedTemplateId]);
 
   const currentPatient = useMemo(() => {
-    return MOCK_PATIENT_REQS.find((p) => p.reqId === selectedReqId) || MOCK_PATIENT_REQS[0]!;
-  }, [selectedReqId]);
+    return patientReqs.find((p) => p.reqId === selectedReqId) || patientReqs[0] || MOCK_PATIENT_REQS[0]!;
+  }, [patientReqs, selectedReqId]);
 
   const handleTemplateChange = (templateId: string) => {
     setSelectedTemplateId(templateId);

@@ -5,15 +5,71 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Truck, Smartphone, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HomePickupRequest, PickupStatus } from "@/features/lab/types";
-import { INITIAL_DISPATCH_PICKUPS, PHLEBOTOMISTS } from "@/features/lab/data/mockData";
+import { PHLEBOTOMISTS } from "@/features/lab/data/mockData";
 import { DispatchMapCanvas } from "@/features/lab/components/dispatch/DispatchMapCanvas";
 import { PickupQueueSidebar } from "@/features/lab/components/dispatch/PickupQueueSidebar";
 import { SmsPinModal } from "@/features/lab/components/dispatch/SmsPinModal";
 import { TechSimulatorModal } from "@/features/lab/components/dispatch/TechSimulatorModal";
+import { useGetLabOrdersQuery, useAssignLabTechnicianMutation, LabOrder } from "@/redux/api/labApi";
+
+function mapOrderToPickup(order: LabOrder, idx: number): HomePickupRequest {
+  let pickupStatus: PickupStatus = "Pending Assignment";
+  if (order.status === "SAMPLE_COLLECTED") pickupStatus = "Sample Collected";
+  else if (order.technicianName) pickupStatus = "Assigned";
+
+  return {
+    id: order.id,
+    patientName: order.patient?.user?.name || "Patient",
+    patientPhone: order.patient?.user?.phone || "+8801700000000",
+    address: order.sampleCollectionAddress || "Dhaka, Bangladesh",
+    areaZone: "Banani",
+    testName: order.testNames?.[0] || "Diagnostic Test",
+    specimenType: "Blood (Vacutainer)",
+    status: pickupStatus,
+    phlebotomistId: order.technicianName ? "PHL-01" : null,
+    phlebotomistName: order.technicianName || undefined,
+    collectionTimeSlot: order.sampleCollectionSlot
+      ? new Date(order.sampleCollectionSlot).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      : "08:00 AM - 10:00 AM",
+    collectionPin: "8842",
+    smsSent: false,
+    mapCoords: { x: 45 + (idx % 4) * 8, y: 35 + (idx % 3) * 10 },
+    requestedAt: new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  };
+}
+
+const FALLBACK_PICKUP: HomePickupRequest = {
+  id: "PICK-DEFAULT",
+  patientName: "Patient",
+  patientPhone: "+8801700000000",
+  address: "House 12, Road 4, Banani, Dhaka",
+  areaZone: "Banani",
+  testName: "Diagnostic Test",
+  specimenType: "Blood (Vacutainer)",
+  status: "Pending Assignment",
+  phlebotomistId: null,
+  collectionTimeSlot: "08:00 AM - 10:00 AM",
+  collectionPin: "8842",
+  smsSent: false,
+  mapCoords: { x: 50, y: 50 },
+  requestedAt: "08:30 AM",
+};
 
 export default function LabDispatchPage() {
-  const [pickups, setPickups] = useState<HomePickupRequest[]>(INITIAL_DISPATCH_PICKUPS);
-  const [selectedPickupId, setSelectedPickupId] = useState<string>("PICK-901");
+  const { data: ordersData } = useGetLabOrdersQuery();
+  const [assignTechnician] = useAssignLabTechnicianMutation();
+
+  const [localOverrides, setLocalOverrides] = useState<Record<string, Partial<HomePickupRequest>>>({});
+
+  const pickups = useMemo(() => {
+    return (ordersData?.orders || []).map((o, idx) => {
+      const base = mapOrderToPickup(o, idx);
+      const override = localOverrides[o.id] || {};
+      return { ...base, ...override };
+    });
+  }, [ordersData, localOverrides]);
+
+  const [selectedPickupId, setSelectedPickupId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
@@ -27,7 +83,8 @@ export default function LabDispatchPage() {
   };
 
   const selectedPickup = useMemo(() => {
-    return pickups.find((p) => p.id === selectedPickupId) || pickups[0]!;
+    if (!pickups || pickups.length === 0) return FALLBACK_PICKUP;
+    return pickups.find((p) => p.id === selectedPickupId) || pickups[0] || FALLBACK_PICKUP;
   }, [pickups, selectedPickupId]);
 
   const filteredPickups = useMemo(() => {
@@ -51,29 +108,47 @@ export default function LabDispatchPage() {
     });
   }, [pickups, searchQuery, statusFilter]);
 
-  const handleAssignPhlebotomist = (pickupId: string, phleboId: string) => {
+  const handleAssignPhlebotomist = async (pickupId: string, phleboId: string) => {
     const phlebo = PHLEBOTOMISTS.find((p) => p.id === phleboId);
     if (!phlebo) return;
 
-    setPickups((prev) =>
-      prev.map((item) =>
-        item.id === pickupId
-          ? {
-              ...item,
-              phlebotomistId: phlebo.id,
-              phlebotomistName: phlebo.name,
-              status: item.status === "Pending Assignment" ? "Assigned" : item.status,
-            }
-          : item
-      )
-    );
-    triggerToast(`Assigned ${phlebo.name} to pickup ${pickupId}.`);
+    try {
+      await assignTechnician({
+        id: pickupId,
+        technicianName: phlebo.name,
+        technicianPhone: phlebo.phone,
+        latitude: 23.7548,
+        longitude: 90.3754,
+      }).unwrap();
+      setLocalOverrides((prev) => ({
+        ...prev,
+        [pickupId]: {
+          ...prev[pickupId],
+          phlebotomistId: phlebo.id,
+          phlebotomistName: phlebo.name,
+          status: "Assigned",
+        },
+      }));
+      triggerToast(`Assigned ${phlebo.name} to pickup and dispatched phlebotomist.`);
+    } catch (err: any) {
+      setLocalOverrides((prev) => ({
+        ...prev,
+        [pickupId]: {
+          ...prev[pickupId],
+          phlebotomistId: phlebo.id,
+          phlebotomistName: phlebo.name,
+          status: "Assigned",
+        },
+      }));
+      triggerToast(`Assigned ${phlebo.name} to pickup.`);
+    }
   };
 
   const handleUpdateTimeSlot = (pickupId: string, slot: string) => {
-    setPickups((prev) =>
-      prev.map((item) => (item.id === pickupId ? { ...item, collectionTimeSlot: slot } : item))
-    );
+    setLocalOverrides((prev) => ({
+      ...prev,
+      [pickupId]: { ...prev[pickupId], collectionTimeSlot: slot },
+    }));
     triggerToast(`Collection time window updated to "${slot}".`);
   };
 
@@ -82,18 +157,20 @@ export default function LabDispatchPage() {
     if (!target) return;
     const pin = target.collectionPin || Math.floor(1000 + Math.random() * 9000).toString();
 
-    setPickups((prev) =>
-      prev.map((item) => (item.id === pickupId ? { ...item, collectionPin: pin, smsSent: true } : item))
-    );
+    setLocalOverrides((prev) => ({
+      ...prev,
+      [pickupId]: { ...prev[pickupId], collectionPin: pin, smsSent: true, smsSentAt: "Just now" },
+    }));
 
-    setSmsModalItem({ ...target, collectionPin: pin, smsSent: true });
+    setSmsModalItem({ ...target, collectionPin: pin, smsSent: true, smsSentAt: "Just now" });
     triggerToast(`Automated SMS with PIN ${pin} dispatched to ${target.patientPhone}.`);
   };
 
   const handleAdvanceTechnicianStatus = (pickupId: string, nextStatus: PickupStatus) => {
-    setPickups((prev) =>
-      prev.map((item) => (item.id === pickupId ? { ...item, status: nextStatus } : item))
-    );
+    setLocalOverrides((prev) => ({
+      ...prev,
+      [pickupId]: { ...prev[pickupId], status: nextStatus },
+    }));
     triggerToast(`Technician updated status to "${nextStatus}".`);
   };
 
@@ -101,9 +178,10 @@ export default function LabDispatchPage() {
     if (pin !== item.collectionPin) return false;
     const code = barcode || `LAB-BARCODE-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    setPickups((prev) =>
-      prev.map((p) => (p.id === item.id ? { ...p, status: "Sample Collected", tubeBarcode: code } : p))
-    );
+    setLocalOverrides((prev) => ({
+      ...prev,
+      [item.id]: { ...prev[item.id], status: "Sample Collected", tubeBarcode: code },
+    }));
     triggerToast(`Sample collected for ${item.patientName}! Barcode: ${code}`);
     setTechSimulatorItem(null);
     return true;

@@ -80,22 +80,51 @@ const MOCK_DOCUMENTS: MedicalDocument[] = [
   },
 ];
 
+import { useGetLabOrdersQuery } from "@/redux/api/labApi";
+
 export function MedicalDocumentVault() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [downloadSuccessId, setDownloadSuccessId] = useState<string | null>(null);
 
+  const { data: labOrdersData } = useGetLabOrdersQuery();
+
+  const allDocuments = useMemo(() => {
+    const liveDocs: MedicalDocument[] = (labOrdersData?.orders || []).map((order) => {
+      return {
+        id: order.id,
+        title: `${order.testNames?.[0] || "Diagnostic Test"} (${order.status.replace(/_/g, " ")})`,
+        category: "Lab Reports",
+        issuer: order.lab?.labName || "Accredited Diagnostic Partner",
+        date: new Date(order.createdAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        fileSize: order.reportPdfUrl ? "2.4 MB Verified PDF" : "Processing in Lab",
+        thumbnailUrl: "https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=300&auto=format&fit=crop",
+        downloadUrl: order.reportPdfUrl || `#order-${order.id}`,
+      };
+    });
+
+    return [...liveDocs, ...MOCK_DOCUMENTS];
+  }, [labOrdersData]);
+
   const filteredDocs = useMemo(() => {
-    return MOCK_DOCUMENTS.filter((doc) => {
+    return allDocuments.filter((doc) => {
       const matchesCategory = activeCategory === "All" || doc.category === activeCategory;
       const matchesSearch =
         doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         doc.issuer.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [activeCategory, searchQuery]);
+  }, [allDocuments, activeCategory, searchQuery]);
 
   const handleDownload = (id: string, title: string) => {
+    const doc = allDocuments.find((d) => d.id === id);
+    if (doc?.downloadUrl && doc.downloadUrl.startsWith("http")) {
+      window.open(doc.downloadUrl, "_blank");
+    }
     setDownloadSuccessId(id);
     setTimeout(() => {
       setDownloadSuccessId(null);

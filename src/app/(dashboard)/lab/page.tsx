@@ -2,19 +2,60 @@
 
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FlaskConical, LayoutGrid, List, Check } from "lucide-react";
+import { FlaskConical, LayoutGrid, List, Check, Loader2 } from "lucide-react";
 import { TestRequisition, RequisitionStatus } from "@/features/lab/types";
-import { INITIAL_REQUISITIONS } from "@/features/lab/data/mockData";
 import { LabStatsRow } from "@/features/lab/components/LabStatsRow";
 import { LabFilterBar } from "@/features/lab/components/LabFilterBar";
 import { LabKanbanBoard } from "@/features/lab/components/LabKanbanBoard";
 import { LabRequisitionsTable } from "@/features/lab/components/LabRequisitionsTable";
 import { BarcodePrintModal } from "@/features/lab/components/BarcodePrintModal";
 import { ClinicalNotesModal } from "@/features/lab/components/ClinicalNotesModal";
+import { useGetLabOrdersQuery, useUpdateLabOrderStatusMutation, LabOrder } from "@/redux/api/labApi";
+
+function mapOrderToRequisition(order: LabOrder): TestRequisition {
+  let status: RequisitionStatus = "New Order";
+  if (order.status === "SAMPLE_COLLECTED") status = "Sample Collection Scheduled";
+  else if (order.status === "PROCESSING") status = "Processing in Lab";
+  else if (order.status === "REPORT_READY") status = "Report Ready";
+
+  return {
+    id: order.id,
+    patientName: order.patient?.user?.name || "Patient",
+    patientAge: 35,
+    patientGender: "Male",
+    patientId: order.patientId.slice(0, 8).toUpperCase(),
+    referringDoctor: "Dr. Farhana Chowdhury",
+    doctorSpecialty: "Medicine",
+    doctorHospital: "Dhaka Medical College & Hospital",
+    testName: order.testNames?.[0] || "Diagnostic Test",
+    testCategory: "Biochemistry & Hematology",
+    specimenType: "Blood / Serum",
+    status,
+    priority: "Routine",
+    requestedAt: new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    barcode: `SM-LAB-${order.id.slice(0, 6).toUpperCase()}`,
+    rackLocation: `Rack-${order.id.charCodeAt(0) % 8 + 1}`,
+    clinicalNotes: {
+      diagnosis: order.notes || "Routine Health Screening",
+      symptoms: ["Fatigue", "General Consultation"],
+      specialInstructions: order.sampleCollectionAddress || "Home Sample Collection",
+      fastingRequired: true,
+      fastingDuration: "10-12 Hours",
+      allergies: [],
+    },
+  };
+}
 
 export default function LabRequisitionsPage() {
-  const [requisitions, setRequisitions] = useState<TestRequisition[]>(INITIAL_REQUISITIONS);
   const [viewMode, setViewMode] = useState<"kanban" | "table">("kanban");
+
+  // Dynamic API Query
+  const { data: ordersData, isLoading: isOrdersLoading } = useGetLabOrdersQuery();
+  const [updateOrderStatus] = useUpdateLabOrderStatusMutation();
+
+  const requisitions = useMemo(() => {
+    return (ordersData?.orders || []).map(mapOrderToRequisition);
+  }, [ordersData]);
 
   // Filter & Search State
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,15 +101,19 @@ export default function LabRequisitionsPage() {
     });
   }, [requisitions, searchQuery, selectedDoctor, selectedTest, selectedPriority]);
 
-  const handleAdvanceStatus = (id: string, currentStatus: RequisitionStatus) => {
-    let nextStatus: RequisitionStatus;
-    if (currentStatus === "New Order") nextStatus = "Sample Collection Scheduled";
-    else if (currentStatus === "Sample Collection Scheduled") nextStatus = "Processing in Lab";
-    else if (currentStatus === "Processing in Lab") nextStatus = "Report Ready";
+  const handleAdvanceStatus = async (id: string, currentStatus: RequisitionStatus) => {
+    let nextBackendStatus: string;
+    if (currentStatus === "New Order") nextBackendStatus = "SAMPLE_COLLECTED";
+    else if (currentStatus === "Sample Collection Scheduled") nextBackendStatus = "PROCESSING";
+    else if (currentStatus === "Processing in Lab") nextBackendStatus = "REPORT_READY";
     else return;
 
-    setRequisitions((prev) => prev.map((r) => (r.id === id ? { ...r, status: nextStatus } : r)));
-    triggerToast(`Order ${id} status updated to "${nextStatus}".`);
+    try {
+      await updateOrderStatus({ id, status: nextBackendStatus }).unwrap();
+      triggerToast(`Order status updated to "${nextBackendStatus}".`);
+    } catch (e: any) {
+      triggerToast(`Failed to update status: ${e?.data?.message || 'Server error'}`);
+    }
   };
 
   const handleResetFilters = () => {
