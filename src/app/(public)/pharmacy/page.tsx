@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useDeferredValue } from "react";
 import {
   PharmacyCartProvider,
   usePharmacyCart,
 } from "@/features/pharmacy/context/PharmacyCartContext";
-import { MOCK_MEDICINES } from "@/features/pharmacy/data/medicines";
+import {
+  useGetPharmacyMedicinesQuery,
+  useGetPharmacyCategoriesQuery,
+} from "@/redux/api/pharmacyApi";
 import { PrescriptionUploadZone } from "@/features/pharmacy/components/PrescriptionUploadZone";
 import { MedicineCard } from "@/features/pharmacy/components/MedicineCard";
 import { PharmacyCheckoutDrawer } from "@/features/pharmacy/components/PharmacyCheckoutDrawer";
@@ -16,13 +19,13 @@ import {
   Search,
   ShoppingBag,
   Sparkles,
-  Truck,
-  HeartPulse,
   Award,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const CATEGORY_TABS = [
+const DEFAULT_CATEGORY_TABS = [
   { id: "all", name: "All Medicines" },
   { id: "pain", name: "Pain Relief & Fever" },
   { id: "digestive", name: "Digestive & Acidity" },
@@ -35,19 +38,30 @@ const CATEGORY_TABS = [
 function PharmacyPageContent() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const deferredSearch = useDeferredValue(searchQuery);
+
   const { setIsDrawerOpen, totalItemCount, subtotal } = usePharmacyCart();
 
-  const filteredMedicines = useMemo(() => {
-    return MOCK_MEDICINES.filter((med) => {
-      const matchesCategory =
-        activeCategory === "all" || med.category === activeCategory;
-      const matchesSearch =
-        med.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        med.genericName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        med.manufacturer.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-  }, [activeCategory, searchQuery]);
+  // Dynamic API queries
+  const {
+    data: medicinesData,
+    isLoading: isMedicinesLoading,
+    isFetching: isMedicinesFetching,
+    isError: isMedicinesError,
+    refetch: refetchMedicines,
+  } = useGetPharmacyMedicinesQuery({
+    category: activeCategory,
+    search: deferredSearch.trim(),
+    limit: 60,
+  });
+
+  const { data: dynamicCategories } = useGetPharmacyCategoriesQuery();
+
+  const categories = dynamicCategories && dynamicCategories.length > 0
+    ? dynamicCategories
+    : DEFAULT_CATEGORY_TABS;
+
+  const medicines = medicinesData?.medicines || [];
 
   return (
     <div className="min-h-screen bg-background pb-20 relative">
@@ -77,7 +91,7 @@ function PharmacyPageContent() {
               </div>
               <div className="flex items-center gap-1.5 bg-card/60 border border-card-border px-3 py-1.5 rounded-xl shadow-xs">
                 <Sparkles className="h-4 w-4 text-primary-teal" />
-                <span>AI OCR Prescription Line Reader</span>
+                <span>Free AI Prescription OCR Line Reader</span>
               </div>
               <div className="flex items-center gap-1.5 bg-card/60 border border-card-border px-3 py-1.5 rounded-xl shadow-xs">
                 <Award className="h-4 w-4 text-emerald-500" />
@@ -97,8 +111,15 @@ function PharmacyPageContent() {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-fg-app">Genuine Medicines & Healthcare Products</h2>
-              <p className="text-xs text-muted-foreground">Order verified pharmaceuticals directly from licensed dark stores</p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-fg-app">Genuine Medicines & Healthcare Products</h2>
+                {isMedicinesFetching && (
+                  <Loader2 className="h-4 w-4 animate-spin text-primary-teal" />
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Order verified pharmaceuticals directly from licensed dark stores • {medicines.length} in stock
+              </p>
             </div>
 
             {/* Search Input */}
@@ -109,36 +130,96 @@ function PharmacyPageContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search medicine, brand or generic..."
-                className="w-full h-10 pl-10 pr-4 rounded-xl bg-card border border-card-border text-xs text-fg-app placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-teal shadow-xs"
+                className="w-full h-10 pl-10 pr-4 rounded-xl bg-card border border-card-border text-xs text-fg-app placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-teal shadow-xs transition-all"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-fg-app"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           </div>
 
           {/* Category Ribbon */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-            {CATEGORY_TABS.map((cat) => {
+            {categories.map((cat: any) => {
               const isSelected = activeCategory === cat.id;
               return (
                 <button
                   key={cat.id}
                   type="button"
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`py-2 px-4 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  className={`py-2 px-4 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                     isSelected
                       ? "bg-primary-teal text-white border border-primary-teal shadow-xs"
                       : "border border-card-border bg-card hover:bg-muted/40 text-fg-app"
                   }`}
                 >
-                  {cat.name}
+                  <span>{cat.name}</span>
+                  {typeof cat.count === "number" && (
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                        isSelected
+                          ? "bg-white/20 text-white"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {cat.count}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
 
           {/* Medicines Grid */}
-          {filteredMedicines.length > 0 ? (
+          {isMedicinesLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {filteredMedicines.map((med) => (
+              {Array.from({ length: 8 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-card-border bg-card p-4 space-y-4 animate-pulse"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="h-5 w-24 bg-muted/60 rounded-md" />
+                    <div className="h-5 w-16 bg-muted/60 rounded-md" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-5 w-3/4 bg-muted/80 rounded-md" />
+                    <div className="h-3 w-1/2 bg-muted/50 rounded-md" />
+                    <div className="h-3 w-2/3 bg-muted/40 rounded-md" />
+                  </div>
+                  <div className="h-8 bg-muted/40 rounded-lg" />
+                  <div className="pt-3 border-t border-card-border flex justify-between items-center">
+                    <div className="h-6 w-16 bg-muted/70 rounded-md" />
+                    <div className="h-8 w-16 bg-muted/70 rounded-lg" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : isMedicinesError ? (
+            <div className="py-16 text-center space-y-3 rounded-2xl border border-dashed border-rose-500/30 bg-rose-500/5 p-8">
+              <Pill className="h-12 w-12 text-rose-500 mx-auto" />
+              <h3 className="text-base font-bold text-fg-app">Unable to Load Medicines</h3>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                Could not connect to the pharmacy catalog server. Please check your connection and retry.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetchMedicines()}
+                className="gap-2"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Retry Fetch
+              </Button>
+            </div>
+          ) : medicines.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {medicines.map((med) => (
                 <MedicineCard key={med.id} medicine={med} />
               ))}
             </div>
@@ -169,7 +250,7 @@ function PharmacyPageContent() {
         <button
           type="button"
           onClick={() => setIsDrawerOpen(true)}
-          className="flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-primary-teal text-white shadow-xl hover:opacity-95 transition-all hover:scale-105 active:scale-95 group border border-primary-teal/40 glow-teal"
+          className="flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-primary-teal text-white shadow-xl hover:opacity-95 transition-all hover:scale-105 active:scale-95 group border border-primary-teal/40 glow-teal cursor-pointer"
         >
           <div className="relative">
             <ShoppingBag className="h-5 w-5" />

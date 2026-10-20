@@ -24,6 +24,11 @@ import { usePharmacyCart } from "../context/PharmacyCartContext";
 import { PharmacyMapPicker } from "./PharmacyMapPicker";
 import { Button } from "@/components/ui/button";
 import { PaymentMethod } from "../types";
+import {
+  useCheckoutCartMutation,
+  CheckoutOrderResponse,
+} from "@/redux/api/pharmacyApi";
+import { toast } from "sonner";
 
 export function PharmacyCheckoutDrawer() {
   const {
@@ -48,18 +53,39 @@ export function PharmacyCheckoutDrawer() {
   } = usePharmacyCart();
 
   const [orderConfirmed, setOrderConfirmed] = useState<boolean>(false);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [confirmedOrder, setConfirmedOrder] = useState<CheckoutOrderResponse | null>(null);
 
-  const handleNextStep = () => {
+  const [checkoutCartApi, { isLoading: isSubmitting }] = useCheckoutCartMutation();
+
+  const handleNextStep = async () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Final Order Confirmation
-      setIsSubmitting(true);
-      setTimeout(() => {
-        setIsSubmitting(false);
+      // Final Order Confirmation via real API
+      try {
+        const payload = {
+          items: cartItems.map((item) => ({
+            medicineId: item.medicine.id,
+            quantity: item.quantity,
+            name: item.medicine.name,
+            price: item.medicine.price,
+          })),
+          shippingAddress: address.addressLine || "House 12, Road 5, Dhanmondi, Dhaka",
+          paymentMethod: paymentMethod.toUpperCase(),
+          isExpressDelivery,
+          contactPhone: address.phone || "+8801700000000",
+          customerName: address.fullName || "ShebaMitro Patient",
+        };
+
+        const result = await checkoutCartApi(payload).unwrap();
+        setConfirmedOrder(result);
         setOrderConfirmed(true);
-      }, 750);
+        clearCart();
+        toast.success(`Order ${result.orderNumber} placed successfully!`);
+      } catch (err: any) {
+        console.error("Checkout error:", err);
+        toast.error(err?.data?.message || "Failed to place order. Please try again.");
+      }
     }
   };
 
@@ -181,29 +207,31 @@ export function PharmacyCheckoutDrawer() {
                     <p className="text-xs text-muted-foreground">
                       Order ID:{" "}
                       <span className="font-mono text-primary-teal font-bold">
-                        PH-{Math.floor(100000 + Math.random() * 900000)}
+                        {confirmedOrder?.orderNumber || "SM-RX-SUCCESS"}
                       </span>
                     </p>
                   </div>
 
                   <div className="bg-surface-card-hover border border-card-border rounded-xl p-4 text-left space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Delivery Speed:</span>
+                      <span className="text-muted-foreground">Fulfillment Partner:</span>
+                      <span className="font-semibold text-fg-app">
+                        {confirmedOrder?.pharmacyName || "Lazz Pharma Kalabagan Hub"}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Estimated Delivery:</span>
                       <span className="font-bold text-amber-500 flex items-center gap-1">
-                        {isExpressDelivery ? (
-                          <>
-                            <Zap className="h-3.5 w-3.5 fill-amber-400" /> ⚡ Express 2-Hour
-                          </>
-                        ) : (
-                          "Standard 24-Hour"
-                        )}
+                        <Zap className="h-3.5 w-3.5 fill-amber-400" />
+                        {confirmedOrder?.estimatedDelivery || (isExpressDelivery ? "Within 2 Hours" : "Same Day")}
                       </span>
                     </div>
 
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Delivery Address:</span>
                       <span className="font-medium text-fg-app truncate max-w-[180px]">
-                        {address.addressLine}
+                        {confirmedOrder?.shippingAddress || address.addressLine}
                       </span>
                     </div>
 
@@ -213,15 +241,15 @@ export function PharmacyCheckoutDrawer() {
                     </div>
 
                     <div className="flex justify-between pt-2 border-t border-card-border font-bold">
-                      <span>Total Amount Paid:</span>
+                      <span>Total Amount:</span>
                       <span className="text-emerald-600 dark:text-emerald-400 text-sm">
-                        ৳{totalAmount.toLocaleString()}
+                        ৳{(confirmedOrder?.totalAmount ?? totalAmount).toLocaleString()}
                       </span>
                     </div>
                   </div>
 
                   <p className="text-xs text-muted-foreground">
-                    A rider has been dispatched from our temperature-controlled pharmacy hub.
+                    A delivery rider has been assigned from our certified dark store. You will receive an SMS tracking link shortly.
                   </p>
 
                   <div className="pt-2">
