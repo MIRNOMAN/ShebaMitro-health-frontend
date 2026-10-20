@@ -8,6 +8,7 @@ import {
 import {
   useGetPharmacyMedicinesQuery,
   useGetPharmacyCategoriesQuery,
+  useSyncMediDataMutation,
 } from "@/redux/api/pharmacyApi";
 import { PrescriptionUploadZone } from "@/features/pharmacy/components/PrescriptionUploadZone";
 import { MedicineCard } from "@/features/pharmacy/components/MedicineCard";
@@ -22,7 +23,10 @@ import {
   Award,
   Loader2,
   RefreshCw,
+  Database,
+  CloudCheck,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 const DEFAULT_CATEGORY_TABS = [
@@ -41,6 +45,7 @@ function PharmacyPageContent() {
   const deferredSearch = useDeferredValue(searchQuery);
 
   const { setIsDrawerOpen, totalItemCount, subtotal } = usePharmacyCart();
+  const [syncMediData, { isLoading: isSyncing }] = useSyncMediDataMutation();
 
   // Dynamic API queries
   const {
@@ -55,13 +60,26 @@ function PharmacyPageContent() {
     limit: 60,
   });
 
-  const { data: dynamicCategories } = useGetPharmacyCategoriesQuery();
+  const { data: dynamicCategories, refetch: refetchCategories } = useGetPharmacyCategoriesQuery();
 
   const categories = dynamicCategories && dynamicCategories.length > 0
     ? dynamicCategories
     : DEFAULT_CATEGORY_TABS;
 
   const medicines = medicinesData?.medicines || [];
+
+  const handleSyncMediData = async () => {
+    try {
+      const res = await syncMediData().unwrap();
+      toast.success(
+        `Successfully synced ${res.synced} Bangladesh medications from MediData API!`
+      );
+      refetchMedicines();
+      refetchCategories();
+    } catch (e: any) {
+      toast.error("Failed to sync from MediData API. Local database is active.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20 relative">
@@ -122,25 +140,44 @@ function PharmacyPageContent() {
               </p>
             </div>
 
-            {/* Search Input */}
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search medicine, brand or generic..."
-                className="w-full h-10 pl-10 pr-4 rounded-xl bg-card border border-card-border text-xs text-fg-app placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-teal shadow-xs transition-all"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-fg-app"
-                >
-                  ✕
-                </button>
-              )}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              {/* MediData Sync Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSyncMediData}
+                disabled={isSyncing}
+                className="h-10 text-xs px-3 gap-1.5 border-card-border hover:border-primary-teal/50 hover:bg-primary-teal/10 text-fg-app"
+                title="Sync and refresh live medicines from MediData API"
+              >
+                {isSyncing ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary-teal" />
+                ) : (
+                  <Database className="h-3.5 w-3.5 text-primary-teal" />
+                )}
+                <span>{isSyncing ? "Syncing MediData..." : "Sync MediData API"}</span>
+              </Button>
+
+              {/* Search Input */}
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search medicine, brand or generic..."
+                  className="w-full h-10 pl-10 pr-4 rounded-xl bg-card border border-card-border text-xs text-fg-app placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-teal shadow-xs transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-fg-app"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 

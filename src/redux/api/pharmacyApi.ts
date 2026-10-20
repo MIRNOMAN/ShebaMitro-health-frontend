@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { baseApi } from "./baseApi";
-import type { Medicine, RecognizedMedicine } from "@/features/pharmacy/types";
+import type { Medicine, RecognizedMedicine, SuggestedMedicine } from "@/features/pharmacy/types";
 
 export interface PharmacyMedicinesResponse {
   medicines: Medicine[];
@@ -24,7 +25,10 @@ export interface PrescriptionScanResponse {
   processingTimeMs: number;
   aiProvider: string;
   prescriptionImageUrl?: string;
+  clinicalCondition?: string;
+  doctorAdvice?: string[];
   recognizedItems: RecognizedMedicine[];
+  suggestedMedicines?: SuggestedMedicine[];
 }
 
 export interface CheckoutOrderInput {
@@ -116,6 +120,15 @@ export const pharmacyApi = baseApi.injectEndpoints({
       transformResponse: (response: any) => response.data ?? response,
       invalidatesTags: [{ type: "Medicine", id: "LIST" }, "Pharmacy"],
     }),
+
+    syncMediData: builder.mutation<{ success: boolean; synced: number; items: string[] }, void>({
+      query: () => ({
+        url: "/medicines/sync",
+        method: "POST",
+      }),
+      transformResponse: (response: any) => response.data ?? response,
+      invalidatesTags: [{ type: "Medicine", id: "LIST" }, { type: "Medicine", id: "CATEGORIES" }],
+    }),
   }),
 });
 
@@ -126,4 +139,5 @@ export const {
   useGetMedicineByIdQuery,
   useScanPrescriptionMutation,
   useCheckoutCartMutation,
+  useSyncMediDataMutation,
 } = pharmacyApi;

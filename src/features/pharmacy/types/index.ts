@@ -18,8 +18,22 @@ export interface RecognizedMedicine {
   id: string;
   name: string;
   dosage: string;
+  genericName?: string;
+  strength?: string;
+  duration?: string;
   matchedMedicine?: Medicine;
   confidence: number;
+}
+
+export interface SuggestedMedicine {
+  id: string;
+  name: string;
+  genericName?: string;
+  type: 'generic_alternative' | 'companion_care' | 'cost_effective' | 'therapeutic_equivalent';
+  reason: string;
+  dosageGuidance?: string;
+  confidence: number;
+  matchedMedicine?: Medicine;
 }
 
 export interface PharmacyCartItem {
