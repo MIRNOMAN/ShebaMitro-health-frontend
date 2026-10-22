@@ -18,6 +18,43 @@ export interface RegisterRequest {
   role?: string;
 }
 
+export interface RegisterResponse {
+  success?: boolean;
+  message: string;
+  email: string;
+  role?: string;
+  requiresVerification?: boolean;
+  demoCode?: string;
+  user?: User;
+  accessToken?: string;
+  refreshToken?: string;
+}
+
+export interface VerifyEmailRequest {
+  email: string;
+  code: string;
+}
+
+export interface VerifyEmailResponse {
+  message: string;
+  isVerified: boolean;
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+  expiresIn?: number;
+}
+
+export interface ResendVerificationRequest {
+  email: string;
+}
+
+export interface ResendVerificationResponse {
+  message: string;
+  email: string;
+  demoCode?: string;
+  alreadyVerified?: boolean;
+}
+
 export interface AuthResponse {
   user: User;
   accessToken: string;
@@ -102,11 +139,39 @@ export const authApi = baseApi.injectEndpoints({
       invalidatesTags: ["Auth"],
     }),
 
-    register: builder.mutation<AuthResponse, RegisterRequest>({
+    register: builder.mutation<RegisterResponse, RegisterRequest>({
       query: (data) => ({
         url: "/auth/register",
         method: "POST",
         body: data,
+      }),
+      transformResponse: (response: any) => response?.data ?? response,
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          const payload = (data as any)?.data ?? data;
+          // Only auto-login if token is provided and user is explicitly verified
+          if (payload?.accessToken && payload?.user?.isVerified) {
+            dispatch(
+              setCredentials({
+                user: payload.user,
+                accessToken: payload.accessToken,
+                refreshToken: payload.refreshToken,
+              }),
+            );
+          }
+        } catch {
+          // Handled by component
+        }
+      },
+      invalidatesTags: ["Auth"],
+    }),
+
+    verifyEmail: builder.mutation<VerifyEmailResponse, VerifyEmailRequest>({
+      query: (body) => ({
+        url: "/auth/verify-email",
+        method: "POST",
+        body,
       }),
       transformResponse: (response: any) => response?.data ?? response,
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
@@ -126,7 +191,19 @@ export const authApi = baseApi.injectEndpoints({
           // Handled by component
         }
       },
-      invalidatesTags: ["Auth"],
+      invalidatesTags: ["Auth", "User"],
+    }),
+
+    resendVerification: builder.mutation<
+      ResendVerificationResponse,
+      ResendVerificationRequest
+    >({
+      query: (body) => ({
+        url: "/auth/resend-verification",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: any) => response?.data ?? response,
     }),
 
     requestOtp: builder.mutation<RequestOtpResponse, RequestOtpRequest>({
@@ -250,6 +327,8 @@ export const authApi = baseApi.injectEndpoints({
 export const {
   useLoginMutation,
   useRegisterMutation,
+  useVerifyEmailMutation,
+  useResendVerificationMutation,
   useRequestOtpMutation,
   useVerifyOtpMutation,
   useForgotPasswordMutation,

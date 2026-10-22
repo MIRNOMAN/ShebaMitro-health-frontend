@@ -22,6 +22,7 @@ import { registerSchema } from "../schemas/authSchema";
 import { UserRole } from "../types";
 import { Button } from "@/components/ui/button";
 import { useRegisterMutation } from "@/redux/api/authApi";
+import { EmailVerificationForm } from "./EmailVerificationForm";
 
 interface RegisterFormProps {
   currentRole: UserRole;
@@ -65,6 +66,9 @@ export function RegisterForm({ currentRole, onChangeRole }: RegisterFormProps) {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect");
 
+  const [step, setStep] = useState<"register" | "verify">("register");
+  const [registeredEmail, setRegisteredEmail] = useState("");
+
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -102,8 +106,10 @@ export function RegisterForm({ currentRole, onChangeRole }: RegisterFormProps) {
       | "LAB"
       | "PHARMACY";
 
+    const cleanEmail = email.trim().toLowerCase();
+
     const validation = registerSchema.safeParse({
-      email: email.trim(),
+      email: cleanEmail,
       password,
       phone: phone.trim() || undefined,
       role: backendRole,
@@ -119,21 +125,19 @@ export function RegisterForm({ currentRole, onChangeRole }: RegisterFormProps) {
 
     try {
       const result = await registerUser({
-        email: email.trim(),
+        email: cleanEmail,
         password,
         phone: phone.trim() || undefined,
         role: backendRole,
       }).unwrap();
 
-      toast.success(
-        `Account created successfully! Welcome to ShebaMitro as ${result.user?.role || backendRole}.`
-      );
+      setRegisteredEmail(cleanEmail);
+      setStep("verify");
 
-      if (redirectUrl && !redirectUrl.startsWith("/dashboard")) {
-        router.push(redirectUrl);
-      } else {
-        router.push("/");
-      }
+      const demoHint = result.demoCode ? ` (Code: ${result.demoCode})` : "";
+      toast.success(
+        result.message || `Account created! Verification code sent to ${cleanEmail}.${demoHint}`
+      );
     } catch (err: unknown) {
       const apiError = err as {
         data?: {
@@ -162,6 +166,15 @@ export function RegisterForm({ currentRole, onChangeRole }: RegisterFormProps) {
       toast.error(errorMsg);
     }
   };
+
+  if (step === "verify") {
+    return (
+      <EmailVerificationForm
+        initialEmail={registeredEmail || email}
+        onBack={() => setStep("register")}
+      />
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

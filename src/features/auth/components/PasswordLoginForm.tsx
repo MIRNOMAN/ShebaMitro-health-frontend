@@ -175,8 +175,18 @@ export function PasswordLoginForm({ role, onSuccessAuth }: PasswordLoginFormProp
 
       {/* Error Message Alert */}
       {errorMessage && (
-        <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs font-bold text-rose-500 animate-in fade-in duration-200">
-          {errorMessage}
+        <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs font-bold text-rose-500 animate-in fade-in duration-200 space-y-1.5">
+          <p>{errorMessage}</p>
+          {errorMessage.toLowerCase().includes("not verified") && (
+            <div className="pt-1">
+              <Link
+                href={`/verify-email?email=${encodeURIComponent(identifier.trim())}`}
+                className="inline-flex items-center gap-1 text-primary-teal hover:underline font-extrabold text-xs"
+              >
+                <span>Enter 6-digit verification code here →</span>
+              </Link>
+            </div>
+          )}
         </div>
       )}
 

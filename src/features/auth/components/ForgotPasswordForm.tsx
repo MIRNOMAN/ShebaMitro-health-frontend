@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Mail,
   Lock,
@@ -27,8 +27,9 @@ import {
 
 export function ForgotPasswordForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<"identifier" | "reset">("identifier");
-  const [identifier, setIdentifier] = useState<string>("patient@shebamitro.health");
+  const [identifier, setIdentifier] = useState<string>(searchParams.get("email") || "");
   const [identifierError, setIdentifierError] = useState<string | null>(null);
 
   const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
