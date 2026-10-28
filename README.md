@@ -24,7 +24,7 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 patient login 
 
-rapadi9855@iconcubic.com|
+rapadi9855@iconcubic.com
 $$Baki09$$
 
 

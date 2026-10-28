@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -13,6 +13,9 @@ import {
   ReferenceLine,
 } from "recharts";
 import { Activity, AlertTriangle, CheckCircle2, TrendingUp, Info } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
+import { useGetMeQuery } from "@/redux/api/authApi";
+import { useGetPatientVitalsQuery } from "@/redux/api/vitalsApi";
 
 const FBS_DATA = [
   { month: "May", fbs: 5.2, status: "Normal" },
@@ -43,6 +46,48 @@ const BP_DATA = [
 
 export function BiomarkerTrendCharts() {
   const [activeTab, setActiveTab] = useState<"fbs" | "hba1c" | "bp">("fbs");
+
+  const { user: authUser } = useAppSelector((state) => state.auth);
+  const { data: profileUser } = useGetMeQuery();
+  const patientProfileId = profileUser?.id || authUser?.id || "";
+
+  const { data: vitalsList } = useGetPatientVitalsQuery(
+    { patientId: patientProfileId },
+    { skip: !patientProfileId }
+  );
+
+  const dynamicFbs = useMemo(() => {
+    const list = (vitalsList || []).filter((v) => v.type === "GLUCOSE");
+    if (list.length >= 2) {
+      return list.slice(0, 6).reverse().map((v) => {
+        const d = new Date(v.recordedAt || v.createdAt);
+        const month = d.toLocaleDateString("en-US", { month: "short" });
+        return {
+          month,
+          fbs: v.value,
+          status: v.value > 7 ? "High ⚠️" : "Normal",
+        };
+      });
+    }
+    return FBS_DATA;
+  }, [vitalsList]);
+
+  const dynamicBp = useMemo(() => {
+    const list = (vitalsList || []).filter((v) => v.type === "BP");
+    if (list.length >= 2) {
+      return list.slice(0, 6).reverse().map((v) => {
+        const d = new Date(v.recordedAt || v.createdAt);
+        const month = d.toLocaleDateString("en-US", { month: "short" });
+        return {
+          month,
+          systolic: v.value,
+          diastolic: 80,
+          status: v.value > 140 ? "High BP ⚠️" : "Optimal",
+        };
+      });
+    }
+    return BP_DATA;
+  }, [vitalsList]);
 
   return (
     <div className="rounded-3xl border border-surface-border bg-surface-card p-6 sm:p-7 space-y-6 shadow-sm relative overflow-hidden">
@@ -115,7 +160,7 @@ export function BiomarkerTrendCharts() {
       <div className="h-72 w-full pt-2">
         <ResponsiveContainer width="100%" height="100%">
           {activeTab === "fbs" ? (
-            <LineChart data={FBS_DATA} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+            <LineChart data={dynamicFbs} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} />
               <YAxis domain={[3, 9]} tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} />
@@ -178,7 +223,7 @@ export function BiomarkerTrendCharts() {
               />
             </LineChart>
           ) : (
-            <LineChart data={BP_DATA} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+            <LineChart data={dynamicBp} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} />
               <YAxis domain={[50, 160]} tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} />

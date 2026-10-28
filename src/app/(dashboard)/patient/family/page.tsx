@@ -1,17 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MOCK_FAMILY_MEMBERS } from "@/features/patient/data/mockFamily";
 import { FamilyMember } from "@/features/patient/types/family";
 import { FamilyAvatarSelector } from "@/features/patient/components/FamilyAvatarSelector";
 import { AddFamilyMemberModal } from "@/features/patient/components/AddFamilyMemberModal";
 import { DependentHealthView } from "@/features/patient/components/DependentHealthView";
 import { Users, ShieldCheck, Heart } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
+import { useGetMeQuery } from "@/redux/api/authApi";
 
 export default function FamilyManagementPage() {
+  const { user: authUser } = useAppSelector((state) => state.auth);
+  const { data: profileUser } = useGetMeQuery();
+  const currentUserName = profileUser?.name || authUser?.name || authUser?.email?.split("@")[0] || "Patient";
+
   const [members, setMembers] = useState<FamilyMember[]>(MOCK_FAMILY_MEMBERS);
   const [selectedMemberId, setSelectedMemberId] = useState<string>("fam-self");
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (currentUserName && currentUserName !== "Patient") {
+      setMembers((prev) =>
+        prev.map((m) => (m.id === "fam-self" ? { ...m, name: currentUserName } : m))
+      );
+    }
+  }, [currentUserName]);
 
   const activeMember = members.find((m) => m.id === selectedMemberId) || members[0]!;
 

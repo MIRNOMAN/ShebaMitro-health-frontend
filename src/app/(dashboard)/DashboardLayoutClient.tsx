@@ -38,6 +38,8 @@ import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { logout } from "@/redux/features/authSlice";
 import { useLogoutMutation } from "@/redux/api/authApi";
+import { useGetPatientAppointmentsQuery } from "@/redux/api/doctorApi";
+import { useGetRemindersQuery } from "@/redux/api/remindersApi";
 
 type UserRole = "patient" | "doctor" | "lab" | "pharmacy";
 
@@ -192,7 +194,47 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
     window.location.href = "/login";
   };
 
-  const navLinks = ROLE_NAV_LINKS[currentRole] || ROLE_NAV_LINKS.patient;
+  const { data: appointmentsRes } = useGetPatientAppointmentsQuery(undefined, {
+    skip: currentRole !== "patient",
+  });
+  const { data: remindersRes } = useGetRemindersQuery(undefined, {
+    skip: currentRole !== "patient",
+  });
+
+  const upcomingCount = React.useMemo(() => {
+    const list = appointmentsRes?.data;
+    if (!Array.isArray(list)) return 0;
+    const now = new Date();
+    return list.filter((a: any) => new Date(a.slotStartTime) >= now && a.status !== "CANCELLED").length;
+  }, [appointmentsRes]);
+
+  const activeRemindersCount = React.useMemo(() => {
+    const list = remindersRes?.data?.reminders;
+    if (!Array.isArray(list)) return 0;
+    return list.filter((r: any) => r.status === "PENDING").length;
+  }, [remindersRes]);
+
+  const navLinks = React.useMemo(() => {
+    const baseLinks = ROLE_NAV_LINKS[currentRole] || ROLE_NAV_LINKS.patient;
+    if (currentRole === "patient") {
+      return baseLinks.map((item) => {
+        if (item.label === "Appointments") {
+          return {
+            ...item,
+            badge: upcomingCount > 0 ? `${upcomingCount} Upcoming` : undefined,
+          };
+        }
+        if (item.label === "Medicine Alarms") {
+          return {
+            ...item,
+            badge: activeRemindersCount > 0 ? `${activeRemindersCount} Active` : undefined,
+          };
+        }
+        return item;
+      });
+    }
+    return baseLinks;
+  }, [currentRole, upcomingCount, activeRemindersCount]);
 
   // Breadcrumbs title parser
   const getBreadcrumbs = () => {

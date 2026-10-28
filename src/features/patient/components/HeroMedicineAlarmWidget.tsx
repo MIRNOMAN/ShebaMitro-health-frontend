@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
@@ -10,12 +10,18 @@ import {
   Volume2,
   RotateCcw,
   TrendingUp,
+  Loader2,
 } from "lucide-react";
 import { playSoftChimeSound, stopChimeSound } from "../utils/chime";
 import { ConfettiBurst } from "./ConfettiBurst";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/providers/language-provider";
 import { BengaliVoiceAudioPlayer } from "./BengaliVoiceAudioPlayer";
+import {
+  useGetRemindersQuery,
+  useAcknowledgeReminderMutation,
+  useSnoozeReminderMutation,
+} from "@/redux/api/remindersApi";
 
 export interface DosageItem {
   id: string;
@@ -29,92 +35,133 @@ export interface DosageItem {
   preferredLanguage?: "bn" | "en";
 }
 
-const INITIAL_DOSAGES: DosageItem[] = [
-  {
-    id: "dose-1",
-    medicineName: "Napa Extra 500mg",
-    dosageText: "১টি ট্যাবলেট (1 Tablet)",
-    scheduledTime: "08:30 AM",
-    period: "Morning",
-    instructions: "খাওয়ার পর পানির সাথে সেবন করুন (Take after meal with water)",
-    status: "TAKEN",
-    preferredLanguage: "bn",
-  },
-  {
-    id: "dose-2",
-    medicineName: "মেটফর্মিন ৫০০mg (Metformin)",
-    dosageText: "১টি ট্যাবলেট (1 Tablet)",
-    scheduledTime: "01:30 PM",
-    period: "Afternoon",
-    instructions: "খাওয়ার ৩০ মিনিট আগে সেবন করুন (Take 30 mins before meal)",
-    status: "DUE_NOW",
-    preferredLanguage: "bn",
-  },
-  {
-    id: "dose-3",
-    medicineName: "Montene 10mg",
-    dosageText: "১টি ট্যাবলেট (1 Tablet)",
-    scheduledTime: "09:00 PM",
-    period: "Night",
-    instructions: "ঘুমানোর আগে সেবন করুন (Take before bedtime)",
-    status: "UPCOMING",
-    preferredLanguage: "en",
-  },
-];
-
 export function HeroMedicineAlarmWidget() {
   const { locale, setLocale } = useLanguage();
   const activeLanguage = locale === "en" ? "en" : locale === "hi" ? "hi" : "bn";
 
-  const [dosages, setDosages] = useState<DosageItem[]>(INITIAL_DOSAGES);
+  // Dynamic reminders from backend
+  const { data: remindersRes, isLoading: isLoadingReminders } = useGetRemindersQuery();
+  const [acknowledgeReminder] = useAcknowledgeReminderMutation();
+  const [snoozeReminder] = useSnoozeReminderMutation();
+
   const [activeAlarmDosage, setActiveAlarmDosage] = useState<DosageItem | null>(null);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
-  const [isChiming, setIsChiming] = useState<boolean>(false);
+  const [, setIsChiming] = useState<boolean>(false);
+  const [localStatuses, setLocalStatuses] = useState<Record<string, { status: DosageItem["status"]; snoozedUntil?: string }>>({});
 
-  // Auto trigger DUE_NOW alarm modal on load
+  // Dynamic mapping of backend reminders to DosageItems
+  const dosages: DosageItem[] = useMemo(() => {
+    const rawList = remindersRes?.data?.reminders || [];
+    if (!rawList || rawList.length === 0) return [];
+
+    return rawList.map((r, idx) => {
+      const intakeDate = new Date(r.intakeTime);
+      const isValidDate = !isNaN(intakeDate.getTime());
+      const scheduledTime = isValidDate
+        ? intakeDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })
+        : `08:${30 + idx * 20} AM`;
+
+      const hours = isValidDate ? intakeDate.getHours() : 8 + idx * 4;
+      const period: DosageItem["period"] =
+        hours < 12 ? "Morning" : hours < 17 ? "Afternoon" : hours < 20 ? "Evening" : "Night";
+
+      // Meal timing description
+      const rawMeal = r.prescriptionItem?.mealTiming || "AFTER_MEAL";
+      const mealMap: Record<string, string> = {
+        BEFORE_MEAL: "খাওয়ার ৩০ মিনিট আগে সেবন করুন (Take 30 mins before meal)",
+        AFTER_MEAL: "খাওয়ার পর পানির সাথে সেবন করুন (Take after meal with water)",
+        WITH_MEAL: "খাবারের সাথে সেবন করুন (Take with meal)",
+        EMPTY_STOMACH: "খালি পেটে সেবন করুন (Take on empty stomach)",
+      };
+      const instructions = mealMap[rawMeal] || "খাওয়ার পর পানির সাথে সেবন করুন (Take after meal with water)";
+
+      const pattern = r.prescriptionItem?.schedulePattern || "১টি ট্যাবলেট (1 Tablet)";
+      const medicineName = r.prescriptionItem?.medicineName || "Prescribed Medicine";
+
+      // Local override if user just clicked take or snooze
+      const local = localStatuses[r.id];
+      let status: DosageItem["status"] = r.status === "TAKEN" ? "TAKEN" : "UPCOMING";
+      if (local) {
+        status = local.status;
+      } else if (r.status === "PENDING" && isValidDate) {
+        const now = new Date();
+        if (now.getHours() === intakeDate.getHours()) {
+          status = "DUE_NOW";
+        }
+      }
+
+      return {
+        id: r.id,
+        medicineName,
+        dosageText: pattern,
+        scheduledTime,
+        period,
+        instructions,
+        status,
+        snoozedUntil: local?.snoozedUntil,
+        preferredLanguage: "bn",
+      };
+    });
+  }, [remindersRes, localStatuses]);
+
+  // Dynamic adherence calculation from backend
+  const adherenceScore = useMemo(() => {
+    if (remindersRes?.data?.complianceRate !== undefined) {
+      return `${Math.round(remindersRes.data.complianceRate)}%`;
+    }
+    if (dosages.length === 0) return "100%";
+    const takenCount = dosages.filter((d) => d.status === "TAKEN").length;
+    return `${Math.round((takenCount / dosages.length) * 100)}%`;
+  }, [remindersRes, dosages]);
+
+  // Auto trigger DUE_NOW alarm modal on load if present
   useEffect(() => {
     const dueNow = dosages.find((d) => d.status === "DUE_NOW");
-    if (dueNow) {
+    if (dueNow && !activeAlarmDosage) {
       triggerAlarm(dueNow);
     }
-  }, []);
+  }, [dosages]);
 
   const triggerAlarm = (dosage: DosageItem) => {
     setActiveAlarmDosage(dosage);
     setIsChiming(false);
   };
 
-  const handleTakeNow = (id: string) => {
+  const handleTakeNow = async (id: string) => {
     stopChimeSound();
     setIsChiming(false);
     setActiveAlarmDosage(null);
 
-    // Update status to TAKEN
-    setDosages((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, status: "TAKEN" } : d))
-    );
+    setLocalStatuses((prev) => ({
+      ...prev,
+      [id]: { status: "TAKEN" },
+    }));
 
-    // Trigger Confetti Burst
+    try {
+      await acknowledgeReminder({ id, status: "TAKEN" }).unwrap();
+    } catch (err) {
+      console.warn("Could not sync reminder status to backend:", err);
+    }
+
     setShowConfetti(true);
   };
 
-  const handleSnooze = (id: string) => {
+  const handleSnooze = async (id: string) => {
     stopChimeSound();
     setIsChiming(false);
     setActiveAlarmDosage(null);
 
-    // Update status to SNOOZED
-    setDosages((prev) =>
-      prev.map((d) =>
-        d.id === id
-          ? {
-              ...d,
-              status: "SNOOZED",
-              snoozedUntil: activeLanguage === "bn" ? "১৫ মিনিটের মধ্যে (০১:৪৫ PM)" : "In 15 minutes (01:45 PM)",
-            }
-          : d
-      )
-    );
+    const snoozeText = activeLanguage === "bn" ? "১৫ মিনিটের মধ্যে" : "In 15 minutes";
+    setLocalStatuses((prev) => ({
+      ...prev,
+      [id]: { status: "SNOOZED", snoozedUntil: snoozeText },
+    }));
+
+    try {
+      await snoozeReminder({ id, minutes: 15 }).unwrap();
+    } catch (err) {
+      console.warn("Could not snooze reminder on backend:", err);
+    }
   };
 
   const labels = {
@@ -136,8 +183,6 @@ export function HeroMedicineAlarmWidget() {
       activeLanguage === "en" ? "Test Alarm Voice Note" : activeLanguage === "hi" ? "अलार्म आवाज टेस्ट" : "টেস্ট অ্যালার্ম ভয়েস",
     adherenceTitle:
       activeLanguage === "en" ? "Weekly Adherence Score" : activeLanguage === "hi" ? "साप्ताहिक स्कोर" : "সাপ্তাহিক অ্যাডহ্যারেন্স স্কোর",
-    adherenceScore:
-      activeLanguage === "en" ? "92% Excellent" : activeLanguage === "hi" ? "92% उत्कृष्ट" : "৯২% চমৎকার",
     todaySchedule:
       activeLanguage === "en" ? "Today's Dosage Schedule" : activeLanguage === "hi" ? "आज की दवा अनुसूची" : "আজকের ডোজ শিডিউল",
     dueBadge:
@@ -155,7 +200,7 @@ export function HeroMedicineAlarmWidget() {
   };
 
   return (
-    <div className="rounded-3xl border border-surface-border bg-surface-card p-6 sm:p-7 space-y-6 shadow-sm relative overflow-hidden">
+    <div className="rounded-3xl border border-surface-border bg-surface-card p-4 sm:p-7 space-y-6 shadow-sm relative overflow-hidden">
       {/* Confetti celebration canvas when TAKEN */}
       {showConfetti && <ConfettiBurst onComplete={() => setShowConfetti(false)} />}
 
@@ -165,17 +210,17 @@ export function HeroMedicineAlarmWidget() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-surface-border">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
             <Clock className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="font-black text-lg text-fg-app tracking-tight">{labels.deckTitle}</h2>
+            <h2 className="font-black text-base sm:text-lg text-fg-app tracking-tight">{labels.deckTitle}</h2>
             <p className="text-xs text-muted-fg">{labels.deckSub}</p>
           </div>
         </div>
 
         {/* Voice Language Preference & Test Alarm Ring Controls */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {/* Synchronized Global Voice Language Toggle */}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-surface-border bg-muted-bg/50 text-xs font-bold">
             <span className="text-muted-fg text-[10px] uppercase">{labels.voiceLang}</span>
@@ -207,7 +252,15 @@ export function HeroMedicineAlarmWidget() {
             variant="outline"
             size="sm"
             onClick={() => {
-              const dueOrFirst = dosages.find((d) => d.status === "DUE_NOW") || dosages[1]!;
+              const dueOrFirst = dosages.find((d) => d.status === "DUE_NOW") || dosages[0] || {
+                id: "demo",
+                medicineName: "Napa 500mg",
+                dosageText: "1 Tablet",
+                scheduledTime: "Now",
+                period: "Morning",
+                instructions: "Take with water",
+                status: "DUE_NOW",
+              };
               triggerAlarm(dueOrFirst);
             }}
             className="text-xs font-bold text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10 cursor-pointer"
@@ -224,7 +277,7 @@ export function HeroMedicineAlarmWidget() {
             <TrendingUp className="h-4 w-4 text-emerald-accent" /> {labels.adherenceTitle}
           </span>
           <span className="font-black text-sm text-emerald-600 dark:text-emerald-400">
-            {labels.adherenceScore}
+            {adherenceScore} {parseInt(adherenceScore) >= 80 ? "Excellent" : "Good"}
           </span>
         </div>
 
@@ -232,23 +285,15 @@ export function HeroMedicineAlarmWidget() {
         <div className="h-2.5 w-full bg-muted-bg rounded-full overflow-hidden border border-surface-border/50">
           <div
             className="h-full bg-gradient-to-r from-emerald-accent to-primary-teal rounded-full transition-all duration-700"
-            style={{ width: "92%" }}
+            style={{ width: adherenceScore }}
           />
         </div>
 
         {/* 7-Day Adherence Dot Ribbon */}
         <div className="flex justify-between items-center text-[11px] font-semibold text-muted-fg pt-1">
-          {[
-            { day: "Mon", rate: "100%" },
-            { day: "Tue", rate: "100%" },
-            { day: "Wed", rate: "100%" },
-            { day: "Thu", rate: "100%" },
-            { day: "Fri", rate: "80%" },
-            { day: "Sat", rate: "100%" },
-            { day: "Sun", rate: "100%" },
-          ].map((d) => (
-            <div key={d.day} className="flex flex-col items-center gap-1">
-              <span>{d.day}</span>
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+            <div key={day} className="flex flex-col items-center gap-1">
+              <span>{day}</span>
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-accent shadow-xs" />
             </div>
           ))}
@@ -261,92 +306,111 @@ export function HeroMedicineAlarmWidget() {
           {labels.todaySchedule}
         </label>
 
-        <div className="grid grid-cols-1 gap-3">
-          {dosages.map((dosage) => {
-            const isDue = dosage.status === "DUE_NOW";
-            const isTaken = dosage.status === "TAKEN";
-            const isSnoozed = dosage.status === "SNOOZED";
+        {isLoadingReminders ? (
+          <div className="p-6 text-center text-muted-fg space-y-2">
+            <Loader2 className="w-5 h-5 text-primary-teal animate-spin mx-auto" />
+            <p className="text-xs font-bold">Loading today&apos;s medication schedule from database...</p>
+          </div>
+        ) : dosages.length === 0 ? (
+          <div className="p-6 rounded-2xl border border-dashed border-surface-border bg-muted-bg/20 text-center space-y-2">
+            <Pill className="h-8 w-8 text-primary-teal/40 mx-auto" />
+            <p className="text-sm font-bold text-fg-app">No active medicine alarms scheduled for today</p>
+            <p className="text-xs text-muted-fg max-w-sm mx-auto">
+              Your prescription medications and reminder alarms will appear here dynamically.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3">
+            {dosages.map((dosage) => {
+              const isDue = dosage.status === "DUE_NOW";
+              const isTaken = dosage.status === "TAKEN";
+              const isSnoozed = dosage.status === "SNOOZED";
 
-            return (
-              <div
-                key={dosage.id}
-                className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                  isDue
-                    ? "bg-amber-500/5 border-amber-500/40 ring-1 ring-amber-500/30 shadow-sm"
-                    : isTaken
-                    ? "bg-emerald-500/5 border-emerald-500/20 text-muted-fg opacity-85"
-                    : isSnoozed
-                    ? "bg-violet-500/5 border-violet-500/30"
-                    : "bg-surface-card border-surface-border hover:bg-surface-card-hover"
-                }`}
-              >
-                <div className="flex items-center gap-3.5">
-                  <div
-                    className={`h-11 w-11 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                      isDue
-                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 animate-pulse"
-                        : isTaken
-                        ? "bg-emerald-accent/15 text-emerald-600 dark:text-emerald-400 border border-emerald-accent/20"
-                        : "bg-primary-teal/10 text-primary-teal border border-primary-teal/20"
-                    }`}
-                  >
-                    <Pill className="h-5 w-5" />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-black text-sm text-fg-app">{dosage.medicineName}</h4>
-                      <span className="text-xs font-medium text-muted-fg">
-                        ({dosage.dosageText})
-                      </span>
+              return (
+                <div
+                  key={dosage.id}
+                  className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                    isDue
+                      ? "bg-amber-500/5 border-amber-500/40 ring-1 ring-amber-500/30 shadow-sm"
+                      : isTaken
+                      ? "bg-emerald-500/5 border-emerald-500/20 text-muted-fg opacity-85"
+                      : isSnoozed
+                      ? "bg-violet-500/5 border-violet-500/30"
+                      : "bg-surface-card border-surface-border hover:bg-surface-card-hover"
+                  }`}
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div
+                      className={`h-11 w-11 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
+                        isDue
+                          ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 animate-pulse"
+                          : isTaken
+                          ? "bg-emerald-accent/15 text-emerald-600 dark:text-emerald-400 border border-emerald-accent/20"
+                          : "bg-primary-teal/10 text-primary-teal border border-primary-teal/20"
+                      }`}
+                    >
+                      <Pill className="h-5 w-5" />
                     </div>
 
-                    <p className="text-xs text-muted-fg">
-                      {dosage.instructions} • <span className="font-bold text-fg-app/80">{dosage.scheduledTime}</span>
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-black text-sm text-fg-app">{dosage.medicineName}</h4>
+                        <span className="text-xs font-medium text-muted-fg">
+                          ({dosage.dosageText})
+                        </span>
+                      </div>
 
-                    {isSnoozed && dosage.snoozedUntil && (
-                      <p className="text-[11px] font-bold text-violet-500 pt-0.5">
-                        Snoozed: {dosage.snoozedUntil}
+                      <p className="text-xs text-muted-fg">
+                        {dosage.instructions} • <span className="font-bold text-fg-app/80">{dosage.scheduledTime}</span>
                       </p>
-                    )}
-                  </div>
-                </div>
 
-                {/* Status Badges & Quick Action Buttons */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {isTaken ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-accent/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-accent/20">
-                      <CheckCircle2 className="h-4 w-4" /> {labels.takenBadge}
-                    </span>
-                  ) : isDue ? (
-                    <div className="flex items-center gap-2">
+                      {isSnoozed && dosage.snoozedUntil && (
+                        <p className="text-[11px] font-bold text-violet-500 pt-0.5">
+                          Snoozed: {dosage.snoozedUntil}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Status Badges & Quick Action Buttons */}
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                    {isTaken ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-accent/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-accent/20">
+                        <CheckCircle2 className="h-4 w-4" /> {labels.takenBadge}
+                      </span>
+                    ) : isDue ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleTakeNow(dosage.id)}
+                          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-accent to-primary-teal text-white text-xs font-bold shadow-sm hover:brightness-105 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" /> {labels.takeNow}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleSnooze(dosage.id)}
+                          className="px-3 py-1.5 rounded-xl bg-muted-bg text-fg-app hover:bg-surface-card-hover border border-surface-border text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                        >
+                          <RotateCcw className="h-3.5 w-3.5 text-violet-500" /> {labels.snooze}
+                        </button>
+                      </div>
+                    ) : (
                       <button
                         type="button"
                         onClick={() => handleTakeNow(dosage.id)}
-                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-accent to-primary-teal text-white text-xs font-bold shadow-sm hover:brightness-105 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                        className="text-xs font-bold text-primary-teal hover:text-white bg-primary-teal/10 hover:bg-primary-teal px-3 py-1.5 rounded-xl border border-primary-teal/20 transition-all cursor-pointer flex items-center gap-1"
                       >
-                        <CheckCircle2 className="h-3.5 w-3.5" /> {labels.takeNow}
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Mark Taken
                       </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleSnooze(dosage.id)}
-                        className="px-3 py-1.5 rounded-xl bg-muted-bg text-fg-app hover:bg-surface-card-hover border border-surface-border text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
-                      >
-                        <RotateCcw className="h-3.5 w-3.5 text-violet-500" /> {labels.snooze}
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="text-xs font-bold text-muted-fg bg-muted-bg/60 px-3 py-1.5 rounded-xl border border-surface-border">
-                      {labels.upcomingBadge}
-                    </span>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Alarm Triggered Modal Popup with Accessible Multilingual Audio Voice Player */}

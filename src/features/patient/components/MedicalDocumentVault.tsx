@@ -107,7 +107,7 @@ export function MedicalDocumentVault() {
       };
     });
 
-    return [...liveDocs, ...MOCK_DOCUMENTS];
+    return liveDocs;
   }, [labOrdersData]);
 
   const filteredDocs = useMemo(() => {
