@@ -22,6 +22,7 @@ import {
   useGetTrendingSearchesQuery,
   SearchResultItem,
 } from "@/redux/api/searchApi";
+import { useGetSpecialtiesQuery } from "@/redux/api/doctorApi";
 
 export type { SearchResultItem };
 
@@ -33,21 +34,42 @@ export function OmniSearch() {
   const [isOpen, setIsOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  // Debounce query by 250ms for smooth API calls
+  // Debounce query by 200ms for fast responsive backend searches
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(query.trim());
-    }, 250);
+    }, 200);
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Fetch dynamic trending searches from backend
+  // Primary: Dynamic trending searches from backend API (/search/trending)
   const {
     data: trendingData,
     isLoading: isLoadingTrending,
   } = useGetTrendingSearchesQuery();
 
-  // Dynamic live search API from backend
+  // Secondary dynamic source: Medical specialties from backend API (/doctors/specialties)
+  const {
+    data: specialtiesRes,
+    isLoading: isLoadingSpecialties,
+  } = useGetSpecialtiesQuery();
+
+  const dynamicSpecialtyTags = React.useMemo(() => {
+    if (!specialtiesRes?.data || !Array.isArray(specialtiesRes.data)) return [];
+    return specialtiesRes.data
+      .slice(0, 8)
+      .map((s) => s.titleEn)
+      .filter(Boolean);
+  }, [specialtiesRes]);
+
+  // 100% Dynamic tags from backend - No static fallback
+  const trendingTags = (trendingData && trendingData.length > 0)
+    ? trendingData
+    : dynamicSpecialtyTags;
+
+  const isTrendingLoading = isLoadingTrending && isLoadingSpecialties && trendingTags.length === 0;
+
+  // Dynamic live search API from backend (/search?q=...)
   const {
     data: searchResults,
     isLoading: isSearching,
@@ -56,22 +78,6 @@ export function OmniSearch() {
     { q: debouncedQuery, limit: 12 },
     { skip: !debouncedQuery }
   );
-
-  const fallbackTrending = React.useMemo(
-    () => [
-      "Chest Pain",
-      "Cardiologist",
-      "Full Body Checkup",
-      "Migraine",
-      "Diabetes Test",
-      "Paracetamol",
-    ],
-    []
-  );
-
-  const trendingTags = (trendingData && trendingData.length > 0)
-    ? trendingData
-    : fallbackTrending;
 
   const results = searchResults || [];
   const hasActiveQuery = query.trim().length > 0;
@@ -98,7 +104,7 @@ export function OmniSearch() {
 
     setIsOpen(false);
 
-    // If there is an exact first result, we can prioritize its destination, or default to doctors directory
+    // If there is an exact first result, prioritize its destination, or default to doctors search
     const firstResult = results[0];
     if (firstResult?.href) {
       router.push(firstResult.href);
@@ -124,10 +130,11 @@ export function OmniSearch() {
 
   return (
     <div className="relative w-full max-w-3xl mx-auto" ref={containerRef}>
-      {/* Omni-Search Box Form with Clean Border & No Nested Inner Focus Outline */}
+      {/* Omni-Search Box Form - Seamless borderless design with pure soft shadow */}
       <form
         onSubmit={handleSearchSubmit}
-        className="relative flex items-center rounded-3xl border border-surface-border bg-surface-card/90 backdrop-blur-2xl p-2 shadow-2xl transition-all duration-300 focus-within:border-primary-teal focus-within:ring-1 focus-within:ring-primary-teal/50 luminous-border"
+        className="relative flex items-center rounded-full bg-surface-card/95 backdrop-blur-2xl p-2 shadow-xl hover:shadow-2xl transition-all duration-300 border-0 outline-none ring-0"
+        style={{ border: "none", outline: "none", boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 0 1px 1px rgba(0,0,0,0.03)" }}
       >
         <div className="pl-4 pr-2 text-muted-fg flex items-center gap-2">
           {isQueryLoading ? (
@@ -146,7 +153,8 @@ export function OmniSearch() {
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={t("searchPlaceholder")}
-          className="w-full bg-transparent py-3 pr-4 text-sm font-semibold text-fg-app placeholder:text-muted-fg/70 outline-none border-none focus:outline-none focus:ring-0 focus:border-none shadow-none"
+          style={{ outline: "none", boxShadow: "none", border: "none" }}
+          className="w-full bg-transparent py-3 pr-4 text-sm font-semibold text-fg-app placeholder:text-muted-fg/70 outline-none border-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-none focus-visible:border-none shadow-none"
         />
 
         {query && (
@@ -156,7 +164,7 @@ export function OmniSearch() {
               setQuery("");
               setDebouncedQuery("");
             }}
-            className="p-2 text-muted-fg hover:text-fg-app transition-colors"
+            className="p-2 text-muted-fg hover:text-fg-app transition-colors focus:outline-none focus-visible:outline-none"
             aria-label="Clear search query"
           >
             <X className="w-4 h-4" />
@@ -166,7 +174,7 @@ export function OmniSearch() {
         <MagneticButton distance={20} strength={0.3} className="ml-2 flex-shrink-0">
           <button
             type="submit"
-            className="px-5 py-3 rounded-2xl bg-gradient-to-r from-primary-teal to-emerald-accent text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-md hover:brightness-110 transition-all cursor-pointer"
+            className="px-5 py-3 rounded-full bg-gradient-to-r from-primary-teal to-emerald-accent text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-md hover:brightness-110 transition-all cursor-pointer focus:outline-none focus-visible:outline-none"
           >
             <span>{t("searchButton")}</span>
             <ArrowRight className="w-4 h-4" />
@@ -182,39 +190,44 @@ export function OmniSearch() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full left-0 right-0 mt-3 rounded-3xl border border-surface-border bg-surface-card p-4 shadow-2xl z-50 overflow-hidden luminous-border"
+            className="absolute top-full left-0 right-0 mt-3 rounded-3xl bg-surface-card p-4 sm:p-5 shadow-2xl z-50 overflow-hidden border border-surface-border/40"
             style={{ backgroundColor: "var(--card)" }}
           >
             {!hasActiveQuery ? (
               /* Dynamic Popular Quick Searches from Backend API */
-              <div className="space-y-3 p-2">
+              <div className="space-y-3 p-1">
                 <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-muted-fg">
                   <Sparkles className="w-3.5 h-3.5 text-primary-teal" />
                   <span>{t("trendingSearches")}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {isLoadingTrending ? (
-                    /* Loading skeleton pills */
+                  {isTrendingLoading ? (
+                    /* Dynamic loading skeleton pills */
                     Array.from({ length: 6 }).map((_, idx) => (
                       <div
                         key={idx}
-                        className="h-8 w-24 rounded-xl bg-muted-bg/60 animate-pulse border border-surface-border/50"
+                        className="h-8 w-24 rounded-xl bg-muted-bg/60 animate-pulse border border-surface-border/30"
                       />
                     ))
-                  ) : (
+                  ) : trendingTags.length > 0 ? (
                     trendingTags.map((tag) => (
                       <button
                         key={tag}
                         type="button"
                         onClick={() => {
                           setQuery(tag);
+                          setDebouncedQuery(tag);
                           setIsOpen(true);
                         }}
-                        className="px-3 py-1.5 rounded-xl border border-surface-border bg-muted-bg/60 text-xs font-bold text-fg-app hover:border-primary-teal hover:text-primary-teal hover:bg-primary-teal/5 transition-all cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-xl border border-surface-border/50 bg-muted-bg/50 text-xs font-bold text-fg-app hover:border-primary-teal hover:text-primary-teal hover:bg-primary-teal/10 transition-all cursor-pointer outline-none focus:outline-none focus-visible:outline-none"
                       >
                         {tag}
                       </button>
                     ))
+                  ) : (
+                    <div className="text-xs text-muted-fg py-1">
+                      No trending searches found at this moment.
+                    </div>
                   )}
                 </div>
               </div>
@@ -247,7 +260,7 @@ export function OmniSearch() {
                   <span>
                     {results.length} Results Found for &quot;{query}&quot;
                   </span>
-                  <span className="text-[9px] text-muted-fg/70">Press Enter to select top result</span>
+                  <span className="text-[9px] text-muted-fg/70">Press Enter or click to open</span>
                 </div>
                 {results.map((item) => (
                   <Link
@@ -283,7 +296,10 @@ export function OmniSearch() {
                 <div className="pt-2">
                   <button
                     type="button"
-                    onClick={() => router.push(`/doctors?search=${encodeURIComponent(query)}`)}
+                    onClick={() => {
+                      setIsOpen(false);
+                      router.push(`/doctors?search=${encodeURIComponent(query)}`);
+                    }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary-teal/10 text-primary-teal font-bold text-xs hover:bg-primary-teal/20 transition-all cursor-pointer"
                   >
                     <span>Browse all doctors for &quot;{query}&quot;</span>

@@ -121,6 +121,16 @@ html {
   outline-offset: 2px;
 }
 
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+}
+
 /* Solid Opaque Cards & Dropdowns for Maximum Contrast & Readability */
 .glass-card {
   background-color: var(--card);

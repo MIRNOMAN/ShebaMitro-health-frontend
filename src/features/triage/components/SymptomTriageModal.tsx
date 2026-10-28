@@ -172,9 +172,7 @@ export function SymptomTriageModal() {
             {locale === "bn" ? "এআই লক্ষণ নির্ণয়" : "AI Symptom Triage"}
           </span>
 
-          <span className="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-black uppercase text-white backdrop-blur-xs hidden sm:inline-block">
-            NestJS AI
-          </span>
+         
         </motion.button>
       </div>
 
@@ -213,7 +211,7 @@ export function SymptomTriageModal() {
                           {locale === "bn" ? "এআই লক্ষণ নির্ণয় ও টিয়াজ" : "AI Symptom Triage & Specialist Finder"}
                         </h2>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-primary-teal/15 text-primary-teal border border-primary-teal/30">
-                          NestJS AI Service
+                          Service
                         </span>
                       </div>
                       <p className="text-xs sm:text-sm text-muted-fg mt-0.5">
@@ -336,7 +334,7 @@ export function SymptomTriageModal() {
                             <span>
                               {locale === "bn"
                                 ? "এআই মাইক্রোসার্ভিসে লক্ষণ বিশ্লেষণ হচ্ছে..."
-                                : "Analyzing with NestJS AI Microservice..."}
+                                : "Analyzing with Microservice..."}
                             </span>
                           </>
                         ) : (

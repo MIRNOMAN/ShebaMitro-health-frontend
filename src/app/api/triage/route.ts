@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Attempt connection to NestJS AI Triage Microservice
+    // 1. Attempt connection to  Triage Microservice
     try {
       const nestResponse = await fetch(NESTJS_TRIAGE_SERVICE_URL, {
         method: "POST",
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       }
     } catch (microserviceErr) {
       // NestJS microservice offline or unreachable -> fallback gracefully to intelligent edge triage engine
-      console.warn("NestJS AI microservice unreachable, operating in resilient edge mode:", microserviceErr);
+      console.warn(" microservice unreachable, operating in resilient edge mode:", microserviceErr);
     }
 
     // 2. Intelligent Medical Triage NLP Engine (Handles English, Bengali, & Banglish)
