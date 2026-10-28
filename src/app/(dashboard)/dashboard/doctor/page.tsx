@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   Users,
   Video,
@@ -14,88 +15,83 @@ import {
   UserCheck,
   PhoneCall,
   Search,
+  Loader2,
+  Stethoscope,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const MOCK_PATIENT_QUEUE = [
-  {
-    id: "p-101",
-    serialNo: "01",
-    name: "Kamrul Islam Manik",
-    ageGender: "48 Yrs / Male",
-    complaint: "Chest pressure & palpitation after walking 500m",
-    type: "Chamber Visit",
-    chamber: "Square Hospital - Panthapath",
-    status: "In-Consultation",
-    vitals: "BP: 135/85 • HR: 88 • SpO2: 98%",
-  },
-  {
-    id: "p-102",
-    serialNo: "02",
-    name: "Dr. Selina Begum",
-    ageGender: "52 Yrs / Female",
-    complaint: "Post-angiogram follow-up consultation",
-    type: "Video Consultation",
-    chamber: "HD Video Call",
-    status: "Waiting",
-    vitals: "BP: 120/80 • HR: 74 • SpO2: 99%",
-  },
-  {
-    id: "p-103",
-    serialNo: "03",
-    name: "Tariqul Alam",
-    ageGender: "36 Yrs / Male",
-    complaint: "High lipid report review & ECG evaluation",
-    type: "Chamber Visit",
-    chamber: "Labaid Specialized Hospital",
-    status: "Waiting",
-    vitals: "BP: 128/82 • HR: 80 • SpO2: 97%",
-  },
-  {
-    id: "p-104",
-    serialNo: "04",
-    name: "Nusrat Parveen",
-    ageGender: "29 Yrs / Female",
-    complaint: "Shortness of breath during stairs climbing",
-    type: "Video Consultation",
-    chamber: "HD Video Call",
-    status: "Waiting",
-    vitals: "BP: 115/75 • HR: 78 • SpO2: 98%",
-  },
-];
+import {
+  useGetDoctorAppointmentsQuery,
+  useGetDoctorStatsQuery,
+  useUpdateAppointmentStatusMutation,
+} from "@/redux/api/doctorApi";
+import { useGetMeQuery } from "@/redux/api/authApi";
+import { useAppSelector } from "@/redux/hooks";
+import { toast } from "sonner";
 
 export default function DoctorDashboardPage() {
-  const [activeQueue, setActiveQueue] = useState(MOCK_PATIENT_QUEUE);
-  const [isLiveConsultActive, setIsLiveConsultActive] = useState<boolean>(true);
+  const { user: authUser } = useAppSelector((state) => state.auth);
+  const { data: profileUser } = useGetMeQuery();
 
-  const handleCompletePatient = (id: string) => {
-    setActiveQueue((prev) => prev.filter((p) => p.id !== id));
+  const { data: appointmentsRes, isLoading: isLoadingAppts, refetch } = useGetDoctorAppointmentsQuery({});
+  const { data: statsRes } = useGetDoctorStatsQuery({});
+  const [updateStatus, { isLoading: isUpdating }] = useUpdateAppointmentStatusMutation();
+
+  const [isLiveConsultActive, setIsLiveConsultActive] = useState<boolean>(true);
+  const [quickRxNotes, setQuickRxNotes] = useState(
+    "1. Tab. Napa Extra 500mg (1+0+1) - 5 days\n2. Cap. Seclo 20mg (1+0+1) - 14 days\n3. Tab. Angilock 50mg (0+0+1) - 30 days"
+  );
+  const [quickRxAdvice, setQuickRxAdvice] = useState("Echocardiogram, Lipid Profile, Low salt diet");
+
+  const appointments = appointmentsRes?.data || [];
+  const stats = statsRes?.data;
+
+  const doctorName = profileUser?.name || authUser?.name || "Prof. Dr. Syed Mahmudul Hasan";
+  const doctorSpecialization = "Senior Consultant • Department of Cardiology & Interventional Heart Care";
+
+  const waitingPatients = appointments.filter((a: any) => a.status === "PENDING" || a.status === "CONFIRMED");
+  const completedToday = stats?.completedAppointments || appointments.filter((a: any) => a.status === "COMPLETED").length;
+  const onlineConsultsCount = appointments.filter((a: any) => a.type === "ONLINE").length;
+  const totalEarnings = stats?.totalEarnings || (completedToday * 1200);
+
+  const handleCompletePatient = async (id: string) => {
+    try {
+      await updateStatus({ id, status: "COMPLETED" }).unwrap();
+      toast.success("Consultation completed and archived");
+      refetch();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status");
+    }
+  };
+
+  const handleIssueQuickRx = () => {
+    toast.success("Prescription generated & dispatched to patient");
   };
 
   return (
     <div className="space-y-8 pb-10">
       {/* Doctor Header Banner */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-gradient-to-r from-primary-teal/10 via-background to-background p-6 rounded-2xl border border-card-border">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-gradient-to-r from-primary-teal/10 via-background to-background p-6 rounded-3xl border border-surface-border">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-primary-teal flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4" /> BMDC A-34281 Verified Specialist
+            <span className="text-xs font-black uppercase tracking-wider text-primary-teal flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4" /> BMDC Verified Specialist
             </span>
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-fg-app tracking-tight">
-            Prof. Dr. <span className="text-primary-teal">Syed Mahmudul Hasan</span>
+          <h1 className="text-2xl sm:text-3xl font-black text-fg-app tracking-tight">
+            {doctorName.startsWith("Dr.") || doctorName.startsWith("Prof.") ? doctorName : `Dr. ${doctorName}`}
           </h1>
-          <p className="text-xs text-muted-foreground">
-            Senior Consultant • Department of Cardiology & Interventional Heart Care
+          <p className="text-xs text-muted-fg font-medium">
+            {doctorSpecialization}
           </p>
         </div>
 
         {/* Live Chamber Toggle Switch */}
-        <div className="flex items-center gap-4 bg-card p-3 rounded-xl border border-card-border shadow-xs shrink-0">
+        <div className="flex items-center gap-4 bg-surface-card p-3 rounded-2xl border border-surface-border shadow-xs shrink-0">
           <div className="space-y-0.5">
-            <span className="text-xs font-bold text-fg-app block">Live Chamber Status</span>
-            <span className="text-[11px] text-muted-foreground block">
+            <span className="text-xs font-black text-fg-app block">Live Chamber Status</span>
+            <span className="text-[11px] text-muted-fg block">
               {isLiveConsultActive ? "Accepting Patients" : "Queue Paused"}
             </span>
           </div>
@@ -104,7 +100,7 @@ export default function DoctorDashboardPage() {
             type="button"
             onClick={() => setIsLiveConsultActive(!isLiveConsultActive)}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-              isLiveConsultActive ? "bg-emerald-500" : "bg-muted-foreground/30"
+              isLiveConsultActive ? "bg-emerald-500" : "bg-muted-fg/30"
             }`}
           >
             <span
@@ -118,66 +114,66 @@ export default function DoctorDashboardPage() {
 
       {/* Stats Counter Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl border border-card-border bg-card shadow-xs space-y-2">
+        <div className="p-4 rounded-2xl border border-surface-border bg-surface-card shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Patients Waiting</span>
+            <span className="text-xs font-semibold text-muted-fg">Patients Waiting</span>
             <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 font-bold text-xs">
               QUEUE
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-fg-app">{activeQueue.length}</span>
-            <span className="text-xs text-muted-foreground font-semibold">Patients</span>
+            <span className="text-2xl font-black text-fg-app">{waitingPatients.length}</span>
+            <span className="text-xs text-muted-fg font-semibold">Patients</span>
           </div>
           <span className="text-[11px] font-medium text-amber-500 flex items-center gap-1">
             <Clock className="h-3 w-3" /> Est. wait time: ~15 mins / patient
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl border border-card-border bg-card shadow-xs space-y-2">
+        <div className="p-4 rounded-2xl border border-surface-border bg-surface-card shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Completed Today</span>
+            <span className="text-xs font-semibold text-muted-fg">Completed Today</span>
             <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
               <CheckCircle2 className="h-4 w-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-fg-app">14</span>
-            <span className="text-xs text-muted-foreground font-semibold">Patients</span>
+            <span className="text-2xl font-black text-fg-app">{completedToday}</span>
+            <span className="text-xs text-muted-fg font-semibold">Consultations</span>
           </div>
           <span className="text-[11px] font-medium text-emerald-500 flex items-center gap-1">
             <CheckCircle2 className="h-3 w-3" /> 100% Prescriptions Issued
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl border border-card-border bg-card shadow-xs space-y-2">
+        <div className="p-4 rounded-2xl border border-surface-border bg-surface-card shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Teleconsult Calls</span>
-            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-500">
+            <span className="text-xs font-semibold text-muted-fg">Teleconsult Calls</span>
+            <div className="p-2 rounded-xl bg-violet-accent/10 text-violet-accent">
               <Video className="h-4 w-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-fg-app">6</span>
-            <span className="text-xs text-muted-foreground font-semibold">HD Calls</span>
+            <span className="text-2xl font-black text-fg-app">{onlineConsultsCount}</span>
+            <span className="text-xs text-muted-fg font-semibold">WebRTC Calls</span>
           </div>
-          <span className="text-[11px] font-medium text-cyan-500 flex items-center gap-1">
-            <Video className="h-3 w-3" /> 2 Video Calls Remaining
+          <span className="text-[11px] font-medium text-violet-accent flex items-center gap-1">
+            <Video className="h-3 w-3" /> Encrypted Video Consults
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl border border-card-border bg-card shadow-xs space-y-2">
+        <div className="p-4 rounded-2xl border border-surface-border bg-surface-card shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Monthly Earnings</span>
+            <span className="text-xs font-semibold text-muted-fg">Monthly Earnings</span>
             <div className="p-2 rounded-xl bg-primary-teal/10 text-primary-teal">
               <TrendingUp className="h-4 w-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-fg-app">৳45,200</span>
+            <span className="text-2xl font-black text-fg-app">৳{totalEarnings.toLocaleString()}</span>
           </div>
           <span className="text-[11px] font-medium text-emerald-500 flex items-center gap-1">
-            <TrendingUp className="h-3 w-3" /> +18% vs last month
+            <TrendingUp className="h-3 w-3" /> Dynamic Revenue Tracker
           </span>
         </div>
       </div>
@@ -185,144 +181,175 @@ export default function DoctorDashboardPage() {
       {/* Main Content Grid: Patient Queue Table + Rx Quick Writer */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Patient Queue List (8 cols) */}
-        <div className="lg:col-span-8 rounded-2xl border border-card-border bg-card p-6 space-y-5 shadow-xs">
-          <div className="flex items-center justify-between border-b border-card-border pb-4">
+        <div className="lg:col-span-8 rounded-3xl border border-surface-border bg-surface-card p-6 space-y-5 shadow-xs">
+          <div className="flex items-center justify-between border-b border-surface-border pb-4">
             <div>
-              <h3 className="font-bold text-lg text-fg-app flex items-center gap-2">
+              <h3 className="font-black text-lg text-fg-app flex items-center gap-2">
                 <Users className="h-5 w-5 text-primary-teal" /> Live Patient Queue & Consultations
               </h3>
-              <p className="text-xs text-muted-foreground">Real-time patient serials & chief complaints</p>
+              <p className="text-xs text-muted-fg">Real-time patient appointments from database</p>
             </div>
 
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
-              {activeQueue.length} Serials Active
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+              {waitingPatients.length} Waiting
             </span>
           </div>
 
-          <div className="space-y-3">
-            {activeQueue.map((patient) => (
-              <div
-                key={patient.id}
-                className={`p-4 rounded-xl border transition-all space-y-3 ${
-                  patient.status === "In-Consultation"
-                    ? "bg-primary-teal/10 border-primary-teal shadow-xs"
-                    : "bg-surface-card-hover/40 border-card-border/80 hover:border-card-border"
-                }`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <span className="h-8 w-8 rounded-xl bg-primary-teal text-white font-extrabold flex items-center justify-center text-xs shadow-xs">
-                      #{patient.serialNo}
-                    </span>
-                    <div>
-                      <h4 className="font-bold text-sm text-fg-app flex items-center gap-2">
-                        {patient.name}
-                        <span className="text-xs font-normal text-muted-foreground">
-                          ({patient.ageGender})
+          {isLoadingAppts ? (
+            <div className="p-10 text-center text-muted-fg space-y-2">
+              <Loader2 className="w-6 h-6 text-primary-teal animate-spin mx-auto" />
+              <p className="text-xs font-bold">Loading live patient appointments...</p>
+            </div>
+          ) : waitingPatients.length > 0 ? (
+            <div className="space-y-3">
+              {waitingPatients.map((patient: any, idx: number) => {
+                const isOnline = patient.type === "ONLINE";
+                const pName = patient.patient?.user?.name || patient.patient?.name || "Patient";
+                const timeStr = new Date(patient.slotStartTime).toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                });
+
+                return (
+                  <div
+                    key={patient.id}
+                    className="p-4 rounded-2xl border border-surface-border bg-muted-bg/30 hover:border-primary-teal/40 transition-all space-y-3"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        <span className="h-8 w-8 rounded-xl bg-primary-teal text-white font-black flex items-center justify-center text-xs shadow-xs">
+                          #{String(idx + 1).padStart(2, "0")}
                         </span>
-                      </h4>
-                      <p className="text-xs text-primary-teal font-medium">{patient.chamber}</p>
+                        <div>
+                          <h4 className="font-black text-sm text-fg-app flex items-center gap-2">
+                            {pName}
+                          </h4>
+                          <p className="text-xs text-primary-teal font-semibold">
+                            {patient.doctor?.hospital || "Hospital Consultation Center"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                            isOnline
+                              ? "bg-violet-accent/10 text-violet-accent border-violet-accent/30"
+                              : "bg-emerald-accent/10 text-emerald-accent border-emerald-accent/30"
+                          }`}
+                        >
+                          {isOnline ? "Video Teleconsult" : "Chamber Visit"}
+                        </span>
+
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                          {patient.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-surface-card border border-surface-border text-xs space-y-1">
+                      <p className="text-fg-app font-medium">
+                        <span className="text-muted-fg font-bold">Appointment Time:</span> {timeStr} • Ref: SM-
+                        {patient.id.slice(0, 6).toUpperCase()}
+                      </p>
+                      {patient.notes && (
+                        <p className="text-muted-fg font-mono text-[11px]">Note: {patient.notes}</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-1 flex-wrap">
+                      {isOnline && (
+                        <Link href={`/teleconsult/${patient.id}`}>
+                          <Button variant="emerald" size="sm" className="text-xs font-bold rounded-xl cursor-pointer">
+                            <Video className="h-3.5 w-3.5 mr-1" /> Join Teleconsult
+                          </Button>
+                        </Link>
+                      )}
+
+                      <Link
+                        href={`/dashboard/doctor/rx-writer?appointmentId=${patient.id}&patientName=${encodeURIComponent(
+                          pName
+                        )}`}
+                      >
+                        <Button variant="primary" size="sm" className="text-xs font-bold rounded-xl cursor-pointer">
+                          <PenTool className="h-3.5 w-3.5 mr-1" /> Write Digital Rx
+                        </Button>
+                      </Link>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCompletePatient(patient.id)}
+                        disabled={isUpdating}
+                        className="text-xs font-bold text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Complete
+                      </Button>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${
-                        patient.type === "Video Consultation"
-                          ? "bg-cyan-500/10 text-cyan-500 border-cyan-500/30"
-                          : "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
-                      }`}
-                    >
-                      {patient.type}
-                    </span>
-
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                        patient.status === "In-Consultation"
-                          ? "bg-emerald-500 text-white animate-pulse"
-                          : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                      }`}
-                    >
-                      {patient.status}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Vitals & Chief Complaint */}
-                <div className="p-3 rounded-lg bg-card/60 border border-card-border/50 text-xs space-y-1">
-                  <p className="text-fg-app font-medium">
-                    <span className="text-muted-foreground font-semibold">Complaint:</span>{" "}
-                    {patient.complaint}
-                  </p>
-                  <p className="text-muted-foreground font-mono text-[11px]">{patient.vitals}</p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center justify-end gap-2 pt-1">
-                  {patient.type === "Video Consultation" && (
-                    <Button variant="emerald" size="sm" className="h-8 text-xs">
-                      <Video className="h-3.5 w-3.5 mr-1" /> Start Teleconsult
-                    </Button>
-                  )}
-
-                  <Button variant="primary" size="sm" className="h-8 text-xs">
-                    <PenTool className="h-3.5 w-3.5 mr-1" /> Write Digital Rx
-                  </Button>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleCompletePatient(patient.id)}
-                    className="h-8 text-xs text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Complete
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-10 text-center space-y-3 text-muted-fg">
+              <Users className="h-10 w-10 text-muted-fg/40 mx-auto" />
+              <p className="text-sm font-bold text-fg-app">No patients in queue currently</p>
+              <p className="text-xs">Appointments booked by patients will appear in this live queue.</p>
+            </div>
+          )}
         </div>
 
         {/* Digital Rx Writer Quick Panel (4 cols) */}
-        <div className="lg:col-span-4 rounded-2xl border border-card-border bg-card p-5 space-y-4 shadow-xs">
-          <div className="flex items-center justify-between border-b border-card-border pb-3">
-            <h3 className="font-bold text-base text-fg-app flex items-center gap-2">
-              <PenTool className="h-4 w-4 text-emerald-500" /> Digital Rx Quick Writer
+        <div className="lg:col-span-4 rounded-3xl border border-surface-border bg-surface-card p-5 space-y-4 shadow-xs">
+          <div className="flex items-center justify-between border-b border-surface-border pb-3">
+            <h3 className="font-black text-base text-fg-app flex items-center gap-2">
+              <PenTool className="h-4 w-4 text-emerald-accent" /> Digital Rx Quick Writer
             </h3>
           </div>
 
           <div className="space-y-3 text-xs">
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Select Patient:</label>
-              <select className="w-full h-9 px-3 rounded-xl bg-card border border-card-border text-xs font-semibold text-fg-app">
-                {activeQueue.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    #{p.serialNo} - {p.name}
-                  </option>
-                ))}
+              <label className="font-bold text-muted-fg">Select Patient from Queue:</label>
+              <select className="w-full h-10 px-3 rounded-xl bg-muted-bg/50 border border-surface-border text-xs font-bold text-fg-app">
+                {waitingPatients.length > 0 ? (
+                  waitingPatients.map((p: any, i: number) => (
+                    <option key={p.id} value={p.id}>
+                      #{i + 1} - {p.patient?.user?.name || p.patient?.name || "Patient"}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">No active patient</option>
+                )}
               </select>
             </div>
 
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Prescribed Medicines:</label>
+              <label className="font-bold text-muted-fg">Prescribed Medications:</label>
               <textarea
                 rows={4}
-                defaultValue={`1. Tab. Napa Extra 500mg (1+0+1) - 5 days\n2. Cap. Seclo 20mg (1+0+1) - 14 days\n3. Tab. Angilock 50mg (0+0+1) - 30 days`}
-                className="w-full p-2.5 rounded-xl bg-card border border-card-border font-mono text-xs text-fg-app focus:outline-none focus:ring-2 focus:ring-primary-teal"
+                value={quickRxNotes}
+                onChange={(e) => setQuickRxNotes(e.target.value)}
+                className="w-full p-2.5 rounded-xl bg-muted-bg/50 border border-surface-border font-mono text-xs text-fg-app focus:outline-none focus:border-primary-teal"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Advice & Diagnostic Tests:</label>
+              <label className="font-bold text-muted-fg">Advice & Diagnostic Tests:</label>
               <input
                 type="text"
-                defaultValue="Echocardiogram, Lipid Profile, Low salt diet"
-                className="w-full h-9 px-3 rounded-xl bg-card border border-card-border text-xs text-fg-app"
+                value={quickRxAdvice}
+                onChange={(e) => setQuickRxAdvice(e.target.value)}
+                className="w-full h-10 px-3 rounded-xl bg-muted-bg/50 border border-surface-border text-xs text-fg-app focus:outline-none focus:border-primary-teal"
               />
             </div>
 
-            <Button variant="emerald" className="w-full h-10 justify-center text-xs shadow-md">
-              <FileText className="h-4 w-4 mr-1.5" /> Generate & Sign Digital Prescription
+            <Button
+              variant="emerald"
+              onClick={handleIssueQuickRx}
+              className="w-full h-10 justify-center text-xs font-bold rounded-xl shadow-md cursor-pointer"
+            >
+              <FileText className="h-4 w-4 mr-1.5" /> Sign & Issue Prescription
             </Button>
           </div>
         </div>

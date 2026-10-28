@@ -162,6 +162,29 @@ export const doctorApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Doctor"],
     }),
+
+    /**
+     * Get single appointment details by ID
+     * GET /api/v1/appointments/:id
+     */
+    getAppointmentById: builder.query<{ success: boolean; data: any }, string>({
+      query: (id) => ({
+        url: `/appointments/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["Doctor"],
+    }),
+
+    /**
+     * Get teleconsultation RTC token
+     * GET /api/v1/teleconsult/:appointmentId/token
+     */
+    getTeleconsultToken: builder.query<{ success: boolean; data: any }, string>({
+      query: (appointmentId) => ({
+        url: `/teleconsult/${appointmentId}/token`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -173,4 +196,6 @@ export const {
   useGetDoctorStatsQuery,
   useUpdateAppointmentStatusMutation,
   useGetPatientAppointmentsQuery,
+  useGetAppointmentByIdQuery,
+  useGetTeleconsultTokenQuery,
 } = doctorApi;
