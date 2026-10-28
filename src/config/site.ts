@@ -1,27 +1,38 @@
 export const siteConfig = {
-  name: "Acme Enterprise",
-  shortName: "Acme",
+  name: "ShebaMitro Healthcare",
+  shortName: "ShebaMitro",
   description:
-    "Enterprise-grade platform for modern teams — ship faster, scale smarter.",
-  url: "https://acme.example.com",
-  ogImage: "https://acme.example.com/og-default.png",
-  creator: "Acme Inc.",
-  authors: [{ name: "Acme Inc.", url: "https://acme.example.com" }] as {
+    "Integrated Bangladeshi Healthcare Platform for Specialist Doctor Appointments, Medicine Alarms, Diagnostic Packages, and Express Pharmacy Delivery.",
+  url: "https://shebamitro.web.mirnoman.com",
+  ogImage: "https://shebamitro.web.mirnoman.com/images/hero-doctor.jpg",
+  creator: "ShebaMitro Health Ltd.",
+  authors: [
+    {
+      name: "ShebaMitro Health Ltd.",
+      url: "https://shebamitro.web.mirnoman.com",
+    },
+  ] as {
     name: string;
     url: string;
   }[],
   keywords: [
-    "enterprise",
-    "saas",
-    "platform",
-    "nextjs",
-    "react",
-    "typescript",
+    "ShebaMitro",
+    "Healthcare Bangladesh",
+    "Specialist Doctor Appointments",
+    "BMDC Doctors",
+    "Telemedicine Bangladesh",
+    "Online Pharmacy",
+    "Express Medicine Delivery",
+    "Diagnostic Lab Packages",
+    "Home Blood Sample Collection",
+    "Smart Medicine Alarms",
+    "Digital Health Records",
+    "E-Prescription Verification",
   ] as string[],
   links: {
-    twitter: "https://twitter.com/acme",
-    github: "https://github.com/acme",
-    docs: "https://docs.acme.example.com",
+    twitter: "https://twitter.com/shebamitro",
+    facebook: "https://facebook.com/shebamitro",
+    linkedin: "https://linkedin.com/company/shebamitro",
   },
 } as const;
 

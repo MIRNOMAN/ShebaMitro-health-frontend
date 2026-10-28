@@ -1,10 +1,23 @@
-"use client";
-
-import React from "react";
+import type { Metadata } from "next";
 import { TERMS_AND_CONDITIONS_DATA } from "@/features/legal/data/legalData";
 import { LegalHeaderBanner } from "@/features/legal/components/LegalHeaderBanner";
 import { LegalSectionNav } from "@/features/legal/components/LegalSectionNav";
 import { LegalDocumentViewer } from "@/features/legal/components/LegalDocumentViewer";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions | ShebaMitro Healthcare",
+  description:
+    "Terms and conditions of use for the ShebaMitro healthcare platform, telemedicine services, diagnostic orders, and pharmacy delivery in Bangladesh.",
+  alternates: {
+    canonical: "/terms",
+  },
+  openGraph: {
+    title: "Terms & Conditions | ShebaMitro Healthcare",
+    description:
+      "Terms and conditions of use for the ShebaMitro healthcare platform, telemedicine services, and pharmacy delivery.",
+    url: "/terms",
+  },
+};
 
 export default function TermsAndConditionsPage() {
   return (

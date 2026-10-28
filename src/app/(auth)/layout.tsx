@@ -8,6 +8,13 @@ export const metadata: Metadata = {
     template: "%s | ShebaMitro Health",
   },
   description: "Secure digital healthcare authentication portal for ShebaMitro.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+  alternates: {
+    canonical: "./",
+  },
 };
 
 export default function AuthLayout({

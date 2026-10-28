@@ -24,6 +24,9 @@ export async function generateMetadata(
   return {
     title: product.name,
     description: product.description,
+    alternates: {
+      canonical: `/products/${product.slug}`,
+    },
     openGraph: {
       title: product.name,
       description: product.description,
@@ -50,7 +53,7 @@ export async function generateMetadata(
 }
 
 export async function generateStaticParams() {
-  return [{ slug: "sample-product" }];
+  return [{ slug: "sample-product" }, { slug: "analytics-suite" }];
 }
 
 export default async function ProductPage({ params }: Props) {

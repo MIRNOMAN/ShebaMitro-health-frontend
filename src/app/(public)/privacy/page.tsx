@@ -1,10 +1,23 @@
-"use client";
-
-import React from "react";
+import type { Metadata } from "next";
 import { PRIVACY_POLICY_DATA } from "@/features/legal/data/legalData";
 import { LegalHeaderBanner } from "@/features/legal/components/LegalHeaderBanner";
 import { LegalSectionNav } from "@/features/legal/components/LegalSectionNav";
 import { LegalDocumentViewer } from "@/features/legal/components/LegalDocumentViewer";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | ShebaMitro Healthcare",
+  description:
+    "ShebaMitro privacy policy and healthcare data protection practices compliant with DGDA, HIPAA, and ISO digital health standards.",
+  alternates: {
+    canonical: "/privacy",
+  },
+  openGraph: {
+    title: "Privacy Policy | ShebaMitro Healthcare",
+    description:
+      "ShebaMitro privacy policy and healthcare data protection practices compliant with international standards.",
+    url: "/privacy",
+  },
+};
 
 export default function PrivacyPolicyPage() {
   return (

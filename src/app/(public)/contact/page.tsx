@@ -1,11 +1,24 @@
-"use client";
-
-import React from "react";
+import type { Metadata } from "next";
 import { ContactHeaderHero } from "@/features/contact/components/ContactHeaderHero";
 import { ContactInfoCards } from "@/features/contact/components/ContactInfoCards";
 import { ContactFormSection } from "@/features/contact/components/ContactFormSection";
 import { ContactFaqAccordion } from "@/features/contact/components/ContactFaqAccordion";
 import { ContactMapLocation } from "@/features/contact/components/ContactMapLocation";
+
+export const metadata: Metadata = {
+  title: "Contact Us & 24/7 Emergency Support | ShebaMitro",
+  description:
+    "Get in touch with ShebaMitro for 24/7 medical support, ambulance dispatch, doctor appointment inquiries, and platform assistance across Bangladesh.",
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    title: "Contact Us & 24/7 Emergency Support | ShebaMitro",
+    description:
+      "Get in touch with ShebaMitro for 24/7 medical support, ambulance dispatch, doctor appointment inquiries, and platform assistance.",
+    url: "/contact",
+  },
+};
 
 export default function PublicContactUsPage() {
   return (
