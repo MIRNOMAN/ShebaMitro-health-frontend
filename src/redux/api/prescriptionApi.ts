@@ -17,9 +17,12 @@ export interface Prescription {
   patientId: string;
   doctorId: string;
   diagnosis?: string;
+  chiefComplaints?: string;
+  advice?: string;
   notes?: string;
   pdfUrl?: string;
   qrCodeUrl?: string;
+  qrCodeHash?: string;
   createdAt: string;
   updatedAt: string;
   items: PrescriptionItem[];
@@ -42,8 +45,11 @@ export interface Prescription {
 
 export const prescriptionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getPrescriptions: builder.query<Prescription[], void>({
-      query: () => "/prescriptions",
+    getPrescriptions: builder.query<Prescription[], { patientId?: string } | void>({
+      query: (params) => ({
+        url: "/prescriptions",
+        params: params || {},
+      }),
       transformResponse: (response: any) => {
         const payload = response?.data ?? response;
         if (Array.isArray(payload)) return payload;
@@ -60,4 +66,3 @@ export const prescriptionApi = baseApi.injectEndpoints({
 });
 
 export const { useGetPrescriptionsQuery, useGetPrescriptionByIdQuery } = prescriptionApi;
-
