@@ -199,8 +199,6 @@ export function PrescriptionUploadZone({
         }
         if (customPromptText) {
           formData.append("rawText", customPromptText);
-        } else {
-          formData.append("rawText", fileName);
         }
         result = await scanPrescriptionApi(formData).unwrap();
       } else {
@@ -570,7 +568,7 @@ export function PrescriptionUploadZone({
 
                 {/* TAB 1: Recognized Prescriptions */}
                 {activeTab === "extracted" && (
-                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                     {recognizedItems.map((item, idx) => (
                       <motion.div
                         key={item.id}
@@ -580,26 +578,72 @@ export function PrescriptionUploadZone({
                         className="p-3 rounded-xl border border-card-border bg-surface-card-hover/50 space-y-1.5"
                       >
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-fg-app">{item.name}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-fg-app text-sm">{item.name}</span>
+                            {item.strength && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-muted text-fg-app/80">
+                                {item.strength}
+                              </span>
+                            )}
+                          </div>
                           <span className="text-[10px] font-extrabold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
                             {item.confidence}% Match
                           </span>
                         </div>
-                        <p className="text-[11px] text-muted-foreground">{item.dosage}</p>
-                        {item.matchedMedicine && (
+
+                        {/* Dosage Instructions */}
+                        <p className="text-[11px] font-medium text-fg-app/90">{item.dosage}</p>
+
+                        {/* Medical Indication */}
+                        {item.indications && (
+                          <div className="flex items-center gap-1.5 text-[10px] text-teal-700 dark:text-teal-300 bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 rounded-md w-fit">
+                            <Stethoscope className="h-3 w-3 shrink-0 text-teal-500" />
+                            <span className="font-semibold">Indication: {item.indications}</span>
+                          </div>
+                        )}
+
+                        {/* Catalog / External Prescribed Status */}
+                        {item.matchedMedicine && (item.isCatalogMatch || item.matchedMedicine.manufacturer !== 'Doctor Prescribed (Special Sourcing)') ? (
                           <div className="text-[10px] text-primary-teal font-semibold pt-0.5 flex items-center justify-between">
                             <span className="flex items-center gap-1">
                               <CheckCircle2 className="h-3 w-3 text-emerald-500" /> Catalog: {item.matchedMedicine.name} ({item.matchedMedicine.packSize})
                             </span>
                             <span className="font-bold">৳{item.matchedMedicine.price}</span>
                           </div>
+                        ) : (
+                          <div className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold pt-0.5 flex items-center justify-between">
+                            <span className="flex items-center gap-1">
+                              <Info className="h-3 w-3 text-amber-500" /> Prescribed on Script (External / Special Sourcing)
+                            </span>
+                            <span className="font-bold">৳{item.matchedMedicine?.price || 30}</span>
+                          </div>
                         )}
+
+                        {/* Quick Add Item */}
+                        <div className="pt-1 flex items-center justify-between border-t border-card-border/40">
+                          <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[200px]">
+                            {item.genericName ? `Generic: ${item.genericName}` : "Prescribed Active Compound"}
+                          </span>
+                          {item.matchedMedicine && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                addToCart(item.matchedMedicine!, 1);
+                                toast.success(`Added ${item.name} to cart!`);
+                              }}
+                              className="h-6 text-[10px] px-2 gap-1 border-primary-teal text-primary-teal hover:bg-primary-teal/10"
+                            >
+                              <Plus className="h-3 w-3" /> Add Item
+                            </Button>
+                          )}
+                        </div>
                       </motion.div>
                     ))}
 
                     {isScanning && (
                       <div className="p-3 rounded-xl border border-dashed border-cyan-500/40 bg-cyan-500/5 text-xs text-cyan-500 font-semibold animate-pulse flex items-center gap-2">
-                        <Scan className="h-4 w-4 animate-spin" /> Scanning doctor handwriting & matching genuine pharmaceuticals...
+                        <Scan className="h-4 w-4 animate-spin" /> Scanning doctor handwriting & extracting medications with indications...
                       </div>
                     )}
 
@@ -613,7 +657,7 @@ export function PrescriptionUploadZone({
 
                 {/* TAB 2: AI Medicine Suggestions */}
                 {activeTab === "suggestions" && (
-                  <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                  <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
                     {suggestedMedicines.map((sug, idx) => (
                       <motion.div
                         key={sug.id}
@@ -624,7 +668,7 @@ export function PrescriptionUploadZone({
                       >
                         <div className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-fg-app">{sug.name}</span>
+                            <span className="font-bold text-fg-app text-sm">{sug.name}</span>
                             <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded-full uppercase tracking-wider ${
                               sug.type === 'companion_care'
                                 ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20'
@@ -640,11 +684,25 @@ export function PrescriptionUploadZone({
                           )}
                         </div>
 
+                        {sug.genericName && (
+                          <p className="text-[10px] text-muted-foreground font-medium italic">
+                            Generic: {sug.genericName}
+                          </p>
+                        )}
+
                         <p className="text-[11px] text-muted-foreground leading-relaxed">
                           {sug.reason}
                         </p>
 
-                        <div className="pt-1 flex items-center justify-between">
+                        {/* Medical Indication */}
+                        {sug.indications && (
+                          <div className="flex items-center gap-1.5 text-[10px] text-amber-700 dark:text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md w-fit">
+                            <Stethoscope className="h-3 w-3 shrink-0 text-amber-500" />
+                            <span className="font-semibold">Indication: {sug.indications}</span>
+                          </div>
+                        )}
+
+                        <div className="pt-1 flex items-center justify-between border-t border-amber-500/10">
                           <span className="text-[10px] text-muted-foreground font-medium">
                             {sug.dosageGuidance || "As advised by doctor"}
                           </span>
@@ -662,7 +720,7 @@ export function PrescriptionUploadZone({
 
                     {isScanning && (
                       <div className="p-3 rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 text-xs text-amber-500 font-semibold animate-pulse flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 animate-spin" /> Generating intelligent medicine alternatives...
+                        <Sparkles className="h-4 w-4 animate-spin" /> Generating intelligent medicine alternatives with indications...
                       </div>
                     )}
 

@@ -28,7 +28,7 @@ interface MedicineItem {
   instructions: string;
 }
 
-export default function DoctorRxWriterPage() {
+function DoctorRxWriterContent() {
   const searchParams = useSearchParams();
   const initialPatientName = searchParams?.get("patientName") || "Kamrul Islam Manik";
   const appointmentId = searchParams?.get("appointmentId") || "";
@@ -311,5 +311,20 @@ export default function DoctorRxWriterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DoctorRxWriterPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="p-12 text-center text-muted-fg space-y-2">
+          <div className="h-6 w-6 border-2 border-primary-teal border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs font-bold">Loading Digital Prescription Engine...</p>
+        </div>
+      }
+    >
+      <DoctorRxWriterContent />
+    </React.Suspense>
   );
 }

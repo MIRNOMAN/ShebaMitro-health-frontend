@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { MOCK_DOCTORS } from "@/features/doctors/data/doctors";
+import { fetchDoctorById } from "@/features/doctors/services/doctorService";
 import DoctorDetailClient from "./DoctorDetailClient";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const doctor = MOCK_DOCTORS.find((d) => d.id === id);
+  const doctor = await fetchDoctorById(id);
 
   if (!doctor) {
     return {
-      title: "Doctor Profile Not Found | ShebaMitro",
-      description: "The requested doctor profile is not available on ShebaMitro.",
+      title: "Doctor Profile | ShebaMitro",
+      description: "Book chamber appointment or video teleconsultation on ShebaMitro.",
       robots: {
         index: false,
         follow: false,
@@ -22,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = `${doctor.name} - ${doctor.specialtyName} | ShebaMitro`;
+  const title = `${doctor.name} - ${doctor.specialtyName || "Specialist"} | ShebaMitro`;
   const description = `Book chamber appointment or video teleconsultation with ${doctor.name}, ${doctor.designation} at ${doctor.hospital}. BMDC Verified: ${doctor.bmdcNo}.`;
 
   return {
@@ -52,17 +54,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export async function generateStaticParams() {
-  return MOCK_DOCTORS.map((doc) => ({ id: doc.id }));
-}
-
 export default async function DoctorDetailPage({ params }: Props) {
   const { id } = await params;
-  const doctor = MOCK_DOCTORS.find((d) => d.id === id);
+  const doctor = await fetchDoctorById(id);
 
   if (!doctor) {
     notFound();
   }
 
-  return <DoctorDetailClient doctorId={id} />;
+  return <DoctorDetailClient doctorId={id} initialDoctor={doctor} />;
 }

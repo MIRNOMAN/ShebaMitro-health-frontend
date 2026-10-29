@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   ShieldCheck,
   Star,
@@ -35,11 +36,13 @@ export function DoctorCard({ doctor, onOpenSlotPreview }: DoctorCardProps) {
         {/* Top Header Row: Avatar, Info, BMDC Badge */}
         <div className="flex items-start gap-4">
           <div className="relative shrink-0">
-            <img
-              src={doctor.avatarUrl}
-              alt={doctor.name}
-              className="h-20 w-20 rounded-2xl object-cover border-2 border-card-border shadow-xs group-hover:border-primary-teal/50 transition-colors"
-            />
+            <Link href={`/doctors/${doctor.id}`}>
+              <img
+                src={doctor.avatarUrl}
+                alt={doctor.name}
+                className="h-20 w-20 rounded-2xl object-cover border-2 border-card-border shadow-xs group-hover:border-primary-teal/50 transition-colors cursor-pointer hover:opacity-90"
+              />
+            </Link>
             {doctor.availableToday && (
               <span
                 title="Available Today"
@@ -67,9 +70,11 @@ export function DoctorCard({ doctor, onOpenSlotPreview }: DoctorCardProps) {
             </div>
 
             {/* Doctor Name */}
-            <h3 className="text-base font-bold text-fg-app group-hover:text-primary-teal transition-colors line-clamp-1">
-              {doctor.name}
-            </h3>
+            <Link href={`/doctors/${doctor.id}`}>
+              <h3 className="text-base font-bold text-fg-app group-hover:text-primary-teal transition-colors line-clamp-1 cursor-pointer">
+                {doctor.name}
+              </h3>
+            </Link>
 
             {/* Specialty */}
             <p className="text-xs font-semibold text-primary-teal">

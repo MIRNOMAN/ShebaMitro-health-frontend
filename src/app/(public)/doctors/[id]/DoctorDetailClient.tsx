@@ -23,16 +23,18 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Doctor } from "@/features/doctors/types";
 
 interface DoctorDetailPageProps {
-  params: Promise<{ id: string }>;
+  doctorId: string;
+  initialDoctor?: Doctor | null;
 }
 
-export default function DoctorDetailClient({ doctorId }: { doctorId: string }) {
-
-
-
-  const { data: doctor, isLoading, isError } = useDoctorDetail(doctorId);
+export default function DoctorDetailClient({
+  doctorId,
+  initialDoctor,
+}: DoctorDetailPageProps) {
+  const { data: doctor, isLoading, isError } = useDoctorDetail(doctorId, initialDoctor);
 
   if (isLoading) {
     return (

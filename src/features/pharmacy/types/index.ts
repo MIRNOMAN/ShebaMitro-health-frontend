@@ -21,6 +21,8 @@ export interface RecognizedMedicine {
   genericName?: string;
   strength?: string;
   duration?: string;
+  indications?: string;
+  isCatalogMatch?: boolean;
   matchedMedicine?: Medicine;
   confidence: number;
 }
@@ -32,6 +34,7 @@ export interface SuggestedMedicine {
   type: 'generic_alternative' | 'companion_care' | 'cost_effective' | 'therapeutic_equivalent';
   reason: string;
   dosageGuidance?: string;
+  indications?: string;
   confidence: number;
   matchedMedicine?: Medicine;
 }

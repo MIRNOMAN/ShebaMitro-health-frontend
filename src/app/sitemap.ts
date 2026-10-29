@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site";
 import { MOCK_DOCTORS } from "@/features/doctors/data/doctors";
+import { fetchDoctors } from "@/features/doctors/services/doctorService";
 import { getProducts } from "@/features/products/services/product.service";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -72,12 +73,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Dynamic specialist doctor profile routes
-  const doctorRoutes: MetadataRoute.Sitemap = MOCK_DOCTORS.map((doc) => ({
-    url: `${baseUrl}/doctors/${doc.id}`,
-    lastModified: currentDate,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
+  let doctorRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const doctorsRes = await fetchDoctors({});
+    const doctorsList = doctorsRes.doctors.length > 0 ? doctorsRes.doctors : MOCK_DOCTORS;
+    doctorRoutes = doctorsList.map((doc) => ({
+      url: `${baseUrl}/doctors/${doc.id}`,
+      lastModified: currentDate,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    }));
+  } catch {
+    doctorRoutes = MOCK_DOCTORS.map((doc) => ({
+      url: `${baseUrl}/doctors/${doc.id}`,
+      lastModified: currentDate,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    }));
+  }
 
   // Dynamic product routes
   let productRoutes: MetadataRoute.Sitemap = [];

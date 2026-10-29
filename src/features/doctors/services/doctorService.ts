@@ -1,11 +1,23 @@
 import { MOCK_DOCTORS } from "../data/doctors";
 import { Doctor, DoctorFilterState } from "../types";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  (process.env.NEXT_PUBLIC_BACKEND_URL
-    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1`
-    : "http://localhost:5100/api/v1");
+export const getApiBase = (): string => {
+  if (typeof window !== "undefined") {
+    return (
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      (process.env.NEXT_PUBLIC_BACKEND_URL
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1`
+        : "/api/v1")
+    );
+  }
+  return (
+    process.env.API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    (process.env.NODE_ENV === "production"
+      ? "https://shebamitro.api.mirnoman.com/api/v1"
+      : "http://127.0.0.1:5100/api/v1")
+  );
+};
 
 export const getMinFee = (doctor: Doctor): number => {
   if (!doctor.chambers || doctor.chambers.length === 0) return 1000;
@@ -13,21 +25,26 @@ export const getMinFee = (doctor: Doctor): number => {
 };
 
 export const fetchDoctorById = async (id: string): Promise<Doctor | null> => {
+  if (!id) return null;
+  const apiBase = getApiBase();
   try {
-    const res = await fetch(`${API_BASE}/doctors/${id}`);
+    const res = await fetch(`${apiBase}/doctors/${id}`, {
+      cache: "no-store",
+    });
     if (res.ok) {
       const data = await res.json();
       if (data.data) return data.data as Doctor;
+      if (data.id) return data as Doctor;
     }
   } catch (err) {
     console.warn("Backend fetchDoctorById failed, using fallback:", err);
   }
   const doc = MOCK_DOCTORS.find((d) => d.id === id);
-  return doc || MOCK_DOCTORS[0] || null;
+  return doc || null;
 };
 
 export const fetchDoctors = async (
-  filters: DoctorFilterState
+  filters: Partial<DoctorFilterState> = {}
 ): Promise<{ doctors: Doctor[]; total: number }> => {
   try {
     const query = new URLSearchParams();
@@ -51,7 +68,10 @@ export const fetchDoctors = async (
     }
     query.set("limit", "50");
 
-    const res = await fetch(`${API_BASE}/doctors?${query.toString()}`);
+    const apiBase = getApiBase();
+    const res = await fetch(`${apiBase}/doctors?${query.toString()}`, {
+      cache: "no-store",
+    });
     if (res.ok) {
       const data = await res.json();
       if (data.data && Array.isArray(data.data.items)) {
@@ -99,19 +119,22 @@ export const fetchDoctors = async (
 
   // Specialty multi-select filter
   if (filters.specialties && filters.specialties.length > 0) {
+    const specs = filters.specialties;
     results = results.filter((doc) =>
-      filters.specialties.includes(doc.specialtyId)
+      specs.includes(doc.specialtyId)
     );
   }
 
   // Max fee filter
   if (filters.maxFee !== undefined && filters.maxFee > 0) {
-    results = results.filter((doc) => getMinFee(doc) <= filters.maxFee);
+    const fee = filters.maxFee;
+    results = results.filter((doc) => getMinFee(doc) <= fee);
   }
 
   // Rating filter
   if (filters.minRating !== undefined && filters.minRating > 0) {
-    results = results.filter((doc) => doc.rating >= filters.minRating);
+    const rating = filters.minRating;
+    results = results.filter((doc) => doc.rating >= rating);
   }
 
   // Gender filter
