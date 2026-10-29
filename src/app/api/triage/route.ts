@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       const nestResponse = await fetch(NESTJS_TRIAGE_SERVICE_URL, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", 
           Accept: "application/json",
         },
         body: JSON.stringify({ symptoms, language }),

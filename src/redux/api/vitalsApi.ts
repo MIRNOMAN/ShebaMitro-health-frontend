@@ -22,6 +22,30 @@ export interface SyncVitalsPayload {
   idempotencyKey?: string;
 }
 
+export interface BiomarkerChartPoint {
+  id: string;
+  timestamp: string;
+  date: string;
+  value: number;
+  unit: string;
+  markerKey: string;
+  markerName: string;
+  status: string;
+  referenceRange: string;
+}
+
+export interface BiomarkerAnalyticsResponse {
+  patientId: string;
+  markerKey: string;
+  markerName: string;
+  unit: string;
+  referenceRange: string;
+  latestStatus: string;
+  totalDataPoints: number;
+  chartData: BiomarkerChartPoint[];
+  dataPoints?: any[];
+}
+
 export const vitalsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getPatientVitals: builder.query<BiometricVital[], { patientId: string; limit?: number }>({
@@ -33,9 +57,31 @@ export const vitalsApi = baseApi.injectEndpoints({
       providesTags: ["Stats"],
     }),
 
+    getBiomarkerAnalytics: builder.query<
+      BiomarkerAnalyticsResponse,
+      { patientId: string; marker?: string; testType?: string; limit?: number }
+    >({
+      query: ({ patientId, marker, testType, limit = 50 }) => ({
+        url: `/analytics/biomarkers/${patientId}`,
+        params: { marker, testType, limit },
+      }),
+      transformResponse: (response: any) => response?.data ?? response,
+      providesTags: ["Stats"],
+    }),
+
     syncVitals: builder.mutation<any, SyncVitalsPayload>({
       query: (body) => ({
         url: "/vitals/sync",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: any) => response?.data ?? response,
+      invalidatesTags: ["Stats"],
+    }),
+
+    uploadReportScan: builder.mutation<any, FormData>({
+      query: (body) => ({
+        url: "/ocr/upload-scan",
         method: "POST",
         body,
       }),
@@ -55,7 +101,8 @@ export const vitalsApi = baseApi.injectEndpoints({
 
 export const {
   useGetPatientVitalsQuery,
+  useGetBiomarkerAnalyticsQuery,
   useSyncVitalsMutation,
+  useUploadReportScanMutation,
   useGetVitalAlertsQuery,
 } = vitalsApi;
-
